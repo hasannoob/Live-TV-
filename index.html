@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CRICFy-style Live + Sports + IPTV</title>
+<style>
+  /* Reset & base */
+  *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans Bengali",sans-serif}
+  body{background:#0b0f11;color:#e6eef0;padding:12px; -webkit-font-smoothing:antialiased;}
+  .app{max-width:460px;margin:0 auto;padding-bottom:86px}
+
+  header{display:flex;align-items:center;gap:10px;padding:8px 0}
+  header .logo{width:40px;height:40px;border-radius:8px;background:#052017;border:2px solid #1ea96b;display:flex;align-items:center;justify-content:center;font-weight:700}
+  header h1{font-size:18px}
+
+  .topbar{background:#0f1720;border-radius:10px;padding:8px;border:2px solid #123b2a;color:#bfe8d0;margin:8px 0 12px;text-align:center;font-size:13px}
+
+  /* chips */
+  .filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .chip{padding:6px 12px;border-radius:22px;border:2px solid #123b2a;background:transparent;color:#bfe8d0;cursor:pointer;font-size:13px}
+  .chip.active{background:#0f2b19;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.6)}
+
+  /* list */
+  .list{display:flex;flex-direction:column;gap:12px}
+  .card{border:2px solid #123b2a;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);display:flex;flex-direction:column;gap:8px}
+  .card .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .team{display:flex;align-items:center;gap:12px}
+  .logo-sm{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#0c1012;border:1px solid rgba(255,255,255,.04);font-size:12px}
+  .meta{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .time{font-size:18px;color:#fff}
+  .date{font-size:13px;color:#5ee3a0}
+  .badge-live{background:#ff2b2b;color:#fff;padding:4px 8px;border-radius:999px;font-weight:600;font-size:12px}
+  .starts{font-size:13px;color:#cbd5c6}
+  .footer{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}
+  .btn-open{padding:8px 12px;border-radius:8px;background:#0f2b19;border:2px solid #1ea96b;color:#dbffe9;cursor:pointer;font-weight:600}
+  .muted{color:#9aa6a0;font-size:13px}
+
+  /* small helper */
+  .muted-sm{color:#9aa6a0;font-size:12px}
+  .channel-card{border:2px solid #123b2a;padding:10px;border-radius:10px;background:#101214;display:flex;justify-content:space-between;align-items:center}
+
+  /* bottom nav */
+  .bottom-nav{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:100%;max-width:480px;display:flex;justify-content:space-around;padding:10px;background:linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,.85));border-radius:14px;border:1px solid rgba(255,255,255,.03)}
+  .nav-item{display:flex;flex-direction:column;align-items:center;color:#8fb8a0;font-size:12px;gap:4px;cursor:pointer}
+  .nav-item.active{color:#fff}
+
+  /* modal */
+  .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);visibility:hidden;opacity:0;transition:opacity .18s}
+  .modal.open{visibility:visible;opacity:1}
+  .modal-content{width:95%;max-width:920px;background:#000;border-radius:10px;padding:10px;max-height:90vh;overflow:auto}
+  .modal-close{display:flex;justify-content:flex-end}
+  .modal-close button{background:transparent;color:#fff;border:none;font-size:20px;cursor:pointer}
+  iframe{width:100%;height:56vw;max-height:64vh;border:0;border-radius:6px;background:#000}
+
+  /* small screens tweak */
+  @media(min-width:600px){
+    .card{flex-direction:row;align-items:center}
+    .card .meta{align-items:flex-end}
+  }
+</style>
+</head>
+<body>
+  <div class="app" role="application">
+    <header>
+      <div class="logo">CF</div>
+      <h1>CRICFy-style Live</h1>
+    </header>
+
+    <div class="topbar">• Please update your app CRICFy v5.0 •</div>
+
+    <!-- filter chips -->
+    <div class="filters" role="tablist">
+      <button class="chip active" data-filter="all">All <small style="margin-left:6px;color:#4f9c78">(<span id="count-all">0</span>)</small></button>
+      <button class="chip" data-filter="live">Live <small style="margin-left:6px;color:#4f9c78">(<span id="count-live">0</span>)</small></button>
+      <button class="chip" data-filter="recent">Recent <small style="margin-left:6px;color:#4f9c78">(<span id="count-recent">0</span>)</small></button>
+      <button class="chip" data-filter="upcoming">Upcoming <small style="margin-left:6px;color:#4f9c78">(<span id="count-upcoming">0</span>)</small></button>
+    </div>
+
+    <!-- main content area -->
+    <main id="mainArea">
+      <section id="eventsView">
+        <div id="events" class="list" aria-live="polite"></div>
+      </section>
+
+      <section id="sportsView" style="display:none">
+        <div style="margin-bottom:10px;color:#9aa6a0">Sports TV Channels</div>
+        <div id="sportsList" class="list"></div>
+      </section>
+
+      <section id="categoriesView" style="display:none">
+        <div style="margin-bottom:10px;color:#9aa6a0">IPTV Categories</div>
+        <div id="iptvList" class="list"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- bottom nav -->
+  <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-item active" data-section="eventsView">🔴<span>Live Events</span></div>
+    <div class="nav-item" data-section="sportsView">⚽<span>Sports</span></div>
+    <div class="nav-item" data-section="categoriesView">📺<span>Categories</span></div>
+  </nav>
+
+  <!-- video modal -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content" role="document">
+      <div class="modal-close"><button id="closeModal" aria-label="Close">✕</button></div>
+      <div id="videoWrap"><!-- iframe inserted here --></div>
+    </div>
+  </div>
+
+<script>
+/*
+  Data structures:
+  - eventsData: matches with startTime, endTime (ms timestamps), category, link (embed)
+  - sportsChannels: sports TV channels list (click -> open video)
+  - iptvChannels: categories / iptv channels (click -> open video)
+
+  NOTE: আপনার বাস্তব ডেটা বসাতে eventsData, sportsChannels, iptvChannels এ লিংক পরিবর্তন করবেন।
+*/
+
+// Sample demo dataset (timestamps relative to now)
+// Replace links with your actual embed links (YouTube embed or HLS player URL)
+const now = Date.now();
+
+let eventsData = [
+  {
+    id:1, category:'football', sub:'Liga Portugal Betclic',
+    home:'Casa Pia', away:'Sporting', logoHome:'CP', logoAway:'SCP',
+    startTime: now + 10 * 1000, // start in 10s
+    endTime: now + 70 * 1000,   // live duration 60s
+    type:'upcoming',
+    link:'https://www.youtube.com/embed/dQw4w9WgXcQ' // demo embed
+  },
+  {
+    id:2, category:'wwe', sub:'Friday Night SmackDown',
+    home:'SmackDown', away:'SmackDown', logoHome:'SD', logoAway:'SD',
+    startTime: now - 20 * 1000, // started 20s ago
+    endTime: now + 40 * 1000,   // ends in 40s
+    type:'live',
+    link:'https://www.youtube.com/embed/ysz5S6PUM-U'
+  },
+  {
+    id:3, category:'cricket', sub:'New Zealand in Zimbabwe',
+    home:'ZIM', away:'NZ', logoHome:'ZIM', logoAway:'NZ',
+    startTime: now - 120 * 1000, // ended 2 minutes ago
+    endTime: now - 50 * 1000,
+    type:'recent',
+    link:'https://www.youtube.com/embed/ScMzIvxBSi4'
+  },
+  {
+    id:4, category:'football', sub:'Durand Cup',
+    home:'Bodoland FC', away:'Punjab FC', logoHome:'BOD', logoAway:'PUN',
+    startTime: now + 120 * 1000, // start in 2 min
+    endTime: now + 240 * 1000,
+    type:'upcoming',
+    link:'https://www.youtube.com/embed/3fumBcKC6RE'
+  }
+];
+
+// Sports channels (click to open)
+const sportsChannels = [
+  { id:'s1', name:'Star Sports 1', desc:'Sports channel 1', link:'https://www.youtube.com/embed/ScMzIvxBSi4' },
+  { id:'s2', name:'ESPN', desc:'Sports channel ESPN', link:'https://www.youtube.com/embed/ysz5S6PUM-U' },
+  { id:'s3', name:'Sky Sports', desc:'Live sports feed', link:'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+];
+
+// IPTV categories/channels
+const iptvChannels = [
+  { id:'i1', name:'IPTV - Channel A', desc:'News & Sports', link:'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+  { id:'i2', name:'IPTV - Channel B', desc:'Entertainment', link:'https://www.youtube.com/embed/ysz5S6PUM-U' },
+  { id:'i3', name:'IPTV - Channel C', desc:'Movies', link:'https://www.youtube.com/embed/ScMzIvxBSi4' }
+];
+
+// State
+let currentFilter = 'all';
+let currentSection = 'eventsView';
+
+// Helper: format time left
+function formatTime(ms){
+  if(ms <= 0) return '0s';
+  let s = Math.floor(ms/1000);
+  const days = Math.floor(s / 86400); s %= 86400;
+  const hrs = Math.floor(s / 3600); s %= 3600;
+  const mins = Math.floor(s / 60); s %= 60;
+  let parts = [];
+  if(days) parts.push(days + 'd');
+  if(hrs) parts.push(hrs + 'h');
+  if(mins) parts.push(mins + 'm');
+  parts.push(s + 's');
+  return parts.join(' ');
+}
+
+// Render counts
+function updateCounts(){
+  document.getElementById('count-all').textContent = eventsData.length;
+  document.getElementById('count-live').textContent = eventsData.filter(e=>e.type==='live').length;
+  document.getElementById('count-upcoming').textContent = eventsData.filter(e=>e.type==='upcoming').length;
+  document.getElementById('count-recent').textContent = eventsData.filter(e=>e.type==='recent').length;
+}
+
+// Render event cards
+function renderEvents(){
+  const container = document.getElementById('events');
+  container.innerHTML = '';
+
+  // filter by top chips
+  let list = eventsData.slice();
+  if(currentFilter !== 'all'){
+    list = list.filter(ev => ev.type === currentFilter);
+  }
+
+  // also optionally filter by section (but eventsView is main)
+  if(currentSection !== 'eventsView'){
+    container.innerHTML = '';
+    return;
+  }
+
+  if(list.length === 0){
+    container.innerHTML = '<div class="muted-sm" style="padding:14px;text-align:center">কোনো ইভেন্ট নেই</div>';
+    return;
+  }
+
+  list.forEach(ev => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.setAttribute('data-id', ev.id);
+    card.setAttribute('data-category', ev.category);
+
+    // compute dynamic display: countdown / live badge / recent
+    let statusHTML = '';
+    const now = Date.now();
+    if(ev.type === 'live'){
+      const remain = ev.endTime - now;
+      const tleft = remain > 0 ? formatTime(remain) : 'Ends soon';
+      statusHTML = `<div style="display:flex;flex-direction:column;align-items:center">
+                      <div class="badge-live">LIVE</div>
+                      <div class="muted-sm" style="margin-top:6px">${tleft}</div>
+                    </div>`;
+    } else if(ev.type === 'upcoming'){
+      const toStart = ev.startTime - now;
+      const tleft = toStart > 0 ? formatTime(toStart) : 'Starting...';
+      statusHTML = `<div style="text-align:center">
+                      <div class="muted-sm">Starts in</div>
+                      <div class="date">${tleft}</div>
+                    </div>`;
+    } else if(ev.type === 'recent'){
+      statusHTML = `<div style="text-align:center"><div class="muted-sm">Match Ended</div></div>`;
+    }
+
+    card.innerHTML = `
+      <div class="row">
+        <div class="team" style="flex:1">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="logo-sm">${ev.logoHome}</div>
+              <div>
+                <div style="font-weight:700">${ev.home} <span style="font-weight:600;color:#9aa6a0">vs</span> ${ev.away}</div>
+                <div style="font-size:13px;color:#8fb8a0">${ev.sub}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="meta">
+          ${statusHTML}
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="muted-sm">#${ev.category}</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn-open" data-link="${ev.link}" data-id="${ev.id}">Open</button>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Render sports channels
+function renderSports(){
+  const list = document.getElementById('sportsList');
+  list.innerHTML = '';
+  sportsChannels.forEach(ch=>{
+    const el = document.createElement('div');
+    el.className = 'channel-card';
+    el.innerHTML = `
+      <div>
+        <div style="font-weight:700">${ch.name}</div>
+        <div class="muted-sm">${ch.desc}</div>
+      </div>
+      <div>
+        <button class="btn-open-channel" data-link="${ch.link}" data-id="${ch.id}" style="padding:8px 10px;border-radius:8px;background:#063022;border:2px solid #1ea96b;color:#dbffe9;cursor:pointer">Watch</button>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
+
+// Render iptv categories
+function renderIPTV(){
+  const list = document.getElementById('iptvList');
+  list.innerHTML = '';
+  iptvChannels.forEach(ch=>{
+    const el = document.createElement('div');
+    el.className = 'channel-card';
+    el.innerHTML = `
+      <div>
+        <div style="font-weight:700">${ch.name}</div>
+        <div class="muted-sm">${ch.desc}</div>
+      </div>
+      <div>
+        <button class="btn-open-iptv" data-link="${ch.link}" data-id="${ch.id}" style="padding:8px 10px;border-radius:8px;background:#063022;border:2px solid #1ea96b;color:#dbffe9;cursor:pointer">Watch</button>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
+
+// Modal handling
+const modal = document.getElementById('modal');
+const videoWrap = document.getElementById('videoWrap');
+
+function openModal(url){
+  if(!url) { alert('ভিডিও লিংক নেই'); return; }
+  // if regular youtube watch link provided, convert to embed
+  if(url.includes('watch?v=')){
+    url = url.replace('watch?v=','embed/');
+  }
+  // ensure autoplay param for embed (may be ignored by browser)
+  if(url.includes('youtube.com/embed') && !url.includes('autoplay=1')) {
+    url += (url.includes('?') ? '&autoplay=1' : '?autoplay=1');
+  }
+  videoWrap.innerHTML = `<iframe src="${url}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+}
+
+function closeModal(){
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  videoWrap.innerHTML = '';
+}
+
+// Delegated click events
+document.addEventListener('click', (e)=>{
+  // open match video
+  if(e.target.matches('.btn-open')){
+    const url = e.target.getAttribute('data-link');
+    openModal(url);
+  }
+  // open sports channel
+  if(e.target.matches('.btn-open-channel')){
+    const url = e.target.getAttribute('data-link');
+    openModal(url);
+  }
+  // open iptv channel
+  if(e.target.matches('.btn-open-iptv')){
+    const url = e.target.getAttribute('data-link');
+    openModal(url);
+  }
+  // modal close
+  if(e.target.id === 'closeModal' || e.target === modal){
+    closeModal();
+  }
+});
+
+// close on ESC
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') closeModal();
+});
+
+// Filters click behavior
+document.querySelectorAll('.chip').forEach(ch=>{
+  ch.addEventListener('click', ()=>{
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    ch.classList.add('active');
+    currentFilter = ch.getAttribute('data-filter');
+    renderAll(); // re-render
+  });
+});
+
+// Bottom nav click
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    item.classList.add('active');
+    const sec = item.getAttribute('data-section');
+    currentSection = sec;
+    // show/hide sections
+    document.getElementById('eventsView').style.display = sec === 'eventsView' ? '' : 'none';
+    document.getElementById('sportsView').style.display = sec === 'sportsView' ? '' : 'none';
+    document.getElementById('categoriesView').style.display = sec === 'categoriesView' ? '' : 'none';
+    renderAll();
+  });
+});
+
+// Status updater: converts upcoming->live when startTime reached, live->recent when endTime passed
+function updateStatuses(){
+  const now = Date.now();
+  let changed = false;
+  eventsData.forEach(ev=>{
+    if(ev.type === 'upcoming' && now >= ev.startTime && now < ev.endTime){
+      ev.type = 'live'; changed = true;
+    } else if((ev.type === 'upcoming' || ev.type === 'live') && now >= ev.endTime){
+      ev.type = 'recent'; changed = true;
+    } else if(ev.type === 'recent' && now < ev.startTime){
+      // edge-case if clocks changed - reset to upcoming
+      ev.type = 'upcoming'; changed = true;
+    }
+    // if an event was scheduled in past but type not set, derive it
+    if(!['upcoming','live','recent'].includes(ev.type)){
+      if(now < ev.startTime) ev.type = 'upcoming';
+      else if(now >= ev.startTime && now < ev.endTime) ev.type = 'live';
+      else ev.type = 'recent';
+      changed = true;
+    }
+  });
+  if(changed) renderAll();
+}
+
+// main render: update counts, events, sports, iptv depending on currentSection
+function renderAll(){
+  updateCounts();
+  renderEvents();
+  renderSports();
+  renderIPTV();
+}
+
+// initial render
+renderAll();
+
+// periodic updates: every 1s update countdowns/statuses
+setInterval(()=>{
+  updateStatuses();
+  // For visible views, re-render dynamic parts (counts and events)
+  updateCounts();
+  // If eventsView visible, just re-render events to update countdown text quickly
+  if(currentSection === 'eventsView') renderEvents();
+}, 1000);
+
+/* 
+  HOW TO USE (quick):
+  - প্রতিটি ম্যাচের 'link' এ আপনার embed link দিন (YouTube embed / HLS player / direct).
+  - Sports ও IPTV লিস্ট-এ চ্যানেল লিংক বসান।
+  - সিস্টেম প্রতি সেকেন্ড চেক করে স্টেট আপডেট করবে: Upcoming -> Live -> Recent।
+  - "Open" বা "Watch" বাটনে ক্লিক করলে ব্রাউজারের মধ্যে মডাল খোলে ভিডিও প্লে হবে।
+*/
+</script>
+</body>
+</html>

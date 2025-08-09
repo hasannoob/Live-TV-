@@ -1,147 +1,157 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dekho Live</title>
 <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #111; color: white; }
-    header { background: #ff1744; padding: 10px; text-align: center; font-size: 24px; font-weight: bold; }
-    .tabs { display: flex; justify-content: center; background: #222; }
-    .tab { padding: 10px 20px; cursor: pointer; color: white; }
-    .tab.active { background: #ff1744; }
-    .section { padding: 10px; }
-    .card { background: #222; margin: 10px 0; padding: 10px; border-radius: 6px; }
-    .card.live { border-left: 5px solid red; animation: pulse 1s infinite; }
-    @keyframes pulse { 0% {opacity:1;} 50% {opacity:0.5;} 100% {opacity:1;} }
-    .countdown { color: yellow; }
-    button { background: #ff1744; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; }
-    /* Floating Video Player */
-    #videoPlayer { display: none; position: fixed; top: 50px; left: 50px; background: black; padding: 5px; border: 2px solid #ff1744; z-index: 9999; }
-    #videoPlayer video { width: 300px; height: 200px; }
-    #closePlayer { position: absolute; top: -10px; right: -10px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; }
+    body {
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: white;
+        margin: 0;
+        padding: 0;
+    }
+    header {
+        background: #e50914;
+        padding: 15px;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    nav {
+        display: flex;
+        background: #222;
+        overflow-x: auto;
+    }
+    nav button {
+        flex: 1;
+        padding: 10px;
+        background: #222;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+    nav button.active {
+        background: #e50914;
+    }
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        padding: 10px;
+    }
+    .card {
+        background: #1c1c1c;
+        border-radius: 8px;
+        overflow: hidden;
+        text-align: center;
+        padding-bottom: 10px;
+    }
+    .card img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+    }
+    .status {
+        padding: 5px;
+        font-weight: bold;
+    }
+    .live {
+        color: red;
+        animation: blink 1s infinite;
+    }
+    @keyframes blink {
+        50% { opacity: 0.4; }
+    }
+    .watch-btn {
+        background: #e50914;
+        color: white;
+        padding: 5px 10px;
+        border: none;
+        margin-top: 5px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
 </style>
 </head>
 <body>
 
 <header>Dekho Live</header>
 
-<div class="tabs">
-    <div class="tab active" onclick="filterEvents('live')">Live (<span id="countLive">0</span>)</div>
-    <div class="tab" onclick="filterEvents('upcoming')">Upcoming (<span id="countUpcoming">0</span>)</div>
-    <div class="tab" onclick="filterEvents('recent')">Recent (<span id="countRecent">0</span>)</div>
-</div>
-
-<div class="section" id="liveEvents">
-    <h2>Live Events</h2>
-    <div id="eventsList"></div>
-</div>
-
-<div class="section">
-    <h2>Sports TV</h2>
-    <div id="sportsList"></div>
-</div>
-
-<div class="section">
-    <h2>Categories</h2>
+<nav>
+    <button onclick="filterCategory('all')" class="active">All</button>
+    <button onclick="filterCategory('live')">Live</button>
+    <button onclick="filterCategory('upcoming')">Upcoming</button>
+    <button onclick="filterCategory('recent')">Recent</button>
     <button onclick="filterCategory('sports')">Sports</button>
-    <button onclick="filterCategory('news')">News</button>
-</div>
+</nav>
 
-<!-- Floating Video Player -->
-<div id="videoPlayer">
-    <button id="closePlayer" onclick="closeVideo()">×</button>
-    <video id="player" controls></video>
-</div>
+<div class="cards" id="cardContainer"></div>
 
 <script>
-const events = [
-    { title: "Football Match", category: "sports", type: "live", video: "sample1.mp4", endTime: Date.now() + 60000 },
-    { title: "Cricket Match", category: "sports", type: "upcoming", video: "sample2.mp4", startTime: Date.now() + 15000, endTime: Date.now() + 90000 },
-    { title: "Hockey Game", category: "sports", type: "recent", video: "sample3.mp4" }
+const matches = [
+    { id: 1, title: "Football Match", img: "https://via.placeholder.com/300x150", status: "live", category: "sports", link: "#", endTime: Date.now() + 600000 },
+    { id: 2, title: "Cricket Match", img: "https://via.placeholder.com/300x150", status: "upcoming", category: "sports", startTime: Date.now() + 10000 },
+    { id: 3, title: "Music Event", img: "https://via.placeholder.com/300x150", status: "recent", category: "music", link: "#" }
 ];
 
-function renderEvents(filter="live") {
-    const list = document.getElementById("eventsList");
-    list.innerHTML = "";
-    let countLive = 0, countUpcoming = 0, countRecent = 0;
-    events.forEach(ev => {
-        if (ev.type === filter) {
-            const div = document.createElement("div");
-            div.className = `card ${ev.type === 'live' ? 'live' : ''}`;
-            div.innerHTML = `<h3>${ev.title}</h3>` +
-                (ev.type === 'upcoming' ? `<div class='countdown' id='cd_${ev.title.replace(/\s/g,'')}'>Loading...</div>` : "") +
-                `<button onclick="openVideo('${ev.video}')">Watch Now</button>`;
-            list.appendChild(div);
-        }
-        if (ev.type === 'live') countLive++;
-        if (ev.type === 'upcoming') countUpcoming++;
-        if (ev.type === 'recent') countRecent++;
-    });
-    document.getElementById("countLive").innerText = countLive;
-    document.getElementById("countUpcoming").innerText = countUpcoming;
-    document.getElementById("countRecent").innerText = countRecent;
-}
-function filterEvents(type) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelector(`.tab[onclick="filterEvents('${type}')"]`).classList.add('active');
-    renderEvents(type);
-}
-function filterCategory(cat) {
-    document.getElementById("sportsList").innerHTML = "";
-    events.filter(e => e.category === cat).forEach(ev => {
-        const div = document.createElement("div");
-        div.className = "card";
-        div.innerHTML = `<h3>${ev.title}</h3><button onclick="openVideo('${ev.video}')">Watch Now</button>`;
-        document.getElementById("sportsList").appendChild(div);
-    });
-}
-function openVideo(src) {
-    const player = document.getElementById("player");
-    player.src = src;
-    document.getElementById("videoPlayer").style.display = "block";
-}
-function closeVideo() {
-    document.getElementById("videoPlayer").style.display = "none";
-    document.getElementById("player").pause();
-}
-// Drag Video Player
-let vp = document.getElementById("videoPlayer");
-let isDragging = false, offsetX, offsetY;
-vp.addEventListener("mousedown", e => {
-    isDragging = true;
-    offsetX = e.clientX - vp.offsetLeft;
-    offsetY = e.clientY - vp.offsetTop;
-});
-document.addEventListener("mouseup", () => isDragging = false);
-document.addEventListener("mousemove", e => {
-    if (isDragging) {
-        vp.style.left = (e.clientX - offsetX) + "px";
-        vp.style.top = (e.clientY - offsetY) + "px";
-    }
-});
-// Countdown Logic
-setInterval(() => {
-    events.forEach(ev => {
-        if (ev.type === 'upcoming') {
-            let cd = document.getElementById(`cd_${ev.title.replace(/\s/g,'')}`);
-            let diff = ev.startTime - Date.now();
-            if (diff <= 0) {
-                ev.type = 'live';
-            } else if (cd) {
-                cd.innerText = Math.floor(diff/1000) + "s to start";
-            }
-        } else if (ev.type === 'live') {
-            if (ev.endTime && Date.now() >= ev.endTime) {
-                ev.type = 'recent';
-            }
-        }
-    });
-    renderEvents(document.querySelector('.tab.active').innerText.toLowerCase().split(" ")[0]);
-}, 1000);
+function renderCards(filter) {
+    const container = document.getElementById('cardContainer');
+    container.innerHTML = '';
+    matches.forEach(match => {
+        if (filter !== 'all' && match.status !== filter && match.category !== filter) return;
 
-renderEvents();
-filterCategory("sports");
+        let statusText = '';
+        if (match.status === 'live') statusText = `<span class="status live">LIVE</span>`;
+        else if (match.status === 'upcoming') {
+            let timeLeft = Math.max(0, match.startTime - Date.now());
+            statusText = `<span class="status" id="countdown-${match.id}">${formatTime(timeLeft)}</span>`;
+            startCountdown(match.id, match.startTime);
+        }
+        else statusText = `<span class="status">Recent</span>`;
+
+        container.innerHTML += `
+            <div class="card">
+                <img src="${match.img}" alt="${match.title}">
+                <h4>${match.title}</h4>
+                ${statusText}
+                <button class="watch-btn" onclick="window.location='${match.link || '#'}'">Watch Now</button>
+            </div>
+        `;
+    });
+}
+
+function filterCategory(cat) {
+    document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    renderCards(cat);
+}
+
+function formatTime(ms) {
+    const sec = Math.floor(ms / 1000);
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    return `${m}:${s}`;
+}
+
+function startCountdown(id, startTime) {
+    const interval = setInterval(() => {
+        const now = Date.now();
+        let timeLeft = startTime - now;
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            const match = matches.find(m => m.id === id);
+            match.status = 'live';
+            renderCards(document.querySelector('nav button.active').innerText.toLowerCase());
+        } else {
+            document.getElementById(`countdown-${id}`).innerText = formatTime(timeLeft);
+        }
+    }, 1000);
+}
+
+renderCards('all');
 </script>
 
 </body>

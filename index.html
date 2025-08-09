@@ -1,158 +1,418 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="bn">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dekho Live</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CRICFy-style Live — Demo</title>
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #111;
-        color: white;
-        margin: 0;
-        padding: 0;
-    }
-    header {
-        background: #e50914;
-        padding: 15px;
-        text-align: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-    }
-    nav {
-        display: flex;
-        background: #222;
-        overflow-x: auto;
-    }
-    nav button {
-        flex: 1;
-        padding: 10px;
-        background: #222;
-        color: white;
-        border: none;
-        cursor: pointer;
-        font-size: 1rem;
-    }
-    nav button.active {
-        background: #e50914;
-    }
-    .cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 10px;
-        padding: 10px;
-    }
-    .card {
-        background: #1c1c1c;
-        border-radius: 8px;
-        overflow: hidden;
-        text-align: center;
-        padding-bottom: 10px;
-    }
-    .card img {
-        width: 100%;
-        height: 100px;
-        object-fit: cover;
-    }
-    .status {
-        padding: 5px;
-        font-weight: bold;
-    }
-    .live {
-        color: red;
-        animation: blink 1s infinite;
-    }
-    @keyframes blink {
-        50% { opacity: 0.4; }
-    }
-    .watch-btn {
-        background: #e50914;
-        color: white;
-        padding: 5px 10px;
-        border: none;
-        margin-top: 5px;
-        cursor: pointer;
-        border-radius: 4px;
-    }
+  /* ========== Theme (mobile-first) ========== */
+  :root{
+    --bg:#0f1114;
+    --surface:#111214;
+    --card:#0f1416;
+    --accent:#18c36b;
+    --danger:#ff5a5a;
+    --muted:#9aa0a6;
+    --text:#e8eef0;
+    --glass: rgba(255,255,255,0.02);
+    --radius:12px;
+    --shadow: 0 6px 18px rgba(0,0,0,0.6);
+    font-family: Inter, ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b0c0d 0%,var(--bg) 100%);color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh;}
+  .wrap{max-width:420px;margin:0 auto;padding:14px 12px 120px;}
+  header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#0e8d56,#14c37a);display:flex;align-items:center;justify-content:center;font-weight:700;color:#072214}
+  h1{font-size:16px;margin:0}
+  .sub{font-size:12px;color:var(--muted)}
+
+  /* tabs */
+  .tabs{display:flex;gap:8px;margin:14px 0;overflow:auto;padding-bottom:6px}
+  .tab{padding:7px 12px;border-radius:999px;border:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;font-size:13px}
+  .tab.active{border-color:rgba(24,195,107,0.18);color:var(--text);background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+
+  /* filters row icons */
+  .controls{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+  .control{flex:1;padding:8px;border-radius:10px;background:var(--card);text-align:center;color:var(--muted);font-size:13px;cursor:pointer;border:1px solid rgba(255,255,255,0.02)}
+
+  /* events list */
+  .list{display:flex;flex-direction:column;gap:12px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border:1px solid rgba(24,195,107,0.12);padding:12px;border-radius:var(--radius);box-shadow:var(--shadow);cursor:pointer;display:flex;flex-direction:column;gap:10px}
+  .league{font-size:13px;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,0.2);display:inline-block}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .teams{display:flex;align-items:center;gap:12px}
+  .team{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px}
+  .logoSmall{width:52px;height:52px;border-radius:8px;background:var(--glass);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--muted)}
+  .metaCol{text-align:right}
+  .timeLarge{font-weight:700;font-size:18px}
+  .dateSmall{color:var(--accent);font-weight:700;margin-top:4px}
+  .muted{color:var(--muted);font-size:13px}
+
+  /* Live badge & blinking */
+  .liveBadge{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,#ff6b6b,#ff2e2e);color:white;font-weight:700;letter-spacing:0.6px}
+  .liveBlink{animation:blink 1000ms linear infinite}
+  @keyframes blink{0%{opacity:1}50%{opacity:0.25}100%{opacity:1}}
+
+  /* countdown */
+  .countdown{font-weight:800;color:var(--accent);font-size:16px}
+
+  /* categories grid */
+  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .catCard{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:12px;border-radius:10px;text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.02)}
+
+  /* bottom nav */
+  .bottomNav{position:fixed;left:0;right:0;bottom:0;background:#111;padding:10px 12px;border-top:1px solid rgba(255,255,255,0.02);display:flex;gap:6px;justify-content:space-between;max-width:420px;margin:0 auto}
+  .bnItem{flex:1;text-align:center;padding:8px;border-radius:10px;color:var(--muted);cursor:pointer}
+  .bnItem.active{color:var(--accent);background:rgba(24,195,107,0.06);border:1px solid rgba(24,195,107,0.06)}
+
+  /* modal video */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:18px;z-index:60;visibility:hidden;opacity:0;transition:opacity .18s}
+  .modal.open{visibility:visible;opacity:1}
+  .modalBox{width:100%;max-width:960px;background:#020303;border-radius:12px;padding:10px}
+  .closeBtn{position:absolute;right:18px;top:18px;background:#111;padding:8px;border-radius:10px;color:var(--muted);cursor:pointer}
+  iframe{width:100%;height:56vw;max-height:560px;border-radius:8px;border:0}
+  /* responsive */
+  @media(min-width:800px){
+    body{background:var(--bg)}
+  }
 </style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">CF</div>
+      <div>
+        <h1>CRICFy-Style Live</h1>
+        <div class="sub">Live • Upcoming • Recent</div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div class="sub">সিনহা</div>
+    </div>
+  </header>
 
-<header>Dekho Live</header>
+  <!-- top tabs with dynamic counts -->
+  <div class="tabs" id="topTabs" role="tablist">
+    <div class="tab active" data-filter="all">All (0)</div>
+    <div class="tab" data-filter="live">Live (0)</div>
+    <div class="tab" data-filter="recent">Recent (0)</div>
+    <div class="tab" data-filter="upcoming">Upcoming (0)</div>
+  </div>
 
-<nav>
-    <button onclick="filterCategory('all')" class="active">All</button>
-    <button onclick="filterCategory('live')">Live</button>
-    <button onclick="filterCategory('upcoming')">Upcoming</button>
-    <button onclick="filterCategory('recent')">Recent</button>
-    <button onclick="filterCategory('sports')">Sports</button>
+  <!-- quick controls -->
+  <div class="controls">
+    <div class="control" id="filterSport">⚽ Sports</div>
+    <div class="control" id="filterTV">📺 Spot TV</div>
+    <div class="control" id="refreshBtn">🔄 Refresh</div>
+  </div>
+
+  <!-- main content area -->
+  <main id="contentArea"></main>
+</div>
+
+<!-- Video Modal -->
+<div class="modal" id="videoModal" aria-hidden="true">
+  <div class="modalBox" role="dialog" aria-modal="true">
+    <div style="position:relative">
+      <div class="closeBtn" id="modalClose">✕</div>
+    </div>
+    <iframe id="player" src="" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div>
+
+<!-- bottom nav -->
+<nav class="bottomNav" role="navigation" aria-label="main nav">
+  <div class="bnItem active" data-section="events">Live Events</div>
+  <div class="bnItem" data-section="sports">Sports</div>
+  <div class="bnItem" data-section="categories">Spot TV</div>
 </nav>
 
-<div class="cards" id="cardContainer"></div>
-
 <script>
-const matches = [
-    { id: 1, title: "Football Match", img: "https://via.placeholder.com/300x150", status: "live", category: "sports", link: "#", endTime: Date.now() + 600000 },
-    { id: 2, title: "Cricket Match", img: "https://via.placeholder.com/300x150", status: "upcoming", category: "sports", startTime: Date.now() + 10000 },
-    { id: 3, title: "Music Event", img: "https://via.placeholder.com/300x150", status: "recent", category: "music", link: "#" }
+/* ========= Sample data =========
+  - প্রতিটি ইভেন্টে startTime/endTime => ISO 8601 (local)
+  - link => ইউটিউব এম্বেড URL অথবা অন্য এম্বেডযোগ্য URL (Full/embed)
+*/
+const EVENTS = [
+  {
+    id: 101,
+    league: "Football | Liga Portugal Betclic",
+    leftTeam: "Casa Pia", leftLogo: "CP",
+    rightTeam: "Sporting", rightLogo: "SCP",
+    startTime: "2025-08-09T13:00:00", // local time string
+    endTime:   "2025-08-09T14:30:00",
+    link: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    channelId: "sports-tv"
+  },
+  {
+    id: 102,
+    league: "Cricket | New Zealand in Zimbabwe",
+    leftTeam: "ZIM", leftLogo: "Z",
+    rightTeam: "NZ", rightLogo: "NZ",
+    startTime: "2025-08-09T16:00:00",
+    endTime:   "2025-08-09T20:00:00",
+    link: "https://www.youtube.com/embed/tVj0ZTS4WF4",
+    channelId: "sports-tv"
+  },
+  {
+    id: 103,
+    league: "WWE | Friday Night SmackDown",
+    leftTeam: "SmackDown", leftLogo: "SD",
+    rightTeam: "SmackDown", rightLogo: "SD",
+    startTime: "2025-08-09T06:00:00",
+    endTime:   "2025-08-09T08:30:00",
+    link: "https://www.youtube.com/embed/3JZ_D3ELwOQ",
+    channelId: "entertainment-tv"
+  },
+  {
+    id: 104,
+    league: "Friendly | Practice Match",
+    leftTeam: "ECA", leftLogo: "E",
+    rightTeam: "SUN", rightLogo: "S",
+    startTime: "2025-07-01T10:00:00",
+    endTime:   "2025-07-01T12:00:00",
+    link: "https://www.youtube.com/embed/9bZkp7q19f0",
+    channelId: "sports-tv"
+  }
 ];
 
-function renderCards(filter) {
-    const container = document.getElementById('cardContainer');
-    container.innerHTML = '';
-    matches.forEach(match => {
-        if (filter !== 'all' && match.status !== filter && match.category !== filter) return;
+const SPOT_TV = [
+  { id: 'sports-tv', name: 'T Sports', link: '#' },
+  { id: 'sony-sports', name: 'Sony Sports 1', link: '#' },
+  { id: 'star-sports', name: 'Star Sports', link: '#' },
+  { id: 'entertainment-tv', name: 'WWE Channel', link: '#' }
+];
 
-        let statusText = '';
-        if (match.status === 'live') statusText = `<span class="status live">LIVE</span>`;
-        else if (match.status === 'upcoming') {
-            let timeLeft = Math.max(0, match.startTime - Date.now());
-            statusText = `<span class="status" id="countdown-${match.id}">${formatTime(timeLeft)}</span>`;
-            startCountdown(match.id, match.startTime);
-        }
-        else statusText = `<span class="status">Recent</span>`;
+/* ========= App State ========= */
+let events = JSON.parse(JSON.stringify(EVENTS)); // shallow copy to mutate statuses
+const contentArea = document.getElementById('contentArea');
+const topTabs = document.getElementById('topTabs');
 
-        container.innerHTML += `
-            <div class="card">
-                <img src="${match.img}" alt="${match.title}">
-                <h4>${match.title}</h4>
-                ${statusText}
-                <button class="watch-btn" onclick="window.location='${match.link || '#'}'">Watch Now</button>
+/* Helper: parse local ISO-like string to Date (assumes given string without timezone is local) */
+function parseLocalISO(s){
+  // If already has timezone (Z or +), Date can parse it normally.
+  if(/Z|[+\-]\d\d:\d\d$/.test(s)) return new Date(s);
+  // treat as local:
+  const parts = s.split(/[-T:]/).map(Number);
+  return new Date(parts[0], parts[1]-1, parts[2], parts[3]||0, parts[4]||0, parts[5]||0);
+}
+
+/* Update each event.status based on current time:
+   - "upcoming": now < start
+   - "live": start <= now <= end
+   - "recent": now > end
+*/
+function refreshStatuses(){
+  const now = new Date();
+  events.forEach(ev=>{
+    const start = parseLocalISO(ev.startTime);
+    const end = parseLocalISO(ev.endTime);
+    if(now < start) ev.status = 'upcoming';
+    else if(now >= start && now <= end) ev.status = 'live';
+    else ev.status = 'recent';
+  });
+}
+
+/* Compute counts for tabs and update labels */
+function updateTabCounts(){
+  const all = events.length;
+  const live = events.filter(e=>e.status==='live').length;
+  const recent = events.filter(e=>e.status==='recent').length;
+  const upcoming = events.filter(e=>e.status==='upcoming').length;
+  const map = { all, live, recent, upcoming };
+  topTabs.querySelectorAll('.tab').forEach(tab=>{
+    const f = tab.dataset.filter;
+    tab.textContent = f.charAt(0).toUpperCase() + f.slice(1) + ` (${map[f]||0})`;
+  });
+}
+
+/* Render event cards (list) */
+function renderEvents(list){
+  if(!list || !list.length){
+    contentArea.innerHTML = `<div class="muted" style="padding:18px;text-align:center">কোনো ইভেন্ট পাওয়া যায়নি</div>`;
+    return;
+  }
+  const html = list.map(ev=>{
+    const start = parseLocalISO(ev.startTime);
+    const end = parseLocalISO(ev.endTime);
+    // Determine display string for time/date
+    const now = new Date();
+    let statusHTML = '';
+    if(ev.status === 'live'){
+      const remaining = Math.max(0, Math.floor((end - now)/1000));
+      const mm = Math.floor(remaining/60), ss = remaining % 60;
+      statusHTML = `<div><span class="liveBadge liveBlink">LIVE</span></div>
+                    <div class="muted" style="margin-top:6px">Ends in <strong>${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}</strong></div>`;
+    } else if(ev.status === 'upcoming'){
+      const remaining = Math.max(0, Math.floor((start - now)/1000));
+      const hh = Math.floor(remaining/3600), mm = Math.floor((remaining%3600)/60), ss = remaining%60;
+      statusHTML = `<div class="countdown">${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}</div>
+                    <div class="muted" style="margin-top:6px">Starts at ${start.toLocaleString()}</div>`;
+    } else {
+      statusHTML = `<div class="muted">Ended • ${new Date(ev.endTime).toLocaleString()}</div>`;
+    }
+
+    return `
+      <article class="card" data-id="${ev.id}" data-link="${ev.link}">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="league">${ev.league}</div>
+          ${ev.status==='live' ? `<div style="font-size:12px;color:var(--muted)">Live Now</div>` : `<div class="muted">${new Date(ev.startTime).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>`}
+        </div>
+
+        <div class="row" style="align-items:center">
+          <div class="teams">
+            <div class="team">
+              <div class="logoSmall">${ev.leftLogo}</div>
+              <div style="font-weight:700;margin-top:6px">${ev.leftTeam}</div>
             </div>
-        `;
+            <div style="width:8px"></div>
+            <div class="team">
+              <div class="logoSmall">${ev.rightLogo}</div>
+              <div style="font-weight:700;margin-top:6px">${ev.rightTeam}</div>
+            </div>
+          </div>
+
+          <div class="metaCol">
+            <div class="timeLarge">${new Date(ev.startTime).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+            <div class="dateSmall">${new Date(ev.startTime).toLocaleDateString()}</div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <div class="muted">#${ev.id}</div>
+          <div>${statusHTML}</div>
+        </div>
+      </article>
+    `;
+  }).join('');
+  contentArea.innerHTML = `<div class="list">${html}</div>`;
+
+  // attach click handlers for opening video
+  contentArea.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const link = card.dataset.link;
+      if(link && link !== '#') openPlayer(link);
+      else alert('Video link নেই — link সেট করুন।');
     });
+  });
 }
 
-function filterCategory(cat) {
-    document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    renderCards(cat);
+/* Render Spot TV categories */
+function renderSpotTV(){
+  const html = SPOT_TV.map(tv=>`
+    <div class="catCard" data-id="${tv.id}" data-link="${tv.link}">
+      <div style="font-weight:800">${tv.name}</div>
+      <div class="muted" style="margin-top:6px">ক্লিক করলে চ্যানেল খুলবে</div>
+    </div>`).join('');
+  contentArea.innerHTML = `<div style="margin-top:6px" class="grid2">${html}</div>`;
+  contentArea.querySelectorAll('.catCard').forEach(c=>{
+    c.addEventListener('click', ()=> {
+      const link = c.dataset.link;
+      if(link && link !== '#') window.open(link,'_blank');
+      else alert('চ্যানেল লিংক নির্ধারণ করুন।');
+    });
+  });
 }
 
-function formatTime(ms) {
-    const sec = Math.floor(ms / 1000);
-    const m = String(Math.floor(sec / 60)).padStart(2, '0');
-    const s = String(sec % 60).padStart(2, '0');
-    return `${m}:${s}`;
+/* Bottom nav & top tabs interactions */
+document.querySelectorAll('.bnItem').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.bnItem').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const s = b.dataset.section;
+    if(s === 'events'){
+      applyActiveTab();
+    } else if(s === 'categories'){
+      renderSpotTV();
+    } else {
+      // for 'sports' we can show all events filtered by sports (demo = all)
+      applyActiveTab();
+    }
+  });
+});
+
+topTabs.addEventListener('click', (e)=>{
+  const t = e.target.closest('.tab');
+  if(!t) return;
+  topTabs.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  applyActiveTab();
+});
+
+document.getElementById('filterTV').addEventListener('click', ()=> {
+  document.querySelector('.bnItem[data-section="categories"]').click();
+});
+document.getElementById('filterSport').addEventListener('click', ()=> {
+  document.querySelector('.bnItem[data-section="sports"]').click();
+});
+document.getElementById('refreshBtn').addEventListener('click', ()=> { tickNow(); });
+
+/* Active tab rendering */
+function applyActiveTab(){
+  const active = topTabs.querySelector('.tab.active').dataset.filter;
+  if(active === 'all') renderEvents(events);
+  else renderEvents(events.filter(e => e.status === active));
 }
 
-function startCountdown(id, startTime) {
-    const interval = setInterval(() => {
-        const now = Date.now();
-        let timeLeft = startTime - now;
-        if (timeLeft <= 0) {
-            clearInterval(interval);
-            const match = matches.find(m => m.id === id);
-            match.status = 'live';
-            renderCards(document.querySelector('nav button.active').innerText.toLowerCase());
-        } else {
-            document.getElementById(`countdown-${id}`).innerText = formatTime(timeLeft);
-        }
-    }, 1000);
+/* Player modal */
+const modal = document.getElementById('videoModal');
+const player = document.getElementById('player');
+const modalClose = document.getElementById('modalClose');
+
+function openPlayer(url){
+  // Convert youtube watch?v=... to embed if needed
+  try{
+    if(url.includes('youtube.com/watch')){
+      const u = new URL(url);
+      const id = u.searchParams.get('v');
+      if(id) url = `https://www.youtube.com/embed/${id}?autoplay=1`;
+    }
+  }catch(e){}
+  player.src = url + (url.includes('?') ? '&autoplay=1' : '?autoplay=1');
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+}
+modalClose.addEventListener('click', closePlayer);
+modal.addEventListener('click', (e)=>{ if(e.target === modal) closePlayer(); });
+function closePlayer(){
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  player.src = '';
 }
 
-renderCards('all');
+/* ========= Timer loop =========
+   - Every 1s update statuses & counts
+   - Re-render current view (optimized lightly)
+*/
+function tickNow(){
+  refreshStatuses();
+  updateTabCounts();
+  // Only re-render visible view
+  const visibleSection = document.querySelector('.bnItem.active')?.dataset.section || 'events';
+  if(visibleSection === 'categories'){
+    // do nothing for categories
+  } else {
+    applyActiveTab();
+  }
+}
+
+/* Initialize & auto tick */
+refreshStatuses();
+updateTabCounts();
+applyActiveTab();
+setInterval(tickNow, 1000);
+
+/* ========= How to customize =========
+  - EVENTS array: add/remove events; set startTime/endTime in local ISO format (YYYY-MM-DDTHH:MM:SS)
+  - link: put embed URL (YouTube embed / other embedable player)
+  - SPOT_TV: add channel objects {id,name,link}
+  - For production you should load events from server (JSON API) and update events[] dynamically
+*/
+
+/* Optional: For dev convenience reload events from "server" localStorage (not required) */
 </script>
-
 </body>
 </html>

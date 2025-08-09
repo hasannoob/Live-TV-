@@ -1,587 +1,115 @@
-<!doctype html>
-<html lang="bn">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Dekho Live — Demo</title>
-<meta name="description" content="Dekho Live — demo prototype (CRICFy-style) — live/upcoming/recent, sports tv, categories, draggable floating player">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dekho Live</title>
 <style>
-  :root{
-    --bg:#0b0c0d; --surface:#0f1314; --card:#111416;
-    --accent:#18c36b; --danger:#ff5a5a; --muted:#9aa0a6; --text:#e8eef0;
-    --radius:12px;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;color:var(--text);background:linear-gradient(180deg,#070708 0%,#0b0c0d 100%);-webkit-font-smoothing:antialiased}
-  .container{max-width:420px;margin:0 auto;padding:12px 12px 120px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0}
-  .brand{display:flex;gap:10px;align-items:center}
-  .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#0e8d56,#14c37a);display:flex;align-items:center;justify-content:center;font-weight:800;color:#072214}
-  h1{font-size:18px;margin:0}
-  .sub{font-size:12px;color:var(--muted)}
-
-  /* tabs */
-  .tabs{display:flex;gap:8px;margin:12px 0;overflow:auto;padding-bottom:6px}
-  .tab{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.02);background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;font-size:13px}
-  .tab.active{border-color:rgba(24,195,107,0.12);color:var(--text);background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
-
-  /* quick controls */
-  .controls{display:flex;gap:8px;margin-bottom:12px}
-  .chip{flex:1;padding:8px;border-radius:10px;background:var(--card);text-align:center;color:var(--muted);font-size:13px;cursor:pointer;border:1px solid rgba(255,255,255,0.02)}
-
-  /* sections */
-  .section-title{display:flex;align-items:center;justify-content:space-between;margin:10px 0 6px}
-  .section-title h2{margin:0;font-size:14px}
-  .list{display:flex;flex-direction:column;gap:10px}
-
-  /* card */
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);box-shadow:0 6px 16px rgba(0,0,0,0.5);cursor:pointer}
-  .card-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .teams{display:flex;gap:12px;align-items:center}
-  .team{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px}
-  .logoSmall{width:56px;height:56px;border-radius:10px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700}
-  .meta{text-align:right}
-  .timeLarge{font-weight:700;font-size:16px}
-  .dateSmall{color:var(--accent);font-weight:700;margin-top:4px}
-  .muted{color:var(--muted);font-size:13px}
-
-  /* live badge */
-  .liveBadge{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,#ff6b6b,#ff2e2e);color:white;font-weight:700;letter-spacing:0.4px}
-  .blink{animation:blink 1000ms linear infinite}
-  @keyframes blink{0%{opacity:1}50%{opacity:0.25}100%{opacity:1}}
-
-  .countdown{font-weight:800;color:var(--accent);font-size:14px}
-
-  .btn{padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:#042010;font-weight:700;cursor:pointer}
-
-  /* categories grid */
-  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
-  .catCard{background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:12px;border-radius:10px;text-align:center;border:1px solid rgba(255,255,255,0.02);cursor:pointer}
-
-  /* floating player */
-  #floatingPlayer{position:fixed;left:16px;bottom:90px;width:320px;height:180px;background:#000;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.6);z-index:9999;display:none;overflow:hidden}
-  #fpHeader{height:28px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);display:flex;align-items:center;justify-content:space-between;padding:0 8px;color:var(--muted);cursor:grab}
-  #fpBody{width:100%;height:calc(100% - 28px);background:#000;display:flex;align-items:center;justify-content:center}
-  #fpPlayer{width:100%;height:100%;border:0}
-  .fpControls{display:flex;gap:8px;align-items:center}
-  .fpBtn{background:transparent;border:0;color:var(--muted);font-weight:700;cursor:pointer;padding:6px;border-radius:6px}
-  .closeBtn{color:#ff9b9b}
-
-  /* bottom nav */
-  .bottomNav{position:fixed;left:0;right:0;bottom:0;background:#0f1112;padding:8px 12px;border-top:1px solid rgba(255,255,255,0.02);display:flex;gap:8px;justify-content:space-between;max-width:420px;margin:0 auto}
-  .bnItem{flex:1;text-align:center;padding:8px;border-radius:10px;color:var(--muted);cursor:pointer}
-  .bnItem.active{color:var(--accent);background:rgba(24,195,107,0.06);border:1px solid rgba(24,195,107,0.06)}
-
-  /* misc */
-  .hidden{display:none}
-  @media (max-width:420px){
-    #floatingPlayer{width:260px;height:150px;left:8px}
-  }
+    body { font-family: Arial, sans-serif; margin:0; background:#111; color:white; }
+    header { background:#e91e63; padding:15px; text-align:center; font-size:24px; font-weight:bold; }
+    .tabs { display:flex; justify-content:center; background:#222; }
+    .tab { padding:10px 20px; cursor:pointer; }
+    .tab.active { background:#e91e63; }
+    .count { background:white; color:black; border-radius:50%; padding:2px 8px; margin-left:5px; }
+    .section { padding:10px; }
+    .card { background:#1c1c1c; margin:10px 0; padding:10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; }
+    .live-badge { background:red; padding:3px 8px; border-radius:5px; animation: blink 1s infinite; }
+    @keyframes blink { 50% {opacity:0.5;} }
+    .watch-btn { background:#e91e63; padding:5px 10px; border:none; color:white; border-radius:5px; cursor:pointer; }
+    .floating-player { position:fixed; bottom:20px; right:20px; width:300px; background:black; border:2px solid #e91e63; border-radius:10px; display:none; }
+    .floating-player video { width:100%; border-radius:10px; }
 </style>
 </head>
 <body>
-  <div class="container" id="app">
-    <header>
-      <div class="brand">
-        <div class="logo">DL</div>
-        <div>
-          <h1>Dekho Live</h1>
-          <div class="sub">Live • Upcoming • Recent</div>
-        </div>
-      </div>
-      <div class="sub">v1 • Demo</div>
-    </header>
 
-    <!-- top tabs -->
-    <div class="tabs" id="topTabs" role="tablist" aria-label="Top Tabs">
-      <button class="tab active" data-filter="all">All (<span id="cntAll">0</span>)</button>
-      <button class="tab" data-filter="live">Live (<span id="cntLive">0</span>)</button>
-      <button class="tab" data-filter="upcoming">Upcoming (<span id="cntUpcoming">0</span>)</button>
-      <button class="tab" data-filter="recent">Recent (<span id="cntRecent">0</span>)</button>
-    </div>
+<header>Dekho Live</header>
 
-    <!-- quick chips -->
-    <div class="controls">
-      <div class="chip" id="chipLive">Live Events</div>
-      <div class="chip" id="chipTV">Sports TV</div>
-      <div class="chip" id="chipCats">Categories</div>
-    </div>
+<div class="tabs">
+    <div class="tab active" onclick="showTab('live')">Live <span id="liveCount" class="count">0</span></div>
+    <div class="tab" onclick="showTab('upcoming')">Upcoming <span id="upcomingCount" class="count">0</span></div>
+    <div class="tab" onclick="showTab('recent')">Recent <span id="recentCount" class="count">0</span></div>
+</div>
 
-    <!-- Content sections -->
-    <section aria-labelledby="liveEventsTitle">
-      <div class="section-title"><h2 id="liveEventsTitle">Live Events</h2><div class="muted" id="liveSummary"></div></div>
-      <div id="eventsList" class="list"></div>
-    </section>
+<div id="live" class="section"></div>
+<div id="upcoming" class="section" style="display:none;"></div>
+<div id="recent" class="section" style="display:none;"></div>
 
-    <section aria-labelledby="sportsTvTitle" style="margin-top:14px">
-      <div class="section-title"><h2 id="sportsTvTitle">Sports TV</h2><div class="muted" id="tvSummary"></div></div>
-      <div id="sportsTvList" class="list"></div>
-    </section>
+<h2 style="padding:10px;">Sports TV</h2>
+<div class="section" id="sportsTV"></div>
 
-    <section aria-labelledby="catsTitle" style="margin-top:14px">
-      <div class="section-title"><h2 id="catsTitle">Categories</h2></div>
-      <div id="categoriesGrid" class="grid2"></div>
-    </section>
-  </div>
+<h2 style="padding:10px;">Categories</h2>
+<div class="section" id="categories"></div>
 
-  <!-- Floating draggable player -->
-  <div id="floatingPlayer" role="dialog" aria-label="Floating Video Player">
-    <div id="fpHeader">
-      <div id="fpTitle" style="font-size:13px;color:var(--muted)">Player</div>
-      <div class="fpControls">
-        <button class="fpBtn" id="fpPop">⤢</button>
-        <button class="fpBtn closeBtn" id="fpClose">✕</button>
-      </div>
-    </div>
-    <div id="fpBody">
-      <!-- iframe or video inserted here -->
-      <iframe id="fpPlayer" src="" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-    </div>
-  </div>
-
-  <!-- bottom nav -->
-  <nav class="bottomNav" aria-label="main">
-    <div class="bnItem active" data-section="home">Home</div>
-    <div class="bnItem" data-section="search">Search</div>
-    <div class="bnItem" data-section="bookmark">Bookmarks</div>
-    <div class="bnItem" data-section="profile">Me</div>
-  </nav>
+<div class="floating-player" id="playerBox" draggable="true">
+    <video id="player" controls></video>
+</div>
 
 <script>
-/* ================= Demo data (customize or replace with fetch('/api/events')) =================
- Each event:
-  - id (unique)
-  - league
-  - leftTeam/rightTeam, leftLogo/rightLogo (text or URL)
-  - startTime (ISO local string) // when upcoming -> live
-  - endTime (ISO local string)   // when live -> recent
-  - link (youtube watch?v=.. OR youtube embed OR mp4 url)
-  - channelId (for sports tv mapping)
-*/
-const DEMO_EVENTS = [
-  {
-    id: 201,
-    league: "Bangladesh vs India • Asia Cup",
-    leftTeam: "BAN", leftLogo: "BAN",
-    rightTeam: "IND", rightLogo: "IND",
-    startTime: "2025-08-09T14:30:00",
-    endTime:   "2025-08-09T18:30:00",
-    link: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    channelId: "t-sports"
-  },
-  {
-    id: 202,
-    league: "LaLiga • Real vs Barca",
-    leftTeam: "RMD", leftLogo: "RM",
-    rightTeam: "FCB", rightLogo: "BC",
-    startTime: "2025-08-09T19:00:00",
-    endTime:   "2025-08-09T21:00:00",
-    link: "https://www.youtube.com/watch?v=3JZ_D3ELwOQ",
-    channelId: "star-sports"
-  },
-  {
-    id: 203,
-    league: "Practice Friendly",
-    leftTeam: "ECA", leftLogo: "E",
-    rightTeam: "SUN", rightLogo: "S",
-    startTime: "2025-07-01T10:00:00",
-    endTime:   "2025-07-01T12:00:00",
-    link: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-    channelId: "t-sports"
-  },
-  {
-    id: 204,
-    league: "WWE • SmackDown",
-    leftTeam: "SD", leftLogo: "SD",
-    rightTeam: "SD", rightLogo: "SD",
-    startTime: "2025-08-09T06:00:00",
-    endTime:   "2025-08-09T08:00:00",
-    link: "https://www.youtube.com/embed/9bZkp7q19f0",
-    channelId: "wwe-channel"
-  }
+const matches = [
+    { id:1, title:"Match 1", start:new Date().getTime() - 1000*60*5, end:new Date().getTime() + 1000*60*10, video:"https://www.w3schools.com/html/mov_bbb.mp4" },
+    { id:2, title:"Match 2", start:new Date().getTime() + 1000*60*2, end:new Date().getTime() + 1000*60*12, video:"https://www.w3schools.com/html/mov_bbb.mp4" },
+    { id:3, title:"Match 3", start:new Date().getTime() - 1000*60*20, end:new Date().getTime() - 1000*60*5, video:"https://www.w3schools.com/html/mov_bbb.mp4" }
 ];
 
-const DEMO_TV = [
-  { id: "t-sports", name: "T Sports", link: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
-  { id: "star-sports", name: "Star Sports", link: "https://www.youtube.com/embed/3JZ_D3ELwOQ" },
-  { id: "sony-sports", name: "Sony Sports 1", link: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
-  { id: "wwe-channel", name: "WWE Channel", link: "https://www.youtube.com/embed/9bZkp7q19f0" }
+const sportsTV = [
+    { name:"Sports TV 1" }, { name:"Sports TV 2" }
 ];
 
-const CATEGORIES = [
-  { id: "sports", name: "Sports" },
-  { id: "entertainment", name: "Entertainment" },
-  { id: "news", name: "News" },
-  { id: "movies", name: "Movies" }
+const categories = [
+    { name:"Football" }, { name:"Cricket" }
 ];
 
-/* ================ App State ================ */
-let events = DEMO_EVENTS.map(e => ({...e})); // clone so we may mutate statuses
-let tvChannels = DEMO_TV;
-let categories = CATEGORIES;
+function renderData(){
+    const now = new Date().getTime();
+    let liveHTML = "", upcomingHTML = "", recentHTML = "";
+    let liveCount=0, upcomingCount=0, recentCount=0;
 
-/* Helpers */
-function parseLocalISO(s){
-  if(!s) return null;
-  // if contains timezone -> Date handles it
-  if(/Z|[+\-]\d\d:\d\d$/.test(s)) return new Date(s);
-  const parts = s.split(/[-T:]/).map(Number);
-  return new Date(parts[0], parts[1]-1, parts[2], parts[3]||0, parts[4]||0, parts[5]||0);
-}
-function now(){ return new Date(); }
-function formatHM(date){
-  if(!date) return "";
-  return date.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-}
-function formatDateShort(date){
-  if(!date) return "";
-  return date.toLocaleDateString();
-}
-
-/* Status update logic (upcoming / live / recent) */
-function refreshStatuses(){
-  const n = now();
-  events.forEach(ev=>{
-    const s = parseLocalISO(ev.startTime);
-    const e = parseLocalISO(ev.endTime);
-    if(s && n < s) ev.status = "upcoming";
-    else if(s && e && n >= s && n <= e) ev.status = "live";
-    else if(e && n > e) ev.status = "recent";
-    else ev.status = "upcoming";
-  });
-}
-
-/* Counts */
-function updateCounts(){
-  const cntAll = events.length;
-  const cntLive = events.filter(e=>e.status==='live').length;
-  const cntUpcoming = events.filter(e=>e.status==='upcoming').length;
-  const cntRecent = events.filter(e=>e.status==='recent').length;
-  document.getElementById('cntAll').innerText = cntAll;
-  document.getElementById('cntLive').innerText = cntLive;
-  document.getElementById('cntUpcoming').innerText = cntUpcoming;
-  document.getElementById('cntRecent').innerText = cntRecent;
-  document.getElementById('liveSummary').innerText = `${cntLive} live • ${cntUpcoming} upcoming`;
-  document.getElementById('tvSummary').innerText = `${tvChannels.length} channels`;
-}
-
-/* Rendering */
-function renderEventsList(filter = 'all'){
-  const container = document.getElementById('eventsList');
-  container.innerHTML = '';
-  let list = events.slice().sort((a,b)=> parseLocalISO(a.startTime) - parseLocalISO(b.startTime));
-  if(filter !== 'all') list = list.filter(e=> e.status === filter);
-  if(list.length === 0){
-    container.innerHTML = `<div class="muted" style="padding:12px;text-align:center">কোনো ইভেন্ট নেই</div>`;
-    return;
-  }
-  list.forEach(ev=>{
-    const start = parseLocalISO(ev.startTime);
-    const end = parseLocalISO(ev.endTime);
-    const isLive = ev.status === 'live';
-    const isUpcoming = ev.status === 'upcoming';
-    const html = document.createElement('article');
-    html.className = 'card';
-    if(isLive) html.classList.add('live');
-    html.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div class="league muted">${ev.league}</div>
-        <div class="muted" style="font-size:13px">${start ? formatDateShort(start) : ''}</div>
-      </div>
-      <div class="card-row" style="margin-top:8px">
-        <div class="teams">
-          <div class="team"><div class="logoSmall">${ev.leftLogo||ev.leftTeam}</div><div style="margin-top:6px;font-weight:700">${ev.leftTeam}</div></div>
-          <div style="min-width:8px"></div>
-          <div class="team"><div class="logoSmall">${ev.rightLogo||ev.rightTeam}</div><div style="margin-top:6px;font-weight:700">${ev.rightTeam}</div></div>
-        </div>
-        <div class="meta">
-          <div class="timeLarge">${start ? formatHM(start) : ''}</div>
-          <div class="dateSmall">${start ? formatDateShort(start) : ''}</div>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-        <div>
-          ${isLive ? `<span class="liveBadge blink">LIVE</span>` : isUpcoming ? `<span class="countdown" data-start="${ev.startTime}" data-id="${ev.id}"></span>` : `<span class="muted">ENDED</span>`}
-        </div>
-        <div>
-          <button class="btn" data-link="${ev.link}" data-id="${ev.id}">Watch Now</button>
-        </div>
-      </div>
-    `;
-    // click on whole card opens player too
-    html.querySelector('.btn')?.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      openFloatingPlayer(ev);
+    matches.forEach(m=>{
+        if(now >= m.start && now <= m.end){
+            liveCount++;
+            liveHTML += `<div class="card">
+                <span>${m.title} <span class="live-badge">LIVE</span></span>
+                <button class="watch-btn" onclick="playVideo('${m.video}')">Watch Now</button>
+            </div>`;
+        } else if(now < m.start){
+            upcomingCount++;
+            // Upcoming গুলো দেখা যাবে না
+        } else if(now > m.end){
+            recentCount++;
+            recentHTML += `<div class="card"><span>${m.title}</span></div>`;
+        }
     });
-    html.addEventListener('click', ()=> openFloatingPlayer(ev));
-    container.appendChild(html);
-  });
+
+    document.getElementById('live').innerHTML = liveHTML || "<p>No Live Matches</p>";
+    document.getElementById('upcoming').innerHTML = upcomingHTML || "<p>No Upcoming Matches</p>";
+    document.getElementById('recent').innerHTML = recentHTML || "<p>No Recent Matches</p>";
+
+    document.getElementById('liveCount').innerText = liveCount;
+    document.getElementById('upcomingCount').innerText = upcomingCount;
+    document.getElementById('recentCount').innerText = recentCount;
 }
 
-/* render TV channels (Sports TV only) */
-function renderSportsTv(filterCategory = 'sports'){
-  const container = document.getElementById('sportsTvList');
-  container.innerHTML = '';
-  // Show only channels that map to sports category: here as demo we assume channel ids matching sports
-  const list = tvChannels.filter(ch => {
-    // custom rule: include all channels for demo, but later you can filter by category map
-    return true;
-  });
-  if(list.length === 0){
-    container.innerHTML = `<div class="muted" style="padding:12px;text-align:center">কোনো চ্যানেল নেই</div>`;
-    return;
-  }
-  list.forEach(ch=>{
-    const el = document.createElement('div');
-    el.className = 'card';
-    el.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div><strong>${ch.name}</strong><div class="muted" style="font-size:13px">Channel ID: ${ch.id}</div></div>
-        <div><button class="btn" data-link="${ch.link}" data-id="${ch.id}">Watch Now</button></div>
-      </div>
-    `;
-    el.querySelector('.btn')?.addEventListener('click', (e)=> {
-      e.stopPropagation();
-      openFloatingPlayer(ch);
-    });
-    container.appendChild(el);
-  });
+function showTab(tab){
+    document.querySelectorAll('.section').forEach(s=>s.style.display="none");
+    document.getElementById(tab).style.display="block";
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    event.target.classList.add('active');
 }
 
-/* render categories */
-function renderCategories(){
-  const grid = document.getElementById('categoriesGrid');
-  grid.innerHTML = '';
-  categories.forEach(cat=>{
-    const el = document.createElement('div');
-    el.className = 'catCard';
-    el.innerHTML = `<div style="font-weight:800">${cat.name}</div><div class="muted" style="margin-top:6px">Show channels & events</div>`;
-    el.addEventListener('click', ()=> {
-      // For demo: clicking filters events by category 'sports' else shows none
-      if(cat.id === 'sports'){
-        // scroll to sports tv section
-        document.getElementById('sportsTvList').scrollIntoView({behavior:'smooth',block:'start'});
-      } else {
-        alert(`${cat.name} ক্যাটাগরির ডেটা নেই (ডেমো)।`);
-      }
-    });
-    grid.appendChild(el);
-  });
+function playVideo(src){
+    const playerBox = document.getElementById('playerBox');
+    const player = document.getElementById('player');
+    player.src = src;
+    playerBox.style.display = "block";
 }
 
-/* Floating player: support youtube watch?v=.., youtube embed, mp4 etc */
-const floating = document.getElementById('floatingPlayer');
-const fpPlayer = document.getElementById('fpPlayer');
-const fpTitle = document.getElementById('fpTitle');
-let fpCurrent = null;
-function openFloatingPlayer(item){
-  // item may be event or channel with .link and .name/league
-  const url = item.link || item;
-  const title = item.name || item.league || 'Player';
-  fpTitle.innerText = title;
-  fpCurrent = item;
-  // if youtube watch?v= then convert to embed
-  let src = url;
-  try{
-    if(typeof url === 'string' && url.includes('youtube.com/watch')){
-      const u = new URL(url);
-      const id = u.searchParams.get('v');
-      if(id) src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
-    } else if(typeof url === 'string' && /^https?:\/\/(www\.)?youtube\.com\/embed\//.test(url)){
-      src = url.includes('?') ? url + '&autoplay=1' : url + '?autoplay=1';
-    } else if(typeof url === 'string' && url.match(/\.(mp4|webm|ogg)(\?.*)?$/i)){
-      // Use HTML5 video by switching iframe to video element
-      // We'll create a blob URL into iframe via data: HTML — simpler: replace iframe with <video> element
-      const videoHtml = `<video id="fpHtmlVideo" src="${src}" controls autoplay style="width:100%;height:100%;"></video>`;
-      document.getElementById('fpBody').innerHTML = videoHtml;
-      floating.style.display = 'block';
-      makeDraggable(floating);
-      return;
-    } else if(typeof url === 'string' && url.startsWith('http')){
-      // fallback: open in iframe
-      src = url;
-    } else {
-      // not a string; ignore
-      console.warn('Unsupported link', url);
-    }
-  }catch(e){ console.warn(e); }
+setInterval(renderData, 1000);
+renderData();
 
-  // ensure iframe exists
-  document.getElementById('fpBody').innerHTML = `<iframe id="fpPlayer" src="${src}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
-  floating.style.display = 'block';
-  makeDraggable(floating);
-}
-
-/* close player */
-document.getElementById('fpClose').addEventListener('click', closeFloatingPlayer);
-function closeFloatingPlayer(){
-  // stop any html5 video
-  const htmlVideo = document.getElementById('fpHtmlVideo');
-  if(htmlVideo){ htmlVideo.pause(); }
-  // remove iframe src to stop playback
-  const iframe = document.querySelector('#fpBody iframe');
-  if(iframe) iframe.src = 'about:blank';
-  floating.style.display = 'none';
-}
-
-/* draggable impl (pointer events) */
-let dragState = {dragging:false, offsetX:0, offsetY:0};
-function makeDraggable(el){
-  const header = document.getElementById('fpHeader') || el;
-  header.style.cursor = 'grab';
-  header.onpointerdown = (ev)=>{
-    dragState.dragging = true;
-    const rect = el.getBoundingClientRect();
-    dragState.offsetX = ev.clientX - rect.left;
-    dragState.offsetY = ev.clientY - rect.top;
-    header.setPointerCapture?.(ev.pointerId);
-  };
-  header.onpointermove = (ev)=>{
-    if(!dragState.dragging) return;
-    let left = ev.clientX - dragState.offsetX;
-    let top = ev.clientY - dragState.offsetY;
-    // constrain within viewport
-    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-    left = Math.max(8, Math.min(left, vw - el.offsetWidth - 8));
-    top = Math.max(8, Math.min(top, vh - el.offsetHeight - 8));
-    el.style.left = left + 'px';
-    el.style.top = top + 'px';
-    el.style.right = 'auto';
-    el.style.bottom = 'auto';
-  };
-  header.onpointerup = (ev)=>{
-    dragState.dragging = false;
-    header.releasePointerCapture?.(ev.pointerId);
-  };
-  // touch safety: pointercancel
-  header.onpointercancel = ()=> dragState.dragging = false;
-}
-
-/* Tab interactions */
-document.getElementById('topTabs').addEventListener('click', (e)=>{
-  const btn = e.target.closest('.tab');
-  if(!btn) return;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  const filter = btn.dataset.filter || btn.getAttribute('data-filter') || btn.textContent.trim().split(' ')[0].toLowerCase();
-  applyFilter(filter);
-});
-
-/* quick chips */
-document.getElementById('chipLive').addEventListener('click', ()=> document.querySelector('.tab[data-filter="live"]').click());
-document.getElementById('chipTV').addEventListener('click', ()=> document.querySelector('.tab[data-filter="all"]').click());
-document.getElementById('chipCats').addEventListener('click', ()=> { document.getElementById('categoriesGrid').scrollIntoView({behavior:'smooth'}); });
-
-/* apply filter (all/live/upcoming/recent) */
-function applyFilter(filter){
-  renderEventsList(filter);
-}
-
-/* countdown tick to update countdown elements and auto-transition statuses */
-function tick(){
-  // update statuses
-  refreshStatuses();
-
-  // auto-transition logic: if upcoming and start <= now => become live; if live and end <= now => become recent
-  const nowTime = now().getTime();
-  let changed = false;
-  events.forEach(ev=>{
-    const s = parseLocalISO(ev.startTime)?.getTime() || null;
-    const e = parseLocalISO(ev.endTime)?.getTime() || null;
-    if(s && ev.status === 'upcoming' && nowTime >= s){
-      ev.status = 'live'; changed = true;
-    }
-    if(e && ev.status === 'live' && nowTime > e){
-      ev.status = 'recent'; changed = true;
-    }
-  });
-
-  // update countdown display
-  document.querySelectorAll('.countdown').forEach(el=>{
-    const start = parseLocalISO(el.dataset.start);
-    const id = Number(el.dataset.id);
-    if(!start) { el.textContent = ''; return; }
-    const diff = start.getTime() - nowTime;
-    if(diff <= 0){
-      el.innerHTML = `<span class="liveBadge blink">LIVE</span>`;
-    } else {
-      const hh = Math.floor(diff/3600000);
-      const mm = Math.floor((diff%3600000)/60000);
-      const ss = Math.floor((diff%60000)/1000);
-      el.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
-    }
-  });
-
-  // if changed or counts maybe changed -> re-render current view
-  updateCounts();
-  const activeFilter = document.querySelector('.tab.active')?.dataset.filter || 'all';
-  renderEventsList(activeFilter);
-}
-
-/* initial render */
-function init(){
-  refreshStatuses();
-  updateCounts();
-  renderEventsList('all');
-  renderSportsTv();
-  renderCategories();
-  // start ticking every 1s
-  setInterval(tick, 1000);
-}
-
-/* render categories grid */
-function renderCategories(){
-  const grid = document.getElementById('categoriesGrid');
-  grid.innerHTML = '';
-  categories.forEach(cat=>{
-    const el = document.createElement('div');
-    el.className = 'catCard';
-    el.innerHTML = `<div style="font-weight:800">${cat.name}</div><div class="muted" style="margin-top:6px">Browse ${cat.name}</div>`;
-    el.addEventListener('click', ()=>{
-      if(cat.id === 'sports'){
-        // scroll to sports tv
-        document.getElementById('sportsTvList').scrollIntoView({behavior:'smooth',block:'start'});
-      } else {
-        alert(`${cat.name} ক্যাটি ডেমো-র জন্য এখানে নেই।`);
-      }
-    });
-    grid.appendChild(el);
-  });
-}
-
-/* render sports tv simplified (all channels) */
-function renderSportsTv(){
-  const container = document.getElementById('sportsTvList');
-  container.innerHTML = '';
-  tvChannels.forEach(ch=>{
-    const el = document.createElement('div');
-    el.className = 'card';
-    el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-weight:800">${ch.name}</div>
-        <div class="muted" style="font-size:13px">Channel ID: ${ch.id}</div>
-      </div>
-      <div><button class="btn" data-link="${ch.link}" data-id="${ch.id}">Watch Now</button></div>
-    </div>`;
-    el.querySelector('.btn')?.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      openFloatingPlayer(ch);
-    });
-    container.appendChild(el);
-  });
-}
-
-/* keyboard: Esc closes player */
-document.addEventListener('keydown', (e)=>{
-  if(e.key === 'Escape') closeFloatingPlayer();
-});
-
-/* init app */
-init();
-
-/* Expose openFloatingPlayer for console/testing */
-window.openFloatingPlayer = openFloatingPlayer;
+// Render Sports TV & Categories
+document.getElementById('sportsTV').innerHTML = sportsTV.map(tv=>`<div class="card">${tv.name}</div>`).join("");
+document.getElementById('categories').innerHTML = categories.map(c=>`<div class="card">${c.name}</div>`).join("");
 </script>
+
 </body>
 </html>

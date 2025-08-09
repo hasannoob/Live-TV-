@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Live Sports TV Website</title>
 <style>
-  /* ... (তোমার আগের CSS কোড এখানে থাকবে) ... */
-  /* আমি আগে যা দিয়েছি সেটা ঠিক থাকুক */
   * {
     box-sizing: border-box;
     margin: 0; padding: 0;
@@ -262,7 +260,7 @@
 
 <div class="cards-container" aria-live="polite" aria-atomic="true">
 
- <article class="match-card live show" data-type="live" data-endtime="2025-08-09T23:20:00+06:00" data-link="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" aria-label="Live Match: Bangladesh vs India">
+ <article class="match-card live show" data-type="live" data-endtime="2025-08-09T23:10:00+06:00" data-link="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" aria-label="Live Match: Bangladesh vs India">
   <div class="teams"><div>Bangladesh</div><div class="vs">VS</div><div>India</div></div>
   <div class="live-animation" aria-label="Live animation"></div>
   <button class="watch-now" aria-label="Play Video">Watch Now</button>
@@ -282,15 +280,14 @@
   <button class="watch-now" disabled>Watch Now</button>
 </article>
 
-<article class="match-card upcoming" data-type="upcoming" data-endtime="2025-08-09T23:20:00+06:00" data-link="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" aria-label="Upcoming Match: Pakistan vs New Zealand">
-  <div class="teams"><div>Pakistan</div><div class="vs">VS</div><div>New Zealand</div></div>
-  <div class="countdown">Time Left: <span class="timer">Loading...</span></div>
+<article class="match-card upcoming" data-type="upcoming" data-starttime="2025-08-09T23:15:00+06:00" data-endtime="2025-08-09T23:50:00+06:00" data-link="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" aria-label="Upcoming Match: Australia vs England">
+  <div class="teams"><div>Australia</div><div class="vs">VS</div><div>England</div></div>
+  <div class="countdown">Starts In: <span class="timer">Loading...</span></div>
   <button class="watch-now" aria-label="Play Video" disabled>Watch Now</button>
 </article>
 
-  <article class="match-card recent show" data-type="recent" data-endtime="2026-01-10T18:00:00+06:00" data-link="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" aria-label="Recent Match: South Africa vs Sri Lanka">
+  <article class="match-card recent show" data-type="recent" data-endtime="2025-08-09T22:00:00+06:00" data-link="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" aria-label="Recent Match: South Africa vs Sri Lanka">
     <div class="teams"><div>South Africa</div><div class="vs">VS</div><div>Sri Lanka</div></div>
-    <div class="countdown">Time Left: <span class="timer">Loading...</span></div>
     <button class="watch-now" aria-label="Play Video" disabled>Watch Now</button>
   </article>
 
@@ -381,64 +378,72 @@
   }
   updateCounts();
 
-  // Countdown update every second
+  // Countdown & status update every second
   function updateCountdowns() {
-  const now = new Date();
-  allMatchCards.forEach(card => {
-    const cardType = card.dataset.type;
-    const endtimeStr = card.dataset.endtime;
-    const watchBtn = card.querySelector('.watch-now');
-    const countdownEl = card.querySelector('.countdown');
-    if (!endtimeStr) return;
+    const now = new Date();
+    allMatchCards.forEach(card => {
+      const cardType = card.dataset.type;
+      const starttimeStr = card.dataset.starttime;
+      const endtimeStr = card.dataset.endtime;
+      const watchBtn = card.querySelector('.watch-now');
+      const countdownEl = card.querySelector('.countdown');
 
-    const endtime = new Date(endtimeStr);
-    let diff = endtime - now;
+      if (!endtimeStr) return;
 
-    if (cardType === 'upcoming') {
-      if (diff <= 0) {
-        card.dataset.type = 'live';
-        card.classList.remove('upcoming');
-        card.classList.add('live');
-        watchBtn.disabled = false;
-        if (countdownEl) countdownEl.style.display = 'none';
+      const starttime = starttimeStr ? new Date(starttimeStr) : null;
+      const endtime = new Date(endtimeStr);
+      let diffStart = starttime ? starttime - now : null;
+      let diffEnd = endtime - now;
 
-        if(!card.querySelector('.live-animation')) {
-          const liveAnim = document.createElement('div');
-          liveAnim.className = 'live-animation';
-          liveAnim.setAttribute('aria-label', 'Live animation');
-          card.insertBefore(liveAnim, watchBtn);
+      if (cardType === 'upcoming') {
+        if (diffStart !== null && diffStart <= 0) {
+          // If start time reached, switch to live
+          card.dataset.type = 'live';
+          card.classList.remove('upcoming');
+          card.classList.add('live');
+          watchBtn.disabled = false;
+          if (countdownEl) countdownEl.style.display = 'none';
+
+          if(!card.querySelector('.live-animation')) {
+            const liveAnim = document.createElement('div');
+            liveAnim.className = 'live-animation';
+            liveAnim.setAttribute('aria-label', 'Live animation');
+            card.insertBefore(liveAnim, watchBtn);
+          }
+          updateCounts();
+        } else {
+          // Show countdown to start
+          if(countdownEl) countdownEl.style.display = 'block';
+          const hours = Math.floor(diffStart / (1000 * 60 * 60));
+          const minutes = Math.floor((diffStart % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diffStart % (1000 * 60)) / 1000);
+          if(countdownEl) countdownEl.querySelector('.timer').textContent = `${hours}h ${minutes}m ${seconds}s`;
+          watchBtn.disabled = true;
         }
-        updateCounts();
-      } else {
-        // কাউন্টডাউন আপডেট
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        if(countdownEl) countdownEl.querySelector('.timer').textContent = `${hours}h ${minutes}m ${seconds}s`;
-        watchBtn.disabled = true;
-        if(countdownEl) countdownEl.style.display = 'block';
-      }
-    } else if (cardType === 'live') {
-      if (diff <= 0) {
-        card.dataset.type = 'recent';
-        card.classList.remove('live');
-        card.classList.add('recent');
-        watchBtn.disabled = true;
+      } else if (cardType === 'live') {
+        if (diffEnd <= 0) {
+          // Live ended, move to recent
+          card.dataset.type = 'recent';
+          card.classList.remove('live');
+          card.classList.add('recent');
+          watchBtn.disabled = true;
+          if (countdownEl) countdownEl.style.display = 'none';
+
+          const liveAnim = card.querySelector('.live-animation');
+          if (liveAnim) liveAnim.remove();
+
+          updateCounts();
+        }
+      } else if (cardType === 'recent') {
+        if (countdownEl)
+          else if (cardType === 'recent') {
         if (countdownEl) countdownEl.style.display = 'none';
-
-        const liveAnim = card.querySelector('.live-animation');
-        if (liveAnim) liveAnim.remove();
-
-        updateCounts();
+        watchBtn.disabled = true;
       }
-    } else if (cardType === 'recent') {
-      if (countdownEl) countdownEl.style.display = 'none';
-      watchBtn.disabled = true;
-    }
-  });
-}
-setInterval(updateCountdowns, 1000);
-updateCountdowns();
+    });
+  }
+  setInterval(updateCountdowns, 1000);
+  updateCountdowns();
 
   // Video play with HLS support
   allMatchCards.forEach(card => {

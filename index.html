@@ -1,115 +1,252 @@
-<!DOCTYPE html>
+<!doctype html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dekho Live</title>
-<style>
-    body { font-family: Arial, sans-serif; margin:0; background:#111; color:white; }
-    header { background:#e91e63; padding:15px; text-align:center; font-size:24px; font-weight:bold; }
-    .tabs { display:flex; justify-content:center; background:#222; }
-    .tab { padding:10px 20px; cursor:pointer; }
-    .tab.active { background:#e91e63; }
-    .count { background:white; color:black; border-radius:50%; padding:2px 8px; margin-left:5px; }
-    .section { padding:10px; }
-    .card { background:#1c1c1c; margin:10px 0; padding:10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; }
-    .live-badge { background:red; padding:3px 8px; border-radius:5px; animation: blink 1s infinite; }
-    @keyframes blink { 50% {opacity:0.5;} }
-    .watch-btn { background:#e91e63; padding:5px 10px; border:none; color:white; border-radius:5px; cursor:pointer; }
-    .floating-player { position:fixed; bottom:20px; right:20px; width:300px; background:black; border:2px solid #e91e63; border-radius:10px; display:none; }
-    .floating-player video { width:100%; border-radius:10px; }
-</style>
-</head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Livefy TV — Demo</title>
+  <meta name="description" content="Livefy TV — M3U8 & YouTube player demo (GitHub Pages ready)" />  <!-- HLS.js for playing .m3u8 in browsers that don't support HLS natively -->  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>  <style>
+    :root{
+      --bg:#0f1113; --panel:#0b0c0d; --accent:#11c17b; --muted:#9aa3a8; --card:#0f1713;
+      --radius:12px; --glass: rgba(255,255,255,0.02);
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    html,body{height:100%;margin:0;background:var(--bg);color:#e6eef0}
+    .app{display:grid;grid-template-columns:280px 1fr;gap:20px;padding:18px;min-height:100vh;box-sizing:border-box}
+
+    /* Sidebar */
+    .sidebar{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:var(--radius);padding:18px;border:1px solid rgba(17,193,123,0.08)}
+    .brand{font-weight:700;font-size:18px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+    .brand .dot{width:36px;height:36px;border-radius:8px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-weight:800;color:#001}
+    .search{margin:10px 0}
+    .search input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .cats{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+    .cat{padding:10px;border-radius:10px;border:1px solid rgba(17,193,123,0.06);cursor:pointer}
+    .cat.active{background:rgba(17,193,123,0.06)}
+
+    /* Main */
+    .main{display:flex;flex-direction:column;gap:16px}
+    .topbar{display:flex;align-items:center;justify-content:space-between}
+    .filters{display:flex;gap:12px}
+    .btn{background:var(--glass);padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+
+    .events{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:12px;border-radius:12px;border:1px solid rgba(17,193,123,0.06)}
+    .card .row{display:flex;align-items:center;justify-content:space-between}
+    .meta{color:var(--muted);font-size:13px;margin-top:8px}
+    .sources{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    .source{padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);cursor:pointer;border:1px solid rgba(255,255,255,0.02)}
+
+    /* Player modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,0.6);z-index:200}
+    .modal.show{display:flex}
+    .player{width:100%;max-width:980px;background:var(--panel);border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.03)}
+    .player .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    video{width:100%;height:520px;background:#000;border-radius:8px}
+    .yt-iframe{width:100%;height:520px;border-radius:8px;border:0}
+
+    .small{font-size:13px;color:var(--muted)}
+
+    /* Responsive */
+    @media (max-width:880px){.app{grid-template-columns:1fr;}.sidebar{order:2}.player video,.yt-iframe{height:320px}}
+  </style></head>
 <body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="dot">L</div> <div>Livefy TV <div class="small">(demo)</div></div></div>
+      <div class="search"><input id="searchInput" placeholder="Search events or channels..." /></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="uploadJson" class="btn">Load events JSON</button><input id="jsonFile" type="file" accept="application/json" style="display:none"/></div><div class="cats" id="categories"></div>
 
-<header>Dekho Live</header>
+  <div style="margin-top:16px;font-size:13px;color:var(--muted)">Tip: add M3U8 or YouTube links to each event. GitHub Pages will serve the files if you place events.json in the repo root.</div>
+</aside>
 
-<div class="tabs">
-    <div class="tab active" onclick="showTab('live')">Live <span id="liveCount" class="count">0</span></div>
-    <div class="tab" onclick="showTab('upcoming')">Upcoming <span id="upcomingCount" class="count">0</span></div>
-    <div class="tab" onclick="showTab('recent')">Recent <span id="recentCount" class="count">0</span></div>
+<main class="main">
+  <div class="topbar">
+    <div><strong id="titleCount">All Events</strong> <span class="small" id="count"></span></div>
+    <div class="filters">
+      <button id="showAll" class="btn">All</button>
+      <button id="showLive" class="btn">Live</button>
+    </div>
+  </div>
+
+  <div class="events" id="eventsList"></div>
+</main>
+
+  </div>  <!-- Player modal -->  <div class="modal" id="playerModal" aria-hidden="true">
+    <div class="player" role="dialog">
+      <div class="head">
+        <div>
+          <div id="playingTitle" style="font-weight:700"></div>
+          <div class="small" id="playingMeta"></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="openInNew" class="btn">Open</button>
+          <button id="closePlayer" class="btn">Close</button>
+        </div>
+      </div><div id="playerWrapper">
+    <video id="hlsPlayer" controls playsinline></video>
+    <!-- iframe for youtube will be injected here -->
+  </div>
+
+  <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div class="small">Sources:</div>
+    <div id="playerSources" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  </div>
+
 </div>
 
-<div id="live" class="section"></div>
-<div id="upcoming" class="section" style="display:none;"></div>
-<div id="recent" class="section" style="display:none;"></div>
+  </div>  <script>
+  /* =====================
+     Demo event data
+     If you prefer, create a file `events.json` in your repo root and it will be fetched automatically.
+     Format:
+     [
+       {
+         "id":"1",
+         "title":"New Zealand vs Zimbabwe",
+         "category":"Cricket",
+         "live":true,
+         "time":"Live",
+         "sources":[{"label":"Fancode","url":"https://example.com/stream.m3u8"},{"label":"YouTube","url":"https://www.youtube.com/watch?v=VIDEO_ID"}]
+       }
+     ]
+  =====================*/
 
-<h2 style="padding:10px;">Sports TV</h2>
-<div class="section" id="sportsTV"></div>
+  const SAMPLE = [
+    {id:'z1',title:'New Zealand in Zimbabwe — Match 1',category:'Cricket',live:true,time:'Live',sources:[{label:'FANCODE - AQ',url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'},{label:'YouTube Highlights',url:'https://www.youtube.com/watch?v=ysz5S6PUM-U'}]},
+    {id:'z2',title:'The Hundred Women — OVI vs MNR',category:'Cricket',live:true,time:'Live',sources:[{label:'CRICFy LIVE',url:'https://test-streams.mux.dev/test_001/stream.m3u8'}]},
+    {id:'z3',title:'Man Utd vs Fiorentina — Friendly',category:'Football',live:true,time:'Live',sources:[{label:'TNT SPORTS',url:'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'}]},
+    {id:'z4',title:'Sample YouTube Only Event',category:'Entertainment',live:false,time:'09/08/2025 19:30',sources:[{label:'YouTube',url:'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}]}
+  ];
 
-<h2 style="padding:10px;">Categories</h2>
-<div class="section" id="categories"></div>
+  let EVENTS = [];
 
-<div class="floating-player" id="playerBox" draggable="true">
-    <video id="player" controls></video>
-</div>
+  // Utility: detect link type
+  function isYouTube(url){return /youtu(?:\.be|be\.com)/i.test(url)}
+  function isM3U8(url){return /\.m3u8($|\?)/i.test(url)}
 
-<script>
-const matches = [
-    { id:1, title:"Match 1", start:new Date().getTime() - 1000*60*5, end:new Date().getTime() + 1000*60*10, video:"https://www.w3schools.com/html/mov_bbb.mp4" },
-    { id:2, title:"Match 2", start:new Date().getTime() + 1000*60*2, end:new Date().getTime() + 1000*60*12, video:"https://www.w3schools.com/html/mov_bbb.mp4" },
-    { id:3, title:"Match 3", start:new Date().getTime() - 1000*60*20, end:new Date().getTime() - 1000*60*5, video:"https://www.w3schools.com/html/mov_bbb.mp4" }
-];
+  // Load external events.json if exists
+  async function loadExternal(){
+    try{
+      const res = await fetch('./events.json', {cache: 'no-store'});
+      if(!res.ok) throw new Error('no file');
+      const data = await res.json();
+      if(Array.isArray(data) && data.length) {EVENTS = data; console.log('Loaded events.json'); return}
+    }catch(e){console.log('No external events.json found, using sample');}
+    EVENTS = SAMPLE;
+  }
 
-const sportsTV = [
-    { name:"Sports TV 1" }, { name:"Sports TV 2" }
-];
+  // Render categories
+  function renderCategories(){
+    const cats = [...new Set(EVENTS.map(e=>e.category || 'Other'))].sort();
+    const container = document.getElementById('categories'); container.innerHTML='';
+    const all = document.createElement('div'); all.className='cat active'; all.textContent='All'; all.onclick=()=>{document.querySelectorAll('.cat').forEach(c=>c.classList.remove('active'));all.classList.add('active');renderEvents();}; container.appendChild(all);
+    cats.forEach(c=>{
+      const el=document.createElement('div'); el.className='cat'; el.textContent=c; el.onclick=()=>{document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderEvents(c)}; container.appendChild(el);
+    })
+  }
 
-const categories = [
-    { name:"Football" }, { name:"Cricket" }
-];
+  // Render events
+  function renderEvents(filterCategory){
+    const list = document.getElementById('eventsList'); list.innerHTML='';
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    const filtered = EVENTS.filter(ev=>{
+      if(filterCategory && filterCategory!=='All' && ev.category!==filterCategory) return false;
+      if(query){return (ev.title||'').toLowerCase().includes(query) || (ev.category||'').toLowerCase().includes(query)}
+      return true;
+    })
+    document.getElementById('count').textContent = `${filtered.length} items`;
+    filtered.forEach(ev=>{
+      const card=document.createElement('div'); card.className='card';
+      card.innerHTML = `<div class="row"><div><strong>${ev.title}</strong><div class="small">${ev.category} • ${ev.time || ''}</div></div><div><button class="btn playBtn">Play</button></div></div>`;
+      const srcWrap=document.createElement('div'); srcWrap.className='sources';
+      ev.sources.forEach(s=>{const b=document.createElement('div'); b.className='source'; b.textContent=s.label; b.onclick=()=>openPlayer(ev,s); srcWrap.appendChild(b)});
+      card.appendChild(srcWrap);
+      list.appendChild(card);
+    })
+  }
 
-function renderData(){
-    const now = new Date().getTime();
-    let liveHTML = "", upcomingHTML = "", recentHTML = "";
-    let liveCount=0, upcomingCount=0, recentCount=0;
+  // Player logic
+  let currentHls = null; // hls.js instance
+  function openPlayer(event, source){
+    const modal = document.getElementById('playerModal');
+    modal.classList.add('show'); modal.setAttribute('aria-hidden','false');
+    document.getElementById('playingTitle').textContent = event.title;
+    document.getElementById('playingMeta').textContent = `${event.category} • ${event.time || ''}`;
+    document.getElementById('openInNew').onclick = ()=>{ window.open(source.url, '_blank'); };
 
-    matches.forEach(m=>{
-        if(now >= m.start && now <= m.end){
-            liveCount++;
-            liveHTML += `<div class="card">
-                <span>${m.title} <span class="live-badge">LIVE</span></span>
-                <button class="watch-btn" onclick="playVideo('${m.video}')">Watch Now</button>
-            </div>`;
-        } else if(now < m.start){
-            upcomingCount++;
-            // Upcoming গুলো দেখা যাবে না
-        } else if(now > m.end){
-            recentCount++;
-            recentHTML += `<div class="card"><span>${m.title}</span></div>`;
-        }
-    });
+    const playerWrapper = document.getElementById('playerWrapper');
 
-    document.getElementById('live').innerHTML = liveHTML || "<p>No Live Matches</p>";
-    document.getElementById('upcoming').innerHTML = upcomingHTML || "<p>No Upcoming Matches</p>";
-    document.getElementById('recent').innerHTML = recentHTML || "<p>No Recent Matches</p>";
+    // Clear existing
+    playerWrapper.querySelectorAll('iframe,video').forEach(n=>n.remove());
 
-    document.getElementById('liveCount').innerText = liveCount;
-    document.getElementById('upcomingCount').innerText = upcomingCount;
-    document.getElementById('recentCount').innerText = recentCount;
-}
+    if(isYouTube(source.url)){
+      // Youtube: embed iframe
+      const vid = parseYouTubeID(source.url);
+      const iframe = document.createElement('iframe'); iframe.className='yt-iframe'; iframe.allow='autoplay; encrypted-media'; iframe.src = `https://www.youtube.com/embed/${vid}?autoplay=1&rel=0`;
+      playerWrapper.appendChild(iframe);
+    } else if(isM3U8(source.url) || source.url.endsWith('.mp4')){
+      const video = document.createElement('video'); video.id='hlsPlayer'; video.controls=true; video.autoplay=true; video.playsinline=true;
+      playerWrapper.appendChild(video);
+      // HLS handling
+      if(video.canPlayType('application/vnd.apple.mpegurl')){
+        video.src = source.url;
+        video.addEventListener('loadedmetadata', ()=>video.play().catch(()=>{}));
+      } else if(Hls && Hls.isSupported()){
+        if(currentHls){currentHls.destroy(); currentHls=null}
+        currentHls = new Hls(); currentHls.loadSource(source.url); currentHls.attachMedia(video);
+        currentHls.on(Hls.Events.MANIFEST_PARSED, ()=>video.play().catch(()=>{}));
+      } else {
+        // fallback
+        video.src = source.url; video.addEventListener('error',()=>alert('Cannot play this format in your browser'));
+      }
+    } else {
+      // unknown: try iframe open
+      const iframe = document.createElement('iframe'); iframe.className='yt-iframe'; iframe.src = source.url; playerWrapper.appendChild(iframe);
+    }
 
-function showTab(tab){
-    document.querySelectorAll('.section').forEach(s=>s.style.display="none");
-    document.getElementById(tab).style.display="block";
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    event.target.classList.add('active');
-}
+    // show all sources in player
+    const srcBox = document.getElementById('playerSources'); srcBox.innerHTML='';
+    event.sources.forEach(s=>{const el=document.createElement('div'); el.className='source'; el.textContent=s.label; el.onclick=()=>openPlayer(event,s); srcBox.appendChild(el)});
+  }
 
-function playVideo(src){
-    const playerBox = document.getElementById('playerBox');
-    const player = document.getElementById('player');
-    player.src = src;
-    playerBox.style.display = "block";
-}
+  function closePlayer(){
+    const modal = document.getElementById('playerModal'); modal.classList.remove('show'); modal.setAttribute('aria-hidden','true');
+    // destroy hls
+    if(currentHls){try{currentHls.destroy()}catch(e){} currentHls=null}
+    document.getElementById('playerWrapper').querySelectorAll('iframe,video').forEach(n=>n.remove());
+  }
 
-setInterval(renderData, 1000);
-renderData();
+  // parse youtube id
+  function parseYouTubeID(url){
+    // support youtu.be and various youtube.com formats
+    try{
+      const u = new URL(url);
+      if(u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+      if(u.searchParams.get('v')) return u.searchParams.get('v');
+      // embed path
+      const parts = u.pathname.split('/'); return parts.pop() || parts.pop();
+    }catch(e){return ''}
+  }
 
-// Render Sports TV & Categories
-document.getElementById('sportsTV').innerHTML = sportsTV.map(tv=>`<div class="card">${tv.name}</div>`).join("");
-document.getElementById('categories').innerHTML = categories.map(c=>`<div class="card">${c.name}</div>`).join("");
-</script>
+  // initialize
+  document.getElementById('closePlayer').addEventListener('click', closePlayer);
+  document.getElementById('playerModal').addEventListener('click', (e)=>{ if(e.target.id==='playerModal') closePlayer(); });
+  document.getElementById('showAll').addEventListener('click', ()=>{document.querySelectorAll('.cat').forEach(c=>c.classList.remove('active')); document.querySelector('.cat').classList.add('active'); renderEvents();});
+  document.getElementById('showLive').addEventListener('click', ()=>{document.querySelectorAll('.cat').forEach(c=>c.classList.remove('active')); renderEvents(); const list=document.getElementById('eventsList'); list.innerHTML=''; const live=EVENTS.filter(e=>e.live); document.getElementById('count').textContent = `${live.length} items`; live.forEach(ev=>{const card=document.createElement('div'); card.className='card'; card.innerHTML = `<div class="row"><div><strong>${ev.title}</strong><div class="small">${ev.category} • ${ev.time || ''}</div></div><div><button class="btn playBtn">Play</button></div></div>`; const srcWrap=document.createElement('div'); srcWrap.className='sources'; ev.sources.forEach(s=>{const b=document.createElement('div'); b.className='source'; b.textContent=s.label; b.onclick=()=>openPlayer(ev,s); srcWrap.appendChild(b)}); card.appendChild(srcWrap); list.appendChild(card)});
+  });
 
-</body>
+  // Search
+  document.getElementById('searchInput').addEventListener('input', ()=>renderEvents(document.querySelector('.cat.active')?.textContent));
+
+  // Load external JSON button
+  document.getElementById('uploadJson').addEventListener('click', ()=>document.getElementById('jsonFile').click());
+  document.getElementById('jsonFile').addEventListener('change', async (ev)=>{
+    const f = ev.target.files[0]; if(!f) return; try{ const txt = await f.text(); const data = JSON.parse(txt); if(Array.isArray(data)){EVENTS = data; renderCategories(); renderEvents(); alert('Loaded events from file.');} else alert('Invalid JSON format: must be an array of events'); }catch(e){alert('Could not read file')}
+  });
+
+  // On load: try to fetch events.json then render
+  (async ()=>{ await loadExternal(); renderCategories(); renderEvents(); })();
+
+  </script></body>
 </html>

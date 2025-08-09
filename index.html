@@ -395,16 +395,13 @@
     let diff = endtime - now;
 
     if (cardType === 'upcoming') {
-      // Upcoming এর কাউন্টডাউন দেখাবে
       if (diff <= 0) {
-        // সময় শেষ হলে আপকামিং থেকে লাইভে যাবে
         card.dataset.type = 'live';
         card.classList.remove('upcoming');
         card.classList.add('live');
         watchBtn.disabled = false;
         if (countdownEl) countdownEl.style.display = 'none';
 
-        // লাইভ এনিমেশন যোগ করো যদি না থাকে
         if(!card.querySelector('.live-animation')) {
           const liveAnim = document.createElement('div');
           liveAnim.className = 'live-animation';
@@ -422,30 +419,26 @@
         if(countdownEl) countdownEl.style.display = 'block';
       }
     } else if (cardType === 'live') {
-      // লাইভ ম্যাচের জন্য ধরলাম endtime হলো ম্যাচ শেষের সময়
       if (diff <= 0) {
-        // লাইভ শেষ হলে রিসেন্ট এ যাবে
         card.dataset.type = 'recent';
         card.classList.remove('live');
         card.classList.add('recent');
-        watchBtn.disabled = true; // ভিডিও প্লে বন্ধ
+        watchBtn.disabled = true;
         if (countdownEl) countdownEl.style.display = 'none';
 
-        // লাইভ এনিমেশন সরিয়ে দাও
         const liveAnim = card.querySelector('.live-animation');
         if (liveAnim) liveAnim.remove();
 
         updateCounts();
       }
     } else if (cardType === 'recent') {
-      // রিসেন্ট ম্যাচে কাউন্টডাউন দেখানোর দরকার নাই
       if (countdownEl) countdownEl.style.display = 'none';
       watchBtn.disabled = true;
     }
   });
 }
-  setInterval(updateCountdowns, 1000);
-  updateCountdowns();
+setInterval(updateCountdowns, 1000);
+updateCountdowns();
 
   // Video play with HLS support
   allMatchCards.forEach(card => {

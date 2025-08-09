@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>লাইভ টিভি ওয়েবসাইট</title>
+<title>Live Sports TV Website</title>
 <style>
   * {
     box-sizing: border-box;
@@ -61,6 +61,7 @@
     border-radius: 25px;
     color: #aaa;
     transition: all 0.3s ease;
+    user-select: none;
   }
   .tab.active {
     background: #0af;
@@ -76,30 +77,28 @@
     position: absolute;
     top: -6px;
     right: -10px;
-    user-select: none;
   }
   .cards-container {
     flex-grow: 1;
     padding: 20px;
     max-width: 900px;
     margin: 0 auto;
-  }
-  section[role="tabpanel"] {
-    display: none;
-  }
-  section[role="tabpanel"].active {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
   .match-card {
     background: #222;
     border-radius: 15px;
-    margin-bottom: 20px;
     padding: 15px 20px;
-    display: flex;
+    display: none;
     flex-direction: column;
     gap: 10px;
     box-shadow: 0 0 8px #0af44a66;
     position: relative;
+  }
+  .match-card.show {
+    display: flex;
   }
   .teams {
     display: flex;
@@ -139,8 +138,12 @@
     font-size: 1rem;
     width: 140px;
   }
-  .watch-now:hover {
+  .watch-now:hover:not(:disabled) {
     background: #08c;
+  }
+  .watch-now:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
   .countdown {
     font-size: 1rem;
@@ -210,245 +213,284 @@
       font-size: 0.9rem;
     }
   }
+  #video-modal {
+    display:none;
+    position:fixed;
+    top:0; left:0; width:100%; height:100%;
+    background:#000b;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+  }
+  #video-modal.active {
+    display:flex;
+  }
+  #video-modal > div {
+    position:relative;
+    width:90%;
+    max-width:720px;
+  }
+  #close-video {
+    position:absolute;
+    top:-30px;
+    right:0;
+    font-size:1.5rem;
+    background:none;
+    color:#0af;
+    cursor:pointer;
+    border:none;
+  }
 </style>
 </head>
 <body>
 
-<header>লাইভ স্পোর্টস টিভি</header>
+<header>Live Sports TV</header>
 
-<div class="announcement-wrapper" aria-label="ঘোষণা বার">
+<div class="announcement-wrapper" aria-label="Announcement Bar">
   <div class="announcement" role="marquee" aria-live="polite" aria-atomic="true">
-    আজকের প্রধান ম্যাচ: বাংলাদেশ বনাম ভারত | লাইভ শুরু হবে রাত ৮টায় | নতুন চ্যানেল যোগ হয়েছে: স্পোর্টস প্লাস |
+    Today's main match: Bangladesh vs India | Live starts at 8 PM | New channel added: Sports Plus |
   </div>
 </div>
 
-<div class="tabs" role="tablist" aria-label="ম্যাচ ক্যাটাগরি">
-  <div class="tab active" id="tab-live" role="tab" aria-selected="true" aria-controls="panel-live" tabindex="0">
-    লাইভ <span class="count" id="live-count">1</span>
-  </div>
-  <div class="tab" id="tab-upcoming" role="tab" aria-selected="false" aria-controls="panel-upcoming" tabindex="-1">
-    আপকামিং <span class="count" id="upcoming-count">2</span>
-  </div>
-  <div class="tab" id="tab-int" role="tab" aria-selected="false" aria-controls="panel-int" tabindex="-1">
-    ইন্ট <span class="count" id="int-count">1</span>
-  </div>
+<div class="tabs" role="tablist" aria-label="Match Categories">
+  <div class="tab active" data-tab="all" role="tab" aria-selected="true" tabindex="0">All</div>
+  <div class="tab" data-tab="live" role="tab" aria-selected="false" tabindex="-1">Live <span class="count" id="live-count">0</span></div>
+  <div class="tab" data-tab="upcoming" role="tab" aria-selected="false" tabindex="-1">Upcoming <span class="count" id="upcoming-count">0</span></div>
+  <div class="tab" data-tab="int" role="tab" aria-selected="false" tabindex="-1">International <span class="count" id="int-count">0</span></div>
 </div>
 
-<div class="cards-container">
+<div class="cards-container" aria-live="polite" aria-atomic="true">
 
-  <section id="panel-live" role="tabpanel" aria-labelledby="tab-live" class="active">
-    <article class="match-card" aria-label="লাইভ ম্যাচ: বাংলাদেশ বনাম ভারত">
-      <div class="teams">
-        <div>বাংলাদেশ</div>
-        <div class="vs">VS</div>
-        <div>ভারত</div>
-      </div>
-      <div class="live-animation" aria-label="লাইভ এনিমেশন"></div>
-      <button class="watch-now" aria-label="ভিডিও প্লে করুন">ওয়াচ নাও</button>
-    </article>
-  </section>
+  <article class="match-card live show" data-type="live" data-link="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" aria-label="Live Match: Bangladesh vs India">
+    <div class="teams"><div>Bangladesh</div><div class="vs">VS</div><div>India</div></div>
+    <div class="live-animation" aria-label="Live animation"></div>
+    <button class="watch-now" aria-label="Play Video">Watch Now</button>
+  </article>
 
-  <section id="panel-upcoming" role="tabpanel" aria-labelledby="tab-upcoming">
-    <article class="match-card" aria-label="আপকামিং ম্যাচ: ইংল্যান্ড বনাম অস্ট্রেলিয়া">
-      <div class="teams">
-        <div>ইংল্যান্ড</div>
-        <div class="vs">VS</div>
-        <div>অস্ট্রেলিয়া</div>
-      </div>
-      <div class="countdown" data-endtime="2025-08-09T14:30:00+06:00">সময় বাকি: <span class="timer">লোড হচ্ছে...</span></div>
-    </article>
-    <article class="match-card" aria-label="আপকামিং ম্যাচ: পাকিস্তান বনাম নিউজিল্যান্ড">
-      <div class="teams">
-        <div>পাকিস্তান</div>
-        <div class="vs">VS</div>
-        <div>নিউজিল্যান্ড</div>
-      </div>
-      <div class="countdown" data-endtime="2025-08-09T15:00:00+06:00">সময় বাকি: <span class="timer">লোড হচ্ছে...</span></div>
-    </article>
-  </section>
+  <article class="match-card upcoming show" data-type="upcoming" data-endtime="2025-12-31T23:59:59+06:00" data-link="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" aria-label="Upcoming Match: England vs Australia">
+    <div class="teams"><div>England</div><div class="vs">VS</div><div>Australia</div></div>
+    <div class="countdown">Time Left: <span class="timer">Loading...</span></div>
+    <button class="watch-now" aria-label="Play Video" disabled>Watch Now</button>
+  </article>
 
-  <section id="panel-int" role="tabpanel" aria-labelledby="tab-int">
-    <article class="match-card" aria-label="ইন্টারন্যাশনাল ম্যাচ: দক্ষিণ আফ্রিকা বনাম শ্রীলংকা">
-      <div class="teams">
-        <div>দক্ষিণ আফ্রিকা</div>
-        <div class="vs">VS</div>
-        <div>শ্রীলংকা</div>
-      </div>
-      <div class="countdown" data-endtime="2025-08-10T18:00:00+06:00">সময় বাকি: <span class="timer">লোড হচ্ছে...</span></div>
-    </article>
-  </section>
+  <article class="match-card upcoming show" data-type="upcoming" data-endtime="2025-12-31T23:59:59+06:00" data-link="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" aria-label="Upcoming Match: Pakistan vs New Zealand">
+    <div class="teams"><div>Pakistan</div><div class="vs">VS</div><div>New Zealand</div></div>
+    <div class="countdown">Time Left: <span class="timer">Loading...</span></div>
+    <button class="watch-now" aria-label="Play Video" disabled>Watch Now</button>
+  </article>
+
+  <article class="match-card int show" data-type="int" data-endtime="2026-01-10T18:00:00+06:00" data-link="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" aria-label="Recent: South Africa vs Sri Lanka">
+    <div class="teams"><div>South Africa</div><div class="vs">VS</div><div>Sri Lanka</div></div>
+    <div class="countdown">Time Left: <span class="timer">Loading...</span></div>
+    <button class="watch-now" aria-label="Play Video" disabled>Watch Now</button>
+  </article>
 
 </div>
 
-<div id="video-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000b;align-items:center;justify-content:center;z-index:9999;">
-  <div style="position:relative;width:90%;max-width:720px;">
-    <button id="close-video" style="position:absolute;top:-30px;right:0;font-size:1.5rem;background:none;color:#0af;cursor:pointer;border:none;">✖</button>
-    <video id="video-player" width="100%" controls autoplay>
-      <source src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" type="video/mp4">
-      আপনার ব্রাউজার ভিডিও সমর্থন করে না।
-    </video>
+<div id="video-modal" role="dialog" aria-modal="true" aria-label="Video Player">
+  <div>
+    <button id="close-video" aria-label="Close Video">✖</button>
+    <video id="video-player" width="100%" controls autoplay></video>
   </div>
 </div>
 
-<nav role="navigation" aria-label="প্রধান নেভিগেশন">
-  <div class="nav-item active" id="nav-home" tabindex="0" aria-current="page">হোম</div>
-  <div class="nav-item" id="nav-sports" tabindex="0">স্পোর্টস টিভি</div>
-  <div class="nav-item" id="nav-category" tabindex="0">ক্যাটাগরি</div>
+<nav role="navigation" aria-label="Main Navigation">
+  <div class="nav-item active" id="nav-home" tabindex="0" aria-current="page">Home</div>
+  <div class="nav-item" id="nav-sports" tabindex="0">Sports TV</div>
+  <div class="nav-item" id="nav-category" tabindex="0">Category</div>
 </nav>
 
-<div class="channel-list" id="sports-channels" aria-live="polite" aria-atomic="true" aria-label="স্পোর্টস টিভি চ্যানেল তালিকা">
-  <div>ক্রিকেট ফ্যান টিভি</div>
-  <div>স্পোর্টস প্লাস</div>
-  <div>লাইভ ক্রিকেট ২৪</div>
-  <div>স্পোর্টস নেটওয়ার্ক</div>
+<div class="channel-list" id="sports-channels" aria-live="polite" aria-atomic="true" aria-label="Sports TV Channel List">
+  <div data-link="https://ptv.example.com" tabindex="0">PTV</div>
+  <div data-link="https://sportsplus.example.com" tabindex="0">Sports Plus</div>
+  <div data-link="https://livecricket24.example.com" tabindex="0">Live Cricket 24</div>
+  <div data-link="https://sportsnetwork.example.com" tabindex="0">Sports Network</div>
 </div>
 
-<div class="iptv-list" id="iptv-list" aria-live="polite" aria-atomic="true" aria-label="আইপিটি চ্যানেল তালিকা">
-  <div>IPTV চ্যানেল ১</div>
-  <div>IPTV চ্যানেল ২</div>
-  <div>IPTV চ্যানেল ৩</div>
-  <div>IPTV চ্যানেল ৪</div>
+<div class="iptv-list" id="iptv-list" aria-live="polite" aria-atomic="true" aria-label="IPTV Channel List">
+  <div data-link="https://iptvchannel1.example.com" tabindex="0">IPTV Channel 1</div>
+  <div data-link="https://iptvchannel2.example.com" tabindex="0">IPTV Channel 2</div>
+  <div data-link="https://iptvchannel3.example.com" tabindex="0">IPTV Channel 3</div>
+  <div data-link="https://iptvchannel4.example.com" tabindex="0">IPTV Channel 4</div>
 </div>
 
 <script>
-  // Tab switching
   const tabs = document.querySelectorAll('.tab');
-  const panels = {
-    'tab-live': document.getElementById('panel-live'),
-    'tab-upcoming': document.getElementById('panel-upcoming'),
-    'tab-int': document.getElementById('panel-int')
-  };
+  const allMatchCards = document.querySelectorAll('.match-card');
+  const liveCountSpan = document.getElementById('live-count');
+  const upcomingCountSpan = document.getElementById('upcoming-count');
+  const intCountSpan = document.getElementById('int-count');
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => activateTab(tab.id));
-    tab.addEventListener('keydown', e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        activateTab(tab.id);
-      }
-    });
-  });
-
-  function activateTab(id) {
-    tabs.forEach(tab => {
-      const selected = tab.id === id;
-      tab.classList.toggle('active', selected);
-      tab.setAttribute('aria-selected', selected);
-      tab.setAttribute('tabindex', selected ? "0" : "-1");
-      if (panels[tab.id]) {
-        if(selected){
-          panels[tab.id].classList.add('active');
-          panels[tab.id].removeAttribute('hidden');
-        } else {
-          panels[tab.id].classList.remove('active');
-          panels[tab.id].setAttribute('hidden', '');
-        }
-      }
-    });
-    hideChannelLists();
-  }
-
-  // Watch Now video modal
-  const watchButtons = document.querySelectorAll('.watch-now');
   const videoModal = document.getElementById('video-modal');
   const videoPlayer = document.getElementById('video-player');
-  const closeVideo = document.getElementById('close-video');
+  const closeVideoBtn = document.getElementById('close-video');
 
-  watchButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      videoModal.style.display = 'flex';
-      videoPlayer.play();
-    });
-  });
-
-  closeVideo.addEventListener('click', () => {
-    videoPlayer.pause();
-    videoModal.style.display = 'none';
-  });
-
-  videoModal.addEventListener('click', e => {
-    if (e.target === videoModal) {
-      videoPlayer.pause();
-      videoModal.style.display = 'none';
-    }
-  });
-
-  // Countdown timers
-  function startCountdowns() {
-    const countdowns = document.querySelectorAll('.countdown');
-    countdowns.forEach(cd => {
-      const endTime = new Date(cd.dataset.endtime);
-      let interval = null;
-
-      function updateTimer() {
-        const now = new Date();
-        const diff = endTime - now;
-        if (diff <= 0) {
-          cd.querySelector('.timer').textContent = 'লাইভ শুরু হয়েছে!';
-          activateTab('tab-live');
-          clearInterval(interval);
-        } else {
-          const hrs = Math.floor(diff / (1000 * 60 * 60));
-          const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const secs = Math.floor((diff % (1000 * 60)) / 1000);
-          cd.querySelector('.timer').textContent =
-            `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-        }
-      }
-      updateTimer();
-      interval = setInterval(updateTimer, 1000);
-    });
-  }
-  startCountdowns();
-
-  // Navigation
   const navHome = document.getElementById('nav-home');
   const navSports = document.getElementById('nav-sports');
   const navCategory = document.getElementById('nav-category');
+
   const sportsChannels = document.getElementById('sports-channels');
   const iptvList = document.getElementById('iptv-list');
-  const cardsContainer = document.querySelector('.cards-container');
-  const tabsContainer = document.querySelector('.tabs');
-  const announcementWrapper = document.querySelector('.announcement-wrapper');
 
-  navHome.addEventListener('click', () => setActiveNav('home'));
-  navSports.addEventListener('click', () => setActiveNav('sports'));
-  navCategory.addEventListener('click', () => setActiveNav('category'));
-
-  navHome.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') { e.preventDefault(); setActiveNav('home'); } });
-  navSports.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') { e.preventDefault(); setActiveNav('sports'); } });
-  navCategory.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') { e.preventDefault(); setActiveNav('category'); } });
-
-  function setActiveNav(section) {
-    navHome.classList.toggle('active', section === 'home');
-    navSports.classList.toggle('active', section === 'sports');
-    navCategory.classList.toggle('active', section === 'category');
-
-    if(section === 'home') {
-      sportsChannels.classList.remove('active');
-      iptvList.classList.remove('active');
-      cardsContainer.style.display = 'block';
-      tabsContainer.style.display = 'flex';
-      announcementWrapper.style.display = 'block';
-    } else if(section === 'sports') {
-      sportsChannels.classList.add('active');
-      iptvList.classList.remove('active');
-      cardsContainer.style.display = 'none';
-      tabsContainer.style.display = 'none';
-      announcementWrapper.style.display = 'none';
-    } else if(section === 'category') {
-      iptvList.classList.add('active');
-      sportsChannels.classList.remove('active');
-      cardsContainer.style.display = 'none';
-      tabsContainer.style.display = 'none';
-      announcementWrapper.style.display = 'none';
+  // Tab selector function
+  function activateTab(selectedTab) {
+    tabs.forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.tab === selectedTab);
+      tab.setAttribute('aria-selected', tab.dataset.tab === selectedTab ? 'true' : 'false');
+      tab.setAttribute('tabindex', tab.dataset.tab === selectedTab ? '0' : '-1');
+    });
+    if(selectedTab === 'all'){
+      allMatchCards.forEach(card => card.classList.add('show'));
+    } else {
+      allMatchCards.forEach(card => {
+        card.classList.toggle('show', card.dataset.type === selectedTab);
+      });
     }
   }
+  activateTab('all');
 
-  function hideChannelLists() {
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => activateTab(tab.dataset.tab));
+    tab.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        activateTab(tab.dataset.tab);
+      }
+    });
+  });
+
+  // Update counts of matches per category
+  function updateCounts() {
+    const liveMatches = [...allMatchCards].filter(c => c.dataset.type === 'live');
+    const upcomingMatches = [...allMatchCards].filter(c => c.dataset.type === 'upcoming');
+    const intMatches = [...allMatchCards].filter(c => c.dataset.type === 'int');
+
+    liveCountSpan.textContent = liveMatches.length;
+    upcomingCountSpan.textContent = upcomingMatches.length;
+    intCountSpan.textContent = intMatches.length;
+
+    document.querySelector('.tab[data-tab="live"] .count').textContent = liveMatches.length || '';
+    document.querySelector('.tab[data-tab="upcoming"] .count').textContent = upcomingMatches.length || '';
+    document.querySelector('.tab[data-tab="int"] .count').textContent = intMatches.length || '';
+  }
+  updateCounts();
+
+ // Countdown updater — runs every second
+  function updateCountdowns() {
+    const now = new Date();
+    allMatchCards.forEach(card => {
+      if(card.dataset.type === 'upcoming' || card.dataset.type === 'int'){
+        const endtimeStr = card.dataset.endtime;
+        if(!endtimeStr) return;
+        const endtime = new Date(endtimeStr);
+        const timerSpan = card.querySelector('.countdown .timer');
+        const watchBtn = card.querySelector('.watch-now');
+        let diff = endtime - now;
+        if(diff <= 0){
+          if(card.dataset.type === 'upcoming'){
+            // Change from upcoming to live
+            card.dataset.type = 'live';
+            card.classList.remove('upcoming');
+            card.classList.add('live');
+            watchBtn.disabled = false;
+            card.querySelector('.countdown').style.display = 'none';
+            // Add live animation if not present
+            if(!card.querySelector('.live-animation')) {
+              const liveAnim = document.createElement('div');
+              liveAnim.className = 'live-animation';
+              liveAnim.setAttribute('aria-label', 'Live animation');
+              card.insertBefore(liveAnim, watchBtn);
+            }
+          } else if(card.dataset.type === 'int'){
+            // If international match time over, hide card (optional)
+            card.classList.remove('show');
+          }
+          updateCounts();  // update counts after change
+        } else {
+          // Update countdown timer text
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          timerSpan.textContent = `${hours}h ${minutes}m ${seconds}s`;
+          watchBtn.disabled = true;
+        }
+      }
+    });
+  }
+  setInterval(updateCountdowns, 1000);
+  updateCountdowns();
+
+  // Watch Now button click: play video modal
+  allMatchCards.forEach(card => {
+    const btn = card.querySelector('.watch-now');
+    btn.addEventListener('click', () => {
+      const videoSrc = card.dataset.link;
+      if(videoSrc) {
+        videoPlayer.src = videoSrc;
+        videoModal.classList.add('active');
+        videoPlayer.play();
+      }
+    });
+  });
+
+  // Close video modal handlers
+  closeVideoBtn.addEventListener('click', () => {
+    videoPlayer.pause();
+    videoPlayer.src = '';
+    videoModal.classList.remove('active');
+  });
+
+  videoModal.addEventListener('click', e => {
+    if(e.target === videoModal){
+      videoPlayer.pause();
+      videoPlayer.src = '';
+      videoModal.classList.remove('active');
+    }
+  });
+
+  // Navigation bar click handlers
+  function clearActiveNav(){
+    [navHome, navSports, navCategory].forEach(nav => nav.classList.remove('active'));
     sportsChannels.classList.remove('active');
     iptvList.classList.remove('active');
+    document.querySelector('.cards-container').style.display = 'flex';
   }
+
+  navHome.addEventListener('click', () => {
+    clearActiveNav();
+    navHome.classList.add('active');
+    document.querySelector('.cards-container').style.display = 'flex';
+  });
+
+  navSports.addEventListener('click', () => {
+    clearActiveNav();
+    navSports.classList.add('active');
+    document.querySelector('.cards-container').style.display = 'none';
+    sportsChannels.classList.add('active');
+  });
+
+  navCategory.addEventListener('click', () => {
+    clearActiveNav();
+    navCategory.classList.add('active');
+    document.querySelector('.cards-container').style.display = 'none';
+    iptvList.classList.add('active');
+  });
+
+  // Sports TV channels click open link in new tab
+  sportsChannels.querySelectorAll('div').forEach(ch => {
+    ch.addEventListener('click', () => {
+      const link = ch.dataset.link;
+      if(link) window.open(link, '_blank');
+    });
+  });
+
+  // IPTV channels click open link in new tab
+  iptvList.querySelectorAll('div').forEach(ch => {
+    ch.addEventListener('click', () => {
+      const link = ch.dataset.link;
+      if(link) window.open(link, '_blank');
+    });
+  });
 </script>
 
 </body>

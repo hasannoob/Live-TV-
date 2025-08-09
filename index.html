@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Live Sports TV Website</title>
 <style>
+  /* ... (তোমার আগের CSS কোড এখানে থাকবে) ... */
+  /* আমি আগে যা দিয়েছি সেটা ঠিক থাকুক */
   * {
     box-sizing: border-box;
     margin: 0; padding: 0;
@@ -57,8 +59,8 @@
   .tab {
     position: relative;
     cursor: pointer;
-    padding: 4px 10px;
-    border-radius: 20px;
+    padding: 8px 18px;
+    border-radius: 25px;
     color: #aaa;
     transition: all 0.3s ease;
     user-select: none;
@@ -80,12 +82,12 @@
   }
   .cards-container {
     flex-grow: 1;
-    padding: 10px;
+    padding: 20px;
     max-width: 900px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 20px;
   }
   .match-card {
     background: #222;
@@ -103,7 +105,7 @@
   .teams {
     display: flex;
     justify-content: space-between;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: 700;
   }
   .vs {
@@ -253,33 +255,32 @@
 </div>
 
 <div class="tabs" role="tablist" aria-label="Match Categories">
-  <div class="tab active" data-tab="all" role="tab" aria-selected="true" tabindex="0">All</div>
-  <div class="tab" data-tab="live" role="tab" aria-selected="false" tabindex="-1">Live <span class="count" id="live-count">0</span></div>
+  <div class="tab active" data-tab="live" role="tab" aria-selected="true" tabindex="0">Live <span class="count" id="live-count">0</span></div>
   <div class="tab" data-tab="upcoming" role="tab" aria-selected="false" tabindex="-1">Upcoming <span class="count" id="upcoming-count">0</span></div>
-  <div class="tab" data-tab="int" role="tab" aria-selected="false" tabindex="-1">Recent <span class="count" id="int-count">0</span></div>
+  <div class="tab" data-tab="recent" role="tab" aria-selected="false" tabindex="-1">Recent Matches <span class="count" id="recent-count">0</span></div>
 </div>
 
 <div class="cards-container" aria-live="polite" aria-atomic="true">
 
-  <article class="match-card live show" data-type="live" data-link="https://tvsen5.aynaott.com/Ptvsports/index.m3u8" aria-label="Live Match: Bangladesh vs India">
+  <article class="match-card live show" data-type="live" data-link="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" aria-label="Live Match: Bangladesh vs India">
     <div class="teams"><div>Bangladesh</div><div class="vs">VS</div><div>India</div></div>
     <div class="live-animation" aria-label="Live animation"></div>
     <button class="watch-now" aria-label="Play Video">Watch Now</button>
   </article>
 
-  <article class="match-card upcoming show" data-type="upcoming" data-endtime="2025-08-09T23:59:59+06:00" data-link="https://tvsen5.aynaott.com/Ptvsports/index.m3u8" aria-label="Upcoming Match: England vs Australia">
+  <article class="match-card upcoming show" data-type="upcoming" data-endtime="2025-12-31T23:59:59+06:00" data-link="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" aria-label="Upcoming Match: England vs Australia">
     <div class="teams"><div>England</div><div class="vs">VS</div><div>Australia</div></div>
     <div class="countdown">Time Left: <span class="timer">Loading...</span></div>
     <button class="watch-now" aria-label="Play Video" disabled>Watch Now</button>
   </article>
 
-  <article class="match-card upcoming show" data-type="upcoming" data-endtime="2025-08-09T23:59:59+06:00" data-link="https://tvsen5.aynaott.com/Ptvsports/index.m3u8" aria-label="Upcoming Match: Pakistan vs New Zealand">
+  <article class="match-card upcoming show" data-type="upcoming" data-endtime="2025-12-31T23:59:59+06:00" data-link="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" aria-label="Upcoming Match: Pakistan vs New Zealand">
     <div class="teams"><div>Pakistan</div><div class="vs">VS</div><div>New Zealand</div></div>
     <div class="countdown">Time Left: <span class="timer">Loading...</span></div>
     <button class="watch-now" aria-label="Play Video" disabled>Watch Now</button>
   </article>
 
-  <article class="match-card int show" data-type="int" data-endtime="2025-01-10T18:00:00+06:00" data-link="https://tvsen5.aynaott.com/Ptvsports/index.m3u8" aria-label="Recent: South Africa vs Sri Lanka">
+  <article class="match-card recent show" data-type="recent" data-endtime="2026-01-10T18:00:00+06:00" data-link="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" aria-label="Recent Match: South Africa vs Sri Lanka">
     <div class="teams"><div>South Africa</div><div class="vs">VS</div><div>Sri Lanka</div></div>
     <div class="countdown">Time Left: <span class="timer">Loading...</span></div>
     <button class="watch-now" aria-label="Play Video" disabled>Watch Now</button>
@@ -301,7 +302,7 @@
 </nav>
 
 <div class="channel-list" id="sports-channels" aria-live="polite" aria-atomic="true" aria-label="Sports TV Channel List">
-  <div data-link="https://tvsen5.aynaott.com/Ptvsports/index.m3u8" tabindex="0">PTV</div>
+  <div data-link="https://ptv.example.com" tabindex="0">PTV</div>
   <div data-link="https://sportsplus.example.com" tabindex="0">Sports Plus</div>
   <div data-link="https://livecricket24.example.com" tabindex="0">Live Cricket 24</div>
   <div data-link="https://sportsnetwork.example.com" tabindex="0">Sports Network</div>
@@ -314,12 +315,13 @@
   <div data-link="https://iptvchannel4.example.com" tabindex="0">IPTV Channel 4</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
   const tabs = document.querySelectorAll('.tab');
   const allMatchCards = document.querySelectorAll('.match-card');
   const liveCountSpan = document.getElementById('live-count');
   const upcomingCountSpan = document.getElementById('upcoming-count');
-  const intCountSpan = document.getElementById('int-count');
+  const recentCountSpan = document.getElementById('recent-count');
 
   const videoModal = document.getElementById('video-modal');
   const videoPlayer = document.getElementById('video-player');
@@ -332,22 +334,18 @@
   const sportsChannels = document.getElementById('sports-channels');
   const iptvList = document.getElementById('iptv-list');
 
-  // Tab selector function
+  // Tab activation function
   function activateTab(selectedTab) {
     tabs.forEach(tab => {
       tab.classList.toggle('active', tab.dataset.tab === selectedTab);
       tab.setAttribute('aria-selected', tab.dataset.tab === selectedTab ? 'true' : 'false');
       tab.setAttribute('tabindex', tab.dataset.tab === selectedTab ? '0' : '-1');
     });
-    if(selectedTab === 'all'){
-      allMatchCards.forEach(card => card.classList.add('show'));
-    } else {
-      allMatchCards.forEach(card => {
-        card.classList.toggle('show', card.dataset.type === selectedTab);
-      });
-    }
+    allMatchCards.forEach(card => {
+      card.classList.toggle('show', card.dataset.type === selectedTab);
+    });
   }
-  activateTab('all');
+  activateTab('live');
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => activateTab(tab.dataset.tab));
@@ -359,27 +357,27 @@
     });
   });
 
-  // Update counts of matches per category
+  // Update counts
   function updateCounts() {
     const liveMatches = [...allMatchCards].filter(c => c.dataset.type === 'live');
     const upcomingMatches = [...allMatchCards].filter(c => c.dataset.type === 'upcoming');
-    const intMatches = [...allMatchCards].filter(c => c.dataset.type === 'int');
+    const recentMatches = [...allMatchCards].filter(c => c.dataset.type === 'recent');
 
     liveCountSpan.textContent = liveMatches.length;
     upcomingCountSpan.textContent = upcomingMatches.length;
-    intCountSpan.textContent = intMatches.length;
+    recentCountSpan.textContent = recentMatches.length;
 
     document.querySelector('.tab[data-tab="live"] .count').textContent = liveMatches.length || '';
     document.querySelector('.tab[data-tab="upcoming"] .count').textContent = upcomingMatches.length || '';
-    document.querySelector('.tab[data-tab="int"] .count').textContent = intMatches.length || '';
+    document.querySelector('.tab[data-tab="recent"] .count').textContent = recentMatches.length || '';
   }
   updateCounts();
 
- // Countdown updater — runs every second
+  // Countdown update every second
   function updateCountdowns() {
     const now = new Date();
     allMatchCards.forEach(card => {
-      if(card.dataset.type === 'upcoming' || card.dataset.type === 'int'){
+      if(card.dataset.type === 'upcoming' || card.dataset.type === 'recent'){
         const endtimeStr = card.dataset.endtime;
         if(!endtimeStr) return;
         const endtime = new Date(endtimeStr);
@@ -388,26 +386,22 @@
         let diff = endtime - now;
         if(diff <= 0){
           if(card.dataset.type === 'upcoming'){
-            // Change from upcoming to live
             card.dataset.type = 'live';
             card.classList.remove('upcoming');
             card.classList.add('live');
             watchBtn.disabled = false;
             card.querySelector('.countdown').style.display = 'none';
-            // Add live animation if not present
             if(!card.querySelector('.live-animation')) {
               const liveAnim = document.createElement('div');
               liveAnim.className = 'live-animation';
               liveAnim.setAttribute('aria-label', 'Live animation');
               card.insertBefore(liveAnim, watchBtn);
             }
-          } else if(card.dataset.type === 'int'){
-            // If international match time over, hide card (optional)
+          } else if(card.dataset.type === 'recent'){
             card.classList.remove('show');
           }
-          updateCounts();  // update counts after change
+          updateCounts();
         } else {
-          // Update countdown timer text
           const hours = Math.floor(diff / (1000 * 60 * 60));
           const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
           const seconds = Math.floor((diff % (1000 * 60)) / 1000);
@@ -420,20 +414,37 @@
   setInterval(updateCountdowns, 1000);
   updateCountdowns();
 
-  // Watch Now button click: play video modal
+  // Video play with HLS support
   allMatchCards.forEach(card => {
     const btn = card.querySelector('.watch-now');
     btn.addEventListener('click', () => {
       const videoSrc = card.dataset.link;
-      if(videoSrc) {
+      if (!videoSrc) return;
+
+      if (Hls.isSupported() && videoSrc.endsWith('.m3u8')) {
+        if (window.hls) {
+          window.hls.destroy();
+        }
+        const hls = new Hls();
+        window.hls = hls;
+        hls.loadSource(videoSrc);
+        hls.attachMedia(videoPlayer);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          videoPlayer.play();
+        });
+      } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
         videoPlayer.src = videoSrc;
-        videoModal.classList.add('active');
+        videoPlayer.play();
+      } else {
+        videoPlayer.src = videoSrc;
         videoPlayer.play();
       }
+
+      videoModal.classList.add('active');
     });
   });
 
-  // Close video modal handlers
+  // Close video modal
   closeVideoBtn.addEventListener('click', () => {
     videoPlayer.pause();
     videoPlayer.src = '';

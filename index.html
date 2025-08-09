@@ -375,42 +375,67 @@
 
   // Countdown update every second
   function updateCountdowns() {
-    const now = new Date();
-    allMatchCards.forEach(card => {
-      if(card.dataset.type === 'upcoming' || card.dataset.type === 'recent'){
-        const endtimeStr = card.dataset.endtime;
-        if(!endtimeStr) return;
-        const endtime = new Date(endtimeStr);
-        const timerSpan = card.querySelector('.countdown .timer');
-        const watchBtn = card.querySelector('.watch-now');
-        let diff = endtime - now;
-        if(diff <= 0){
-          if(card.dataset.type === 'upcoming'){
-            card.dataset.type = 'live';
-            card.classList.remove('upcoming');
-            card.classList.add('live');
-            watchBtn.disabled = false;
-            card.querySelector('.countdown').style.display = 'none';
-            if(!card.querySelector('.live-animation')) {
-              const liveAnim = document.createElement('div');
-              liveAnim.className = 'live-animation';
-              liveAnim.setAttribute('aria-label', 'Live animation');
-              card.insertBefore(liveAnim, watchBtn);
-            }
-          } else if(card.dataset.type === 'recent'){
-            card.classList.remove('show');
-          }
-          updateCounts();
-        } else {
-          const hours = Math.floor(diff / (1000 * 60 * 60));
-          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-          timerSpan.textContent = `${hours}h ${minutes}m ${seconds}s`;
-          watchBtn.disabled = true;
+  const now = new Date();
+  allMatchCards.forEach(card => {
+    const cardType = card.dataset.type;
+    const endtimeStr = card.dataset.endtime;
+    const watchBtn = card.querySelector('.watch-now');
+    const countdownEl = card.querySelector('.countdown');
+    if (!endtimeStr) return;
+
+    const endtime = new Date(endtimeStr);
+    let diff = endtime - now;
+
+    if (cardType === 'upcoming') {
+      // Upcoming এর কাউন্টডাউন দেখাবে
+      if (diff <= 0) {
+        // সময় শেষ হলে আপকামিং থেকে লাইভে যাবে
+        card.dataset.type = 'live';
+        card.classList.remove('upcoming');
+        card.classList.add('live');
+        watchBtn.disabled = false;
+        if (countdownEl) countdownEl.style.display = 'none';
+
+        // লাইভ এনিমেশন যোগ করো যদি না থাকে
+        if(!card.querySelector('.live-animation')) {
+          const liveAnim = document.createElement('div');
+          liveAnim.className = 'live-animation';
+          liveAnim.setAttribute('aria-label', 'Live animation');
+          card.insertBefore(liveAnim, watchBtn);
         }
+        updateCounts();
+      } else {
+        // কাউন্টডাউন আপডেট
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        if(countdownEl) countdownEl.querySelector('.timer').textContent = `${hours}h ${minutes}m ${seconds}s`;
+        watchBtn.disabled = true;
+        if(countdownEl) countdownEl.style.display = 'block';
       }
-    });
-  }
+    } else if (cardType === 'live') {
+      // লাইভ ম্যাচের জন্য ধরলাম endtime হলো ম্যাচ শেষের সময়
+      if (diff <= 0) {
+        // লাইভ শেষ হলে রিসেন্ট এ যাবে
+        card.dataset.type = 'recent';
+        card.classList.remove('live');
+        card.classList.add('recent');
+        watchBtn.disabled = true; // ভিডিও প্লে বন্ধ
+        if (countdownEl) countdownEl.style.display = 'none';
+
+        // লাইভ এনিমেশন সরিয়ে দাও
+        const liveAnim = card.querySelector('.live-animation');
+        if (liveAnim) liveAnim.remove();
+
+        updateCounts();
+      }
+    } else if (cardType === 'recent') {
+      // রিসেন্ট ম্যাচে কাউন্টডাউন দেখানোর দরকার নাই
+      if (countdownEl) countdownEl.style.display = 'none';
+      watchBtn.disabled = true;
+    }
+  });
+}
   setInterval(updateCountdowns, 1000);
   updateCountdowns();
 

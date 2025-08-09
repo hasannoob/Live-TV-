@@ -1,495 +1,455 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Livefy TV — Master Copy</title>
-  <meta name="description" content="Livefy TV — CRICFy style demo. M3U8, MP4, YouTube player, auto countdown -> live -> ended." />
-
-  <!-- HLS for m3u8 -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
-
-  <style>
-    :root{
-      --bg:#0d0f10; --panel:#0a0b0c; --accent:#11c17b; --muted:#98a3a8; --card-border:rgba(17,193,123,0.10);
-      --radius:12px; --glass:rgba(255,255,255,0.02);
-      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>লাইভ টিভি ওয়েবসাইট</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  body {
+    background: #121212;
+    color: #eee;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: #1f1f1f;
+    padding: 15px 20px;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #0af;
+    text-align: center;
+    letter-spacing: 2px;
+    border-bottom: 2px solid #0af;
+  }
+  .announcement-wrapper {
+    background: #222;
+    overflow: hidden;
+    white-space: nowrap;
+    border-bottom: 2px solid #0af;
+  }
+  .announcement {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scroll-left 15s linear infinite;
+    font-size: 1rem;
+    color: #0af;
+    user-select: none;
+  }
+  @keyframes scroll-left {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+  }
+  .tabs {
+    display: flex;
+    justify-content: center;
+    background: #181818;
+    border-bottom: 2px solid #0af;
+    padding: 10px 0;
+    gap: 30px;
+    font-weight: 600;
+  }
+  .tab {
+    position: relative;
+    cursor: pointer;
+    padding: 8px 18px;
+    border-radius: 25px;
+    color: #aaa;
+    transition: all 0.3s ease;
+  }
+  .tab.active {
+    background: #0af;
+    color: #121212;
+    font-weight: 700;
+  }
+  .tab .count {
+    background: #ff3b3b;
+    color: white;
+    font-size: 0.75rem;
+    border-radius: 50%;
+    padding: 2px 7px;
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    user-select: none;
+  }
+  .cards-container {
+    flex-grow: 1;
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  section[role="tabpanel"] {
+    display: none;
+  }
+  section[role="tabpanel"].active {
+    display: block;
+  }
+  .match-card {
+    background: #222;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 0 8px #0af44a66;
+    position: relative;
+  }
+  .teams {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  .vs {
+    align-self: center;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0af;
+  }
+  .live-animation {
+    margin: 0 auto;
+    width: 60px;
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #0af, #0a0, #0af);
+    background-size: 200% 100%;
+    animation: live-wave 1.5s linear infinite;
+  }
+  @keyframes live-wave {
+    0% { background-position: 0% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .watch-now {
+    background: #0af;
+    color: #121212;
+    font-weight: 700;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 25px;
+    cursor: pointer;
+    align-self: center;
+    transition: background 0.3s ease;
+    font-size: 1rem;
+    width: 140px;
+  }
+  .watch-now:hover {
+    background: #08c;
+  }
+  .countdown {
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    color: #0af;
+    user-select: none;
+  }
+  nav {
+    background: #181818;
+    border-top: 2px solid #0af;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 30px;
+    font-weight: 600;
+    color: #0af;
+  }
+  nav .nav-item {
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    user-select: none;
+  }
+  nav .nav-item:hover,
+  nav .nav-item.active {
+    background: #0af;
+    color: #121212;
+  }
+  .channel-list, .iptv-list {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #222;
+    border-radius: 15px;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    color: #0af;
+  }
+  .channel-list.active, .iptv-list.active {
+    display: flex;
+  }
+  .channel-list div, .iptv-list div {
+    padding: 12px 15px;
+    background: #111;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+  }
+  .channel-list div:hover, .iptv-list div:hover {
+    background: #0af;
+    color: #121212;
+  }
+  @media (max-width: 600px) {
+    .teams {
+      flex-direction: column;
+      font-size: 1rem;
+      text-align: center;
+      gap: 6px;
     }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:#e9f2f1;-webkit-font-smoothing:antialiased}
-    .app{min-height:100vh;display:flex;flex-direction:column;padding-bottom:78px}
-
-    /* header */
-    header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.02)}
-    .logo{display:flex;align-items:center;gap:10px}
-    .icon{width:44px;height:44px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:#001}
-    .title{font-weight:700;font-size:18px}
-    .ann{margin:12px 16px;padding:10px;border-radius:10px;background:linear-gradient(90deg, rgba(17,193,123,0.06), transparent);border:1px solid rgba(17,193,123,0.08);font-size:13px}
-
-    /* controls */
-    .controls{display:flex;gap:10px;padding:10px 16px;align-items:center}
-    .filter-btn{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;background:transparent;color:inherit}
-    .filter-btn.active{box-shadow:0 0 0 6px rgba(17,193,123,0.04);border-color:var(--accent)}
-    .search{margin-left:auto}
-    .search input{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
-
-    /* layout */
-    .main{display:grid;grid-template-columns:1fr 340px;gap:16px;padding:0 16px;margin-top:6px}
-    .col-left{display:flex;flex-direction:column;gap:12px}
-    .col-right{display:flex;flex-direction:column;gap:12px}
-
-    /* match card */
-    .card{border-radius:12px;padding:12px;border:1px solid var(--card-border);background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
-    .match-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .teams{display:flex;gap:16px;align-items:center}
-    .team{display:flex;flex-direction:column;align-items:center;gap:6px;width:120px}
-    .team .name{font-weight:700;text-align:center}
-    .team .logo{width:72px;height:72px;border-radius:8px;background:#0b0c0d;border:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center}
-    .vs{font-weight:800;color:var(--muted)}
-    .meta-row{display:flex;align-items:center;gap:8px;margin-top:8px;justify-content:space-between}
-    .live-badge{background:linear-gradient(90deg,var(--accent),#00b16a);padding:6px 8px;border-radius:10px;color:#001;font-weight:800}
-    .int-badge{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:10px;color:var(--muted);font-weight:700}
-    .watch-btn{padding:8px 12px;border-radius:10px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);cursor:pointer}
-
-    /* right pane categories/channels */
-    .panel-title{font-weight:700;margin-bottom:8px}
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .channel{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
-    .channel img{width:48px;height:32px;object-fit:cover;border-radius:6px;background:#111}
-
-    /* bottom nav */
-    .bottom-nav{position:fixed;left:0;right:0;bottom:0;height:64px;background:#060708;border-top:1px solid rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:space-around;z-index:60}
-    .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font-size:12px;cursor:pointer}
-    .nav-item.active{color:var(--accent)}
-
-    /* popup and player */
-    .popup{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);min-width:280px;background:#0b0c0d;border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,0.04);display:none;z-index:200}
-    .popup.show{display:block}
-    .list-row{padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);cursor:pointer;border:1px solid rgba(255,255,255,0.02);margin-bottom:8px}
-
-    .player-modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;padding:18px;z-index:300}
-    .player-modal.show{display:flex}
-    .player-box{width:100%;max-width:980px;background:var(--panel);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.03)}
-    .player-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-    .video-wrap{background:#000;border-radius:8px;overflow:hidden}
-    video,iframe{width:100%;height:520px;border:0}
-    .small{font-size:13px;color:var(--muted)}
-
-    @media (max-width:980px){.main{grid-template-columns:1fr;padding:0 12px}.col-right{order:2}.video-wrap video,iframe{height:320px}}
-    @media (max-width:560px){.team{width:95px}.team .logo{width:56px;height:56px}}
-  </style>
+    .vs {
+      margin: 0 auto;
+    }
+    nav {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+    }
+  }
+</style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="logo">
-        <div class="icon">L</div>
-        <div>
-          <div class="title">Livefy TV</div>
-          <div class="small">CRICFy-style master</div>
-        </div>
-      </div>
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-        <div class="small">v1 • Auto countdown → live</div>
-        <div style="cursor:pointer;padding:8px;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);margin-left:8px" id="btnUpload">Upload JSON</div>
-        <input id="fileInput" type="file" accept="application/json" style="display:none"/>
-      </div>
-    </header>
 
-    <div class="ann" id="annBar">Livefy TV Announcement: সব স্ট্রিম বৈধ লিংক ব্যবহার করবেন।</div>
+<header>লাইভ স্পোর্টস টিভি</header>
 
-    <div class="controls">
-      <div>
-        <button class="filter-btn active" id="tabAll">Home <span id="countAll" style="margin-left:8px;color:var(--muted)"></span></button>
-        <button class="filter-btn" id="tabLive">Live <span id="countLive" style="margin-left:6px;color:var(--muted)"></span></button>
-        <button class="filter-btn" id="tabUpcoming">Upcoming <span id="countUpcoming" style="margin-left:6px;color:var(--muted)"></span></button>
-        <button class="filter-btn" id="tabEnded">Ended <span id="countEnded" style="margin-left:6px;color:var(--muted)"></span></button>
-      </div>
-      <div class="search">
-        <input id="search" placeholder="Search team, match or channel..." />
-      </div>
-    </div>
-
-    <main class="main">
-      <!-- left column: matches -->
-      <section class="col-left" id="matchesCol">
-        <!-- match cards injected here -->
-      </section>
-
-      <!-- right: channels & categories -->
-      <aside class="col-right">
-        <div class="card">
-          <div class="panel-title">Sports TV</div>
-          <div id="channelsList" style="display:flex;flex-direction:column;gap:8px">
-            <!-- channels -->
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="panel-title">Categories (IPTV)</div>
-          <div class="grid-2" id="iptvList" style="margin-top:8px">
-            <!-- iptv items -->
-          </div>
-        </div>
-
-      </aside>
-    </main>
-
-    <!-- multiple links popup -->
-    <div class="popup" id="linksPopup" role="dialog" aria-hidden="true">
-      <h3>Multiple links available</h3>
-      <div id="linksList" style="margin-top:10px"></div>
-      <div style="text-align:right;margin-top:10px"><button class="filter-btn" id="closeLinks">Close</button></div>
-    </div>
-
-    <!-- player modal -->
-    <div class="player-modal" id="playerModal" aria-hidden="true">
-      <div class="player-box">
-        <div class="player-head">
-          <div>
-            <div id="playerTitle" style="font-weight:700"></div>
-            <div class="small" id="playerSub"></div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button class="filter-btn" id="openNew">Open</button>
-            <button class="filter-btn" id="closePlayer">Close</button>
-          </div>
-        </div>
-        <div class="video-wrap" id="videoWrap"></div>
-        <div style="margin-top:8px" class="small">Sources:</div>
-        <div id="playerSources" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
-      </div>
-    </div>
-
-    <!-- bottom nav -->
-    <nav class="bottom-nav">
-      <div class="nav-item active" id="navHome"> <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Live Events</span></div>
-      <div class="nav-item" id="navSports"> <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.6"/></svg><span>Sports TV</span></div>
-      <div class="nav-item" id="navCats"> <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/></svg><span>Categories</span></div>
-    </nav>
-
+<div class="announcement-wrapper" aria-label="ঘোষণা বার">
+  <div class="announcement" role="marquee" aria-live="polite" aria-atomic="true">
+    আজকের প্রধান ম্যাচ: বাংলাদেশ বনাম ভারত | লাইভ শুরু হবে রাত ৮টায় | নতুন চ্যানেল যোগ হয়েছে: স্পোর্টস প্লাস |
   </div>
+</div>
+
+<div class="tabs" role="tablist" aria-label="ম্যাচ ক্যাটাগরি">
+  <div class="tab active" id="tab-live" role="tab" aria-selected="true" aria-controls="panel-live" tabindex="0">
+    লাইভ <span class="count" id="live-count">1</span>
+  </div>
+  <div class="tab" id="tab-upcoming" role="tab" aria-selected="false" aria-controls="panel-upcoming" tabindex="-1">
+    আপকামিং <span class="count" id="upcoming-count">2</span>
+  </div>
+  <div class="tab" id="tab-int" role="tab" aria-selected="false" aria-controls="panel-int" tabindex="-1">
+    ইন্ট <span class="count" id="int-count">1</span>
+  </div>
+</div>
+
+<div class="cards-container">
+
+  <section id="panel-live" role="tabpanel" aria-labelledby="tab-live" class="active">
+    <article class="match-card" aria-label="লাইভ ম্যাচ: বাংলাদেশ বনাম ভারত">
+      <div class="teams">
+        <div>বাংলাদেশ</div>
+        <div class="vs">VS</div>
+        <div>ভারত</div>
+      </div>
+      <div class="live-animation" aria-label="লাইভ এনিমেশন"></div>
+      <button class="watch-now" aria-label="ভিডিও প্লে করুন">ওয়াচ নাও</button>
+    </article>
+  </section>
+
+  <section id="panel-upcoming" role="tabpanel" aria-labelledby="tab-upcoming">
+    <article class="match-card" aria-label="আপকামিং ম্যাচ: ইংল্যান্ড বনাম অস্ট্রেলিয়া">
+      <div class="teams">
+        <div>ইংল্যান্ড</div>
+        <div class="vs">VS</div>
+        <div>অস্ট্রেলিয়া</div>
+      </div>
+      <div class="countdown" data-endtime="2025-08-09T14:30:00+06:00">সময় বাকি: <span class="timer">লোড হচ্ছে...</span></div>
+    </article>
+    <article class="match-card" aria-label="আপকামিং ম্যাচ: পাকিস্তান বনাম নিউজিল্যান্ড">
+      <div class="teams">
+        <div>পাকিস্তান</div>
+        <div class="vs">VS</div>
+        <div>নিউজিল্যান্ড</div>
+      </div>
+      <div class="countdown" data-endtime="2025-08-09T15:00:00+06:00">সময় বাকি: <span class="timer">লোড হচ্ছে...</span></div>
+    </article>
+  </section>
+
+  <section id="panel-int" role="tabpanel" aria-labelledby="tab-int">
+    <article class="match-card" aria-label="ইন্টারন্যাশনাল ম্যাচ: দক্ষিণ আফ্রিকা বনাম শ্রীলংকা">
+      <div class="teams">
+        <div>দক্ষিণ আফ্রিকা</div>
+        <div class="vs">VS</div>
+        <div>শ্রীলংকা</div>
+      </div>
+      <div class="countdown" data-endtime="2025-08-10T18:00:00+06:00">সময় বাকি: <span class="timer">লোড হচ্ছে...</span></div>
+    </article>
+  </section>
+
+</div>
+
+<div id="video-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000b;align-items:center;justify-content:center;z-index:9999;">
+  <div style="position:relative;width:90%;max-width:720px;">
+    <button id="close-video" style="position:absolute;top:-30px;right:0;font-size:1.5rem;background:none;color:#0af;cursor:pointer;border:none;">✖</button>
+    <video id="video-player" width="100%" controls autoplay>
+      <source src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" type="video/mp4">
+      আপনার ব্রাউজার ভিডিও সমর্থন করে না।
+    </video>
+  </div>
+</div>
+
+<nav role="navigation" aria-label="প্রধান নেভিগেশন">
+  <div class="nav-item active" id="nav-home" tabindex="0" aria-current="page">হোম</div>
+  <div class="nav-item" id="nav-sports" tabindex="0">স্পোর্টস টিভি</div>
+  <div class="nav-item" id="nav-category" tabindex="0">ক্যাটাগরি</div>
+</nav>
+
+<div class="channel-list" id="sports-channels" aria-live="polite" aria-atomic="true" aria-label="স্পোর্টস টিভি চ্যানেল তালিকা">
+  <div>ক্রিকেট ফ্যান টিভি</div>
+  <div>স্পোর্টস প্লাস</div>
+  <div>লাইভ ক্রিকেট ২৪</div>
+  <div>স্পোর্টস নেটওয়ার্ক</div>
+</div>
+
+<div class="iptv-list" id="iptv-list" aria-live="polite" aria-atomic="true" aria-label="আইপিটি চ্যানেল তালিকা">
+  <div>IPTV চ্যানেল ১</div>
+  <div>IPTV চ্যানেল ২</div>
+  <div>IPTV চ্যানেল ৩</div>
+  <div>IPTV চ্যানেল ৪</div>
+</div>
 
 <script>
-/* ------------------------
-   Sample data (fallback)
-   Time format: ISO 8601 with timezone offset recommended.
-   Each event:
-   {
-     id, teamA:{name,logo}, teamB:{name,logo}, category, startAt: ISO string, durationMinutes: number,
-     live: bool (optional), ended: bool (optional),
-     sources: [{label,url}, ...]
-   }
-------------------------*/
-const SAMPLE_EVENTS = [
-  {
-    id:'e1',
-    teamA:{name:'NZ',logo:''},
-    teamB:{name:'ZIM',logo:''},
-    title:'New Zealand vs Zimbabwe — 1st Test',
-    category:'Cricket',
-    startAt: '2025-08-10T15:30:00+06:00',
-    durationMinutes: 180,
-    live:false,
-    ended:false,
-    sources:[{label:'M3U8 Stream',url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'},{label:'YouTube',url:'https://www.youtube.com/watch?v=ysz5S6PUM-U'}]
-  },
-  {
-    id:'e2',
-    teamA:{name:'MNR',logo:''},
-    teamB:{name:'OVI',logo:''},
-    title:'The Hundred Women — OVI vs MNR',
-    category:'Cricket',
-    startAt: new Date(Date.now() + 1000 * 60 * 3).toISOString(), // starts ~3 minutes from page load
-    durationMinutes: 140,
-    live:false,
-    ended:false,
-    sources:[{label:'Test MP4',url:'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'}]
-  },
-  {
-    id:'e3',
-    teamA:{name:'Man U',logo:''},
-    teamB:{name:'FIO',logo:''},
-    title:'Man Utd vs Fiorentina — Friendly',
-    category:'Football',
-    startAt: '2025-08-12T18:00:00+06:00',
-    durationMinutes: 120,
-    live:false,
-    ended:false,
-    sources:[{label:'YouTube',url:'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}]
-  }
-];
+  // Tab switching
+  const tabs = document.querySelectorAll('.tab');
+  const panels = {
+    'tab-live': document.getElementById('panel-live'),
+    'tab-upcoming': document.getElementById('panel-upcoming'),
+    'tab-int': document.getElementById('panel-int')
+  };
 
-const SAMPLE_CHANNELS = [
-  {id:'c1',title:'Star Sports HD',logo:'',url:'https://test-streams.mux.dev/test_001/stream.m3u8'},
-  {id:'c2',title:'Sky Sports',logo:'',url:'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'},
-  {id:'c3',title:'Willow',logo:'',url:'https://www.youtube.com/watch?v=ysz5S6PUM-U'}
-];
-
-const SAMPLE_IPTV = [
-  {id:'ip1',title:'IPTV 1',thumb:'',url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'},
-  {id:'ip2',title:'IPTV 2',thumb:'',url:'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'}
-];
-
-/* State */
-let EVENTS = [];
-let CHANNELS = [];
-let IPTV = [];
-
-/* Helpers */
-function isYouTube(u){ return /youtu(?:\.be|be\.com)/i.test(u) }
-function isM3U8(u){ return /\.m3u8(\?|$)/i.test(u) }
-function parseYouTubeID(url){ try{ const u=new URL(url); if(u.hostname.includes('youtu.be')) return u.pathname.slice(1); if(u.searchParams.get('v')) return u.searchParams.get('v'); const p=u.pathname.split('/'); return p.pop()||p.pop(); }catch(e){return ''} }
-
-/* Load external JSON if present (events.json, channels.json, iptv.json) */
-async function tryLoadExternal(){
-  try{
-    const resp = await fetch('./events.json',{cache:'no-store'});
-    if(resp.ok){ const d = await resp.json(); if(Array.isArray(d) && d.length) EVENTS = d; }
-  }catch(e){ /* ignore */ }
-  try{
-    const resp = await fetch('./channels.json',{cache:'no-store'});
-    if(resp.ok){ const d = await resp.json(); if(Array.isArray(d) && d.length) CHANNELS = d; }
-  }catch(e){}
-  try{
-    const resp = await fetch('./iptv.json',{cache:'no-store'});
-    if(resp.ok){ const d = await resp.json(); if(Array.isArray(d) && d.length) IPTV = d; }
-  }catch(e){}
-  // fallbacks
-  if(!EVENTS.length) EVENTS = SAMPLE_EVENTS;
-  if(!CHANNELS.length) CHANNELS = SAMPLE_CHANNELS;
-  if(!IPTV.length) IPTV = SAMPLE_IPTV;
-}
-
-/* Render UI */
-function renderAll(){
-  renderCounts();
-  renderMatches();
-  renderChannels();
-  renderIPTV();
-}
-
-function renderCounts(){
-  const total = EVENTS.length;
-  const live = EVENTS.filter(e=>e.live && !e.ended).length;
-  const upcoming = EVENTS.filter(e=>!e.live && !e.ended).length;
-  const ended = EVENTS.filter(e=>e.ended).length;
-  document.getElementById('countAll').textContent = `(${total})`;
-  document.getElementById('countLive').textContent = `(${live})`;
-  document.getElementById('countUpcoming').textContent = `(${upcoming})`;
-  document.getElementById('countEnded').textContent = `(${ended})`;
-}
-
-function makeTeamHTML(team){
-  return `<div class="team">
-    <div class="logo">${team.logo ? `<img src="${team.logo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:6px">` : team.name}</div>
-    <div class="name">${team.name}</div>
-  </div>`;
-}
-
-function renderMatches(filterTab){
-  const container = document.getElementById('matchesCol'); container.innerHTML='';
-  const q = (document.getElementById('search').value || '').trim().toLowerCase();
-
-  let list = EVENTS.slice().sort((a,b)=> new Date(a.startAt) - new Date(b.startAt));
-  if(filterTab === 'live') list = list.filter(e=>e.live && !e.ended);
-  if(filterTab === 'upcoming') list = list.filter(e=>!e.live && !e.ended);
-  if(filterTab === 'ended') list = list.filter(e=>e.ended);
-
-  if(q) list = list.filter(e=> (e.title||'').toLowerCase().includes(q) || (e.category||'').toLowerCase().includes(q) || (e.teamA?.name||'').toLowerCase().includes(q) || (e.teamB?.name||'').toLowerCase().includes(q) );
-
-  list.forEach(ev=>{
-    const card = document.createElement('div'); card.className='card';
-    const teamsHTML = `<div class="teams">
-      ${makeTeamHTML(ev.teamA)}
-      <div class="vs">VS</div>
-      ${makeTeamHTML(ev.teamB)}
-    </div>`;
-    let statusHTML = '';
-    if(ev.ended) statusHTML = `<div class="int-badge">INT</div>`;
-    else if(ev.live) statusHTML = `<div class="live-badge">LIVE</div>`;
-    else statusHTML = `<div class="small" id="countdown-${ev.id}">Starts: ${new Date(ev.startAt).toLocaleString()}</div>`;
-
-    const actionHTML = `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-      ${statusHTML}
-      <div class="watch-btn" onclick='openLinksPopupById("${ev.id}")'>Watch Now</div>
-    </div>`;
-
-    card.innerHTML = `<div class="match-row">
-      <div style="flex:1">
-        <div style="font-weight:700">${ev.title}</div>
-        ${teamsHTML}
-        <div class="meta-row"><div class="small">${ev.category} • ${new Date(ev.startAt).toLocaleString()}</div><div class="small">Duration: ${ev.durationMinutes||120}m</div></div>
-      </div>
-      <div style="width:180px">${actionHTML}</div>
-    </div>`;
-
-    container.appendChild(card);
-  });
-}
-
-/* channels */
-function renderChannels(){
-  const box = document.getElementById('channelsList'); box.innerHTML='';
-  CHANNELS.forEach(c=>{
-    const el = document.createElement('div'); el.className='channel';
-    el.innerHTML = `<img src="${c.logo||'https://via.placeholder.com/120x80?text=TV'}" alt=""><div style="flex:1"><div style="font-weight:700">${c.title}</div><div class="small">${c.url}</div></div>`;
-    el.onclick = ()=> openPlayer({title:c.title,category:'Channel'}, {label:c.title,url:c.url});
-    box.appendChild(el);
-  });
-}
-function renderIPTV(){
-  const box = document.getElementById('iptvList'); box.innerHTML='';
-  IPTV.forEach(i=>{
-    const el = document.createElement('div'); el.style.cursor='pointer'; el.innerHTML=`<div style="font-weight:700">${i.title}</div>`;
-    el.onclick = ()=> openPlayer({title:i.title,category:'IPTV'},{label:i.title,url:i.url});
-    box.appendChild(el);
-  });
-}
-
-/* Links popup by event id */
-function openLinksPopupById(id){
-  const ev = EVENTS.find(x=>x.id===id);
-  if(!ev) return alert('Event not found');
-  openLinksPopup(ev);
-}
-function openLinksPopup(ev){
-  const p = document.getElementById('linksPopup');
-  const list = document.getElementById('linksList'); list.innerHTML='';
-  ev.sources.forEach(s=>{
-    const row = document.createElement('div'); row.className='list-row';
-    row.innerHTML = `<div style="font-weight:700">${s.label}</div><div class="small">${s.url}</div>`;
-    row.onclick = ()=> { p.classList.remove('show'); openPlayer(ev,s); };
-    list.appendChild(row);
-  });
-  p.classList.add('show');
-}
-document.getElementById('closeLinks').addEventListener('click', ()=>document.getElementById('linksPopup').classList.remove('show'));
-
-/* Player */
-let currentHls = null;
-function openPlayer(ev, source){
-  const modal = document.getElementById('playerModal'); modal.classList.add('show');
-  document.getElementById('playerTitle').textContent = ev.title || source.label;
-  document.getElementById('playerSub').textContent = `${ev.category || ''}`;
-  document.getElementById('openNew').onclick = ()=> window.open(source.url,'_blank');
-
-  const wrap = document.getElementById('videoWrap'); wrap.innerHTML='';
-  const srcBox = document.getElementById('playerSources'); srcBox.innerHTML='';
-  (ev.sources||[source]).forEach(s=>{
-    const b = document.createElement('div'); b.className='watch-btn'; b.style.margin='4px'; b.textContent = s.label; b.onclick = ()=> openPlayer(ev,s); srcBox.appendChild(b);
-  });
-
-  if(isYouTube(source.url)){
-    const id = parseYouTubeID(source.url);
-    const iframe = document.createElement('iframe'); iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`; iframe.allow='autoplay; encrypted-media'; iframe.loading='lazy';
-    wrap.appendChild(iframe);
-  } else {
-    const video = document.createElement('video'); video.controls=true; video.autoplay=true; video.playsInline=true;
-    wrap.appendChild(video);
-    if(isM3U8(source.url)){
-      if(video.canPlayType('application/vnd.apple.mpegurl')) video.src = source.url;
-      else if(Hls && Hls.isSupported()){
-        if(currentHls){ try{ currentHls.destroy() }catch(e){} currentHls=null; }
-        currentHls = new Hls(); currentHls.loadSource(source.url); currentHls.attachMedia(video);
-      } else video.src = source.url;
-    } else {
-      video.src = source.url;
-    }
-  }
-}
-document.getElementById('closePlayer').addEventListener('click', ()=> {
-  const modal = document.getElementById('playerModal'); modal.classList.remove('show');
-  const wrap = document.getElementById('videoWrap'); wrap.innerHTML=''; if(currentHls){ try{ currentHls.destroy() }catch(e){} currentHls=null; }
-});
-document.getElementById('playerModal').addEventListener('click', (e)=>{ if(e.target.id==='playerModal') { document.getElementById('closePlayer').click(); } });
-
-/* Nav tabs */
-function clearActiveTabs(){ document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')) }
-document.getElementById('tabAll').addEventListener('click', ()=>{ clearActiveTabs(); document.getElementById('tabAll').classList.add('active'); renderMatches(); });
-document.getElementById('tabLive').addEventListener('click', ()=>{ clearActiveTabs(); document.getElementById('tabLive').classList.add('active'); renderMatches('live'); });
-document.getElementById('tabUpcoming').addEventListener('click', ()=>{ clearActiveTabs(); document.getElementById('tabUpcoming').classList.add('active'); renderMatches('upcoming'); });
-document.getElementById('tabEnded').addEventListener('click', ()=>{ clearActiveTabs(); document.getElementById('tabEnded').classList.add('active'); renderMatches('ended'); });
-
-/* bottom nav */
-function setActiveNav(id){ document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-document.getElementById('navHome').addEventListener('click', ()=>{ setActiveNav('navHome'); document.querySelector('main').scrollIntoView({behavior:'smooth'}); clearActiveTabs(); document.getElementById('tabAll').classList.add('active'); renderMatches(); });
-document.getElementById('navSports').addEventListener('click', ()=>{ setActiveNav('navSports'); clearActiveTabs(); document.getElementById('tabAll').classList.remove('active'); renderChannelsView(); });
-document.getElementById('navCats').addEventListener('click', ()=>{ setActiveNav('navCats'); clearActiveTabs(); document.getElementById('tabAll').classList.remove('active'); renderCatsView(); });
-
-/* Alternate views for bottom nav (simple switches) */
-function renderChannelsView(){ document.getElementById('matchesCol').innerHTML = '<div class="card"><div class="panel-title">Sports TV</div><div id="onlyChannels"></div></div>'; const d = document.getElementById('onlyChannels'); CHANNELS.forEach(c=>{ const el=document.createElement('div'); el.className='channel'; el.innerHTML=`<img src="${c.logo||'https://via.placeholder.com/120x80?text=TV'}"><div style="flex:1"><div style="font-weight:700">${c.title}</div><div class="small">${c.url}</div></div>`; el.onclick=()=> openPlayer({title:c.title,category:'Channel'},{label:c.title,url:c.url}); d.appendChild(el); }); }
-function renderCatsView(){ document.getElementById('matchesCol').innerHTML = '<div class="card"><div class="panel-title">Categories / IPTV</div><div id="onlyIPTV" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div></div>'; const d=document.getElementById('onlyIPTV'); IPTV.forEach(i=>{ const el=document.createElement('div'); el.style.cursor='pointer'; el.style.padding='8px'; el.style.border='1px solid rgba(255,255,255,0.03)'; el.innerHTML=`<div style="font-weight:700">${i.title}</div><div class="small">${i.url}</div>`; el.onclick=()=> openPlayer({title:i.title,category:'IPTV'},{label:i.title,url:i.url}); d.appendChild(el); }); }
-
-/* Search */
-document.getElementById('search').addEventListener('input', ()=> {
-  const active = document.querySelector('.filter-btn.active');
-  if(active && active.id === 'tabLive') renderMatches('live');
-  else if(active && active.id === 'tabUpcoming') renderMatches('upcoming');
-  else if(active && active.id === 'tabEnded') renderMatches('ended');
-  else renderMatches();
-});
-
-/* Upload JSON */
-document.getElementById('btnUpload').addEventListener('click', ()=> document.getElementById('fileInput').click());
-document.getElementById('fileInput').addEventListener('change', async (ev)=>{
-  const f = ev.target.files[0]; if(!f) return;
-  try{
-    const txt = await f.text(); const d = JSON.parse(txt);
-    if(Array.isArray(d)){ EVENTS = d; renderAll(); alert('events.json loaded'); } else alert('JSON must be an array of events');
-  }catch(e){ alert('Invalid file') }
-});
-
-/* Countdown & auto transition logic:
-   - Every second: update countdown displays
-   - If now >= startAt and not live and not ended -> mark live, set liveStart = now
-   - If live and now >= (startAt + durationMinutes) -> mark ended
-*/
-function tick(){
-  const now = new Date();
-  EVENTS.forEach(ev=>{
-    if(ev.ended) return;
-    const start = new Date(ev.startAt);
-    if(!ev.live && now >= start){
-      ev.live = true;
-      ev.liveStartedAt = start;
-    }
-    if(ev.live && ev.durationMinutes){
-      const end = new Date(start.getTime() + (ev.durationMinutes||120)*60000);
-      if(now >= end){
-        ev.live = false; ev.ended = true;
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => activateTab(tab.id));
+    tab.addEventListener('keydown', e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        activateTab(tab.id);
       }
-    }
-    // update countdown displays if element exists
-    const el = document.getElementById(`countdown-${ev.id}`);
-    if(el){
-      if(ev.ended) el.textContent = 'Ended';
-      else if(ev.live) el.textContent = 'Live';
-      else {
-        const diff = start - now;
-        if(diff <= 0) el.textContent = 'Starting...';
-        else {
-          const d = Math.floor(diff/86400000); const h = Math.floor((diff%86400000)/3600000); const m = Math.floor((diff%3600000)/60000); const s = Math.floor((diff%60000)/1000);
-          el.textContent = `${d>0?d+'d ':''}${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    });
+  });
+
+  function activateTab(id) {
+    tabs.forEach(tab => {
+      const selected = tab.id === id;
+      tab.classList.toggle('active', selected);
+      tab.setAttribute('aria-selected', selected);
+      tab.setAttribute('tabindex', selected ? "0" : "-1");
+      if (panels[tab.id]) {
+        if(selected){
+          panels[tab.id].classList.add('active');
+          panels[tab.id].removeAttribute('hidden');
+        } else {
+          panels[tab.id].classList.remove('active');
+          panels[tab.id].setAttribute('hidden', '');
         }
       }
+    });
+    hideChannelLists();
+  }
+
+  // Watch Now video modal
+  const watchButtons = document.querySelectorAll('.watch-now');
+  const videoModal = document.getElementById('video-modal');
+  const videoPlayer = document.getElementById('video-player');
+  const closeVideo = document.getElementById('close-video');
+
+  watchButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      videoModal.style.display = 'flex';
+      videoPlayer.play();
+    });
+  });
+
+  closeVideo.addEventListener('click', () => {
+    videoPlayer.pause();
+    videoModal.style.display = 'none';
+  });
+
+  videoModal.addEventListener('click', e => {
+    if (e.target === videoModal) {
+      videoPlayer.pause();
+      videoModal.style.display = 'none';
     }
   });
-  renderCounts();
-  // Re-render limited parts (we avoid full re-render every second to keep performance)
-}
-/* periodically re-render match cards to reflect status changes (every 3s) */
-setInterval(()=>{ renderMatches(document.querySelector('.filter-btn.active')?.id === 'tabLive' ? 'live' : (document.querySelector('.filter-btn.active')?.id === 'tabUpcoming' ? 'upcoming' : (document.querySelector('.filter-btn.active')?.id === 'tabEnded' ? 'ended' : undefined))); },3000);
 
-setInterval(tick,1000);
+  // Countdown timers
+  function startCountdowns() {
+    const countdowns = document.querySelectorAll('.countdown');
+    countdowns.forEach(cd => {
+      const endTime = new Date(cd.dataset.endtime);
+      let interval = null;
 
-/* init */
-(async function init(){
-  await tryLoadExternal();
-  renderAll();
-  // initial tick so countdowns show immediately
-  tick();
-})();
+      function updateTimer() {
+        const now = new Date();
+        const diff = endTime - now;
+        if (diff <= 0) {
+          cd.querySelector('.timer').textContent = 'লাইভ শুরু হয়েছে!';
+          activateTab('tab-live');
+          clearInterval(interval);
+        } else {
+          const hrs = Math.floor(diff / (1000 * 60 * 60));
+          const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const secs = Math.floor((diff % (1000 * 60)) / 1000);
+          cd.querySelector('.timer').textContent =
+            `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+        }
+      }
+      updateTimer();
+      interval = setInterval(updateTimer, 1000);
+    });
+  }
+  startCountdowns();
+
+  // Navigation
+  const navHome = document.getElementById('nav-home');
+  const navSports = document.getElementById('nav-sports');
+  const navCategory = document.getElementById('nav-category');
+  const sportsChannels = document.getElementById('sports-channels');
+  const iptvList = document.getElementById('iptv-list');
+  const cardsContainer = document.querySelector('.cards-container');
+  const tabsContainer = document.querySelector('.tabs');
+  const announcementWrapper = document.querySelector('.announcement-wrapper');
+
+  navHome.addEventListener('click', () => setActiveNav('home'));
+  navSports.addEventListener('click', () => setActiveNav('sports'));
+  navCategory.addEventListener('click', () => setActiveNav('category'));
+
+  navHome.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') { e.preventDefault(); setActiveNav('home'); } });
+  navSports.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') { e.preventDefault(); setActiveNav('sports'); } });
+  navCategory.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') { e.preventDefault(); setActiveNav('category'); } });
+
+  function setActiveNav(section) {
+    navHome.classList.toggle('active', section === 'home');
+    navSports.classList.toggle('active', section === 'sports');
+    navCategory.classList.toggle('active', section === 'category');
+
+    if(section === 'home') {
+      sportsChannels.classList.remove('active');
+      iptvList.classList.remove('active');
+      cardsContainer.style.display = 'block';
+      tabsContainer.style.display = 'flex';
+      announcementWrapper.style.display = 'block';
+    } else if(section === 'sports') {
+      sportsChannels.classList.add('active');
+      iptvList.classList.remove('active');
+      cardsContainer.style.display = 'none';
+      tabsContainer.style.display = 'none';
+      announcementWrapper.style.display = 'none';
+    } else if(section === 'category') {
+      iptvList.classList.add('active');
+      sportsChannels.classList.remove('active');
+      cardsContainer.style.display = 'none';
+      tabsContainer.style.display = 'none';
+      announcementWrapper.style.display = 'none';
+    }
+  }
+
+  function hideChannelLists() {
+    sportsChannels.classList.remove('active');
+    iptvList.classList.remove('active');
+  }
 </script>
+
 </body>
 </html>

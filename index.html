@@ -1,177 +1,422 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="bn">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Live Events</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Live Board — HLS (M3U8) Popup Player</title>
+
+<!-- HLS.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
-body { font-family: Arial, sans-serif; margin:0; background:#111; color:#fff; }
-header { display:flex; gap:10px; justify-content:center; padding:10px; background:#222; }
-header button { background:#333; border:none; color:#fff; padding:8px 14px; border-radius:6px; cursor:pointer; }
-header button.active { background:#ff5722; }
-.tab-nav { position:fixed; bottom:0; left:0; width:100%; display:flex; background:#222; }
-.tab-nav button { flex:1; background:#333; border:none; padding:12px; color:#fff; cursor:pointer; }
-.tab-nav button.active { background:#ff5722; }
-.container { padding:80px 10px 60px; display:grid; gap:10px; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); }
-.card { background:#1e1e1e; border-radius:10px; padding:15px; text-align:center; }
-.teams { display:flex; justify-content:space-between; align-items:center; }
-.team { width:40%; }
-.vs { font-size:24px; font-weight:bold; }
-.live-badge { color:#fff; background:red; padding:2px 6px; border-radius:4px; animation: blink 1s infinite; display:inline-block; margin-top:5px; }
-@keyframes blink { 50% { opacity:0; } }
-.watch-btn { margin-top:10px; padding:8px 14px; background:#ff5722; border:none; border-radius:6px; cursor:pointer; color:#fff; }
-.countdown { margin-top:5px; font-size:14px; color:#ccc; }
-.ended { margin-top:5px; font-size:14px; color:#aaa; }
-.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
-.modal video { max-width:90%; max-height:90%; }
+:root{
+  --bg:#071015; --card:#0f1720; --muted:#9fb6a9; --accent:#ff7a2d; --glass: rgba(255,255,255,0.03);
+}
+*{box-sizing:border-box}
+body{
+  background:linear-gradient(180deg,var(--bg),#041018 160%);
+  color:#eaf6f0; font-family:Inter, system-ui, "Noto Sans Bengali", Arial; margin:0; -webkit-font-smoothing:antialiased;
+}
+.app{max-width:1100px;margin:18px auto;padding:18px}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.brand{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#102724,#073024);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.04);font-weight:800;color:var(--accent);font-size:20px}
+.h1{font-size:20px;margin:0}
+.h1sub{font-size:13px;color:var(--muted);margin-top:6px}
+
+/* chips */
+.chips{display:flex;gap:10px;margin:14px 0;flex-wrap:wrap}
+.chip{border-radius:999px;padding:8px 14px;border:1px solid rgba(255,255,255,0.04);background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);cursor:pointer;color:var(--muted);font-weight:700}
+.chip.active{background:linear-gradient(90deg, rgba(255,122,45,0.12), rgba(255,122,45,0.04));border-color:rgba(255,122,45,0.22);color:var(--accent)}
+
+/* layout */
+.layout{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
+@media(max-width:980px){ .layout{grid-template-columns:1fr} }
+
+/* cards */
+.cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.03);padding:14px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,7,0.6);display:flex;flex-direction:column;gap:12px;transition:transform .16s}
+.card:hover{transform:translateY(-6px)}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.team-block{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#062a1d,#08302d);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent);border:1px solid rgba(255,255,255,0.03);flex-shrink:0}
+.team-name{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.team-sub{font-size:13px;color:var(--muted);margin-top:6px}
+.center{ text-align:center; min-width:140px}
+.vs{font-weight:900;font-size:18px;color:#ffd875}
+.live-badge{display:inline-block;margin-top:8px;background:linear-gradient(90deg,#ff512f,#ff7a2d);color:white;padding:7px 12px;border-radius:999px;font-weight:900;box-shadow:0 8px 30px rgba(255,122,45,0.12);animation:pulse 1.2s infinite}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+.countdown{font-weight:800;color:var(--muted)}
+.recent-note{font-weight:800;color:#c6cbd0}
+.card-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.btn-watch{background:var(--accent);color:#041014;border:none;padding:10px 14px;border-radius:10px;font-weight:900;cursor:pointer}
+.btn-watch.disabled{opacity:.35;cursor:not-allowed;background:linear-gradient(90deg,#666,#444);color:#ddd}
+
+/* sidebar */
+.sidebar{display:flex;flex-direction:column;gap:12px}
+.panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+.panel h3{margin:0 0 8px 0}
+.channel{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02)}
+.ch-left{display:flex;align-items:center;gap:10px}
+.ch-logo{width:48px;height:48px;border-radius:8px;background:#081815;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent);border:1px solid rgba(255,255,255,0.03)}
+.ch-meta{font-size:13px;color:var(--muted)}
+.ch-btn{background:transparent;border:2px solid var(--accent);color:var(--accent);padding:8px 10px;border-radius:8px;font-weight:800;cursor:pointer}
+
+/* bottom tabs for mobile */
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:linear-gradient(180deg, rgba(2,6,7,0.5), rgba(2,6,7,0.85));border-radius:14px;padding:8px;border:1px solid rgba(255,255,255,0.03);display:flex;gap:6px;z-index:40}
+.tab-btn{background:transparent;border:none;color:var(--muted);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:800}
+.tab-btn.active{color:var(--accent);background:rgba(255,122,45,0.06)}
+
+/* modal popup */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,7,0.8);z-index:60;padding:18px}
+.modal.open{display:flex}
+.modal-card{width:100%;max-width:980px;background:#000;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.04)}
+.modal-head{display:flex;justify-content:flex-end;padding:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent)}
+.modal-head button{background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer}
+.modal-body{background:#000;padding:0}
+.player{width:100%;height:56vw;max-height:66vh;border:0;display:block;background:black}
+@media(max-width:560px){ .player{height:56vh} .layout{grid-template-columns:1fr} .tabs{display:flex} }
 </style>
 </head>
 <body>
+  <div class="app" role="application">
+    <div class="header">
+      <div class="brand">CF</div>
+      <div>
+        <div class="h1">CRICFy — Live Board</div>
+        <div class="h1sub">Live events • Sports channels • IPTV — Dark theme</div>
+      </div>
+    </div>
 
-<header>
-    <button id="filter-all" class="active">All (<span id="count-all">0</span>)</button>
-    <button id="filter-live">Live (<span id="count-live">0</span>)</button>
-    <button id="filter-upcoming">Upcoming (<span id="count-upcoming">0</span>)</button>
-    <button id="filter-recent">Recent (<span id="count-recent">0</span>)</button>
-</header>
+    <!-- chips -->
+    <div class="chips" role="tablist" aria-label="Filters">
+      <button class="chip active" data-filter="all">All <span style="margin-left:8px" id="count-all">0</span></button>
+      <button class="chip" data-filter="live">Live <span style="margin-left:8px" id="count-live">0</span></button>
+      <button class="chip" data-filter="upcoming">Upcoming <span style="margin-left:8px" id="count-upcoming">0</span></button>
+      <button class="chip" data-filter="recent">Recent <span style="margin-left:8px" id="count-recent">0</span></button>
+    </div>
 
-<div class="container" id="cards-container"></div>
+    <div class="layout">
+      <!-- left: cards -->
+      <div>
+        <div class="cards" id="cardsGrid" aria-live="polite"></div>
+      </div>
 
-<div class="tab-nav">
-    <button id="tab-events" class="active">Live Events</button>
-    <button id="tab-sports">Sports</button>
-    <button id="tab-categories">Categories</button>
-</div>
+      <!-- right: sidebar channels -->
+      <aside class="sidebar">
+        <div class="panel">
+          <h3>Sports Channels</h3>
+          <div id="sportsList"></div>
+        </div>
 
-<div class="modal" id="video-modal">
-    <video id="video-player" controls autoplay></video>
-</div>
+        <div class="panel">
+          <h3>IPTV Categories</h3>
+          <div id="iptvList"></div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- mobile tabs -->
+    <div class="tabs" role="tablist" aria-label="Tabs">
+      <button class="tab-btn active" data-tab="events">Live Events</button>
+      <button class="tab-btn" data-tab="sports">Sports</button>
+      <button class="tab-btn" data-tab="categories">Categories</button>
+    </div>
+  </div>
+
+  <!-- Modal for HLS player -->
+  <div id="videoModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-card" role="document">
+      <div class="modal-head"><button id="closeModal" aria-label="Close">✕</button></div>
+      <div class="modal-body">
+        <video id="player" class="player" controls playsinline></video>
+      </div>
+    </div>
+  </div>
 
 <script>
-const eventsData = [
-    { type: 'upcoming', teamA: 'Pakistan', teamB: 'Bangladesh', startTime: Date.now() + 12000, video: 'sample.mp4' },
-    { type: 'live', teamA: 'India', teamB: 'West Indies', video: 'sample.mp4' },
-    { type: 'recent', teamA: 'New Zealand', teamB: 'South Africa', video: 'sample.mp4' }
+/* -------------------------------
+   SAMPLE DATA - Replace these with your real data & M3U8 links
+   - eventsData: each event may have startTime and endTime (ms timestamps)
+   - sportsChannels, iptvChannels: each has link (m3u8)
+   ---------------------------------*/
+const now = Date.now();
+
+let eventsData = [
+  // Upcoming example: starts in 15s, runs 60s
+  { id:1, category:'football', home:'Casa Pia', away:'Sporting', logoHome:'CP', logoAway:'SCP', startTime: now + 15*1000, endTime: now + 75*1000, type:'upcoming', link:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+
+  // Live example
+  { id:2, category:'wwe', home:'SmackDown', away:'SmackDown', logoHome:'SD', logoAway:'SD', startTime: now - 20*1000, endTime: now + 40*1000, type:'live', link:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+
+  // Recent example
+  { id:3, category:'cricket', home:'ZIM', away:'NZ', logoHome:'ZIM', logoAway:'NZ', startTime: now - 140*1000, endTime: now - 40*1000, type:'recent', link:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+
+  // Another upcoming
+  { id:4, category:'football', home:'Bodoland FC', away:'Punjab FC', logoHome:'BOD', logoAway:'PUN', startTime: now + 130*1000, endTime: now + 400*1000, type:'upcoming', link:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' }
 ];
 
 const sportsChannels = [
-    { name: 'Sports TV 1', video: 'sample.mp4' },
-    { name: 'Sports TV 2', video: 'sample.mp4' }
+  { id:'s1', name:'Star Sports 1', desc:'Live sports channel', link:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+  { id:'s2', name:'ESPN', desc:'24/7 Sports', link:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+  { id:'s3', name:'Sky Sports', desc:'Top sports coverage', link:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' }
 ];
 
 const iptvChannels = [
-    { name: 'IPTV Channel 1', video: 'sample.mp4' },
-    { name: 'IPTV Channel 2', video: 'sample.mp4' }
+  { id:'i1', name:'IPTV Channel A', desc:'News & Sports', link:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+  { id:'i2', name:'IPTV Channel B', desc:'Entertainment', link:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+  { id:'i3', name:'IPTV Channel C', desc:'Movies', link:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' }
 ];
 
-let currentTab = 'events';
-let currentFilter = 'all';
+/* State */
+let activeFilter = 'all';
+let activeTab = 'events';
+const cardsGrid = document.getElementById('cardsGrid');
+const sportsList = document.getElementById('sportsList');
+const iptvList = document.getElementById('iptvList');
+const modal = document.getElementById('videoModal');
+const player = document.getElementById('player');
+const closeModalBtn = document.getElementById('closeModal');
 
-function renderCards() {
-    const container = document.getElementById('cards-container');
-    container.innerHTML = '';
-    let dataToRender = [];
+let hls = null;
 
-    if (currentTab === 'events') {
-        dataToRender = eventsData.filter(e => currentFilter === 'all' || e.type === currentFilter);
-        updateCounts();
-        dataToRender.forEach(event => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="teams">
-                    <div class="team">${event.teamA}</div>
-                    <div>
-                        <div class="vs">VS</div>
-                        ${event.type === 'live' ? `<div class="live-badge">LIVE</div>` : ''}
-                        ${event.type === 'upcoming' ? `<div class="countdown" data-time="${event.startTime}"></div>` : ''}
-                        ${event.type === 'recent' ? `<div class="ended">MATCH ENDED</div>` : ''}
-                    </div>
-                    <div class="team">${event.teamB}</div>
-                </div>
-                <button class="watch-btn" data-video="${event.video}">WATCH NOW</button>
-            `;
-            container.appendChild(card);
-        });
-    } else if (currentTab === 'sports') {
-        sportsChannels.forEach(ch => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="team">${ch.name}</div>
-                <button class="watch-btn" data-video="${ch.video}">WATCH NOW</button>
-            `;
-            container.appendChild(card);
-        });
-    } else if (currentTab === 'categories') {
-        iptvChannels.forEach(ch => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="team">${ch.name}</div>
-                <button class="watch-btn" data-video="${ch.video}">WATCH NOW</button>
-            `;
-            container.appendChild(card);
-        });
+/* Utility format */
+function fmt(ms){
+  if(ms <= 0) return '0s';
+  let s = Math.floor(ms/1000);
+  const d = Math.floor(s/86400); s %= 86400;
+  const h = Math.floor(s/3600); s %= 3600;
+  const m = Math.floor(s/60); s %= 60;
+  const parts = [];
+  if(d) parts.push(d+'d');
+  if(h) parts.push(h+'h');
+  if(m) parts.push(m+'m');
+  parts.push(s+'s');
+  return parts.join(' ');
+}
+
+/* Counts */
+function updateCounts(){
+  document.getElementById('count-all').textContent = eventsData.length;
+  document.getElementById('count-live').textContent = eventsData.filter(e=>e.type==='live').length;
+  document.getElementById('count-upcoming').textContent = eventsData.filter(e=>e.type==='upcoming').length;
+  document.getElementById('count-recent').textContent = eventsData.filter(e=>e.type==='recent').length;
+}
+
+/* Render events */
+function renderEvents(){
+  cardsGrid.innerHTML = '';
+  let list = eventsData.slice();
+  if(activeFilter !== 'all') list = list.filter(e=>e.type===activeFilter);
+
+  if(activeTab !== 'events'){
+    // Show placeholder in cards area when viewing channels
+    cardsGrid.innerHTML = `<div style="grid-column:1/-1;padding:18px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02);color:var(--muted)">You are viewing <strong>${activeTab}</strong>. Use the right panel to open channel streams.</div>`;
+    return;
+  }
+
+  if(list.length === 0){
+    cardsGrid.innerHTML = `<div style="grid-column:1/-1;padding:18px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02);color:var(--muted)">কোনো ইভেন্ট নেই</div>`;
+    return;
+  }
+
+  list.forEach(ev=>{
+    const el = document.createElement('article');
+    el.className = 'card';
+    el.innerHTML = `
+      <div class="card-top">
+        <div class="team-block">
+          <div class="logo">${ev.logoHome || ev.home.slice(0,2)}</div>
+          <div>
+            <div class="team-name">${ev.home}</div>
+            <div class="team-sub">${ev.category}</div>
+          </div>
+        </div>
+
+        <div class="center">
+          <div class="vs">VS</div>
+          ${ev.type === 'live' ? `<div class="live-badge" aria-live="polite">● LIVE</div>` : ''}
+          ${ev.type === 'upcoming' ? `<div class="countdown" data-start="${ev.startTime}" data-id="${ev.id}">${fmt(ev.startTime - Date.now())}</div>` : ''}
+          ${ev.type === 'recent' ? `<div class="recent-note">MATCH ENDED</div>` : ''}
+        </div>
+
+        <div class="team-block" style="justify-content:flex-end">
+          <div>
+            <div class="team-name" style="text-align:right">${ev.away}</div>
+            <div class="team-sub" style="text-align:right">${ev.sub || ''}</div>
+          </div>
+          <div class="logo">${ev.logoAway || ev.away.slice(0,2)}</div>
+        </div>
+      </div>
+
+      <div class="card-bottom">
+        <div class="tag">#${ev.category}</div>
+        <div>
+          ${ev.type === 'live' ? `<button class="btn-watch" data-link="${ev.link}" data-id="${ev.id}">WATCH NOW</button>` : ev.type === 'upcoming' ? `<button class="btn-watch disabled" disabled>WATCH (Starts Soon)</button>` : `<button class="btn-watch disabled" disabled>MATCH ENDED</button>`}
+        </div>
+      </div>
+    `;
+    cardsGrid.appendChild(el);
+  });
+}
+
+/* Render channels lists */
+function renderChannels(){
+  sportsList.innerHTML = '';
+  sportsChannels.forEach(ch=>{
+    const div = document.createElement('div');
+    div.className = 'channel';
+    div.innerHTML = `<div class="ch-left"><div class="ch-logo">${ch.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div><div class="ch-meta"><div style="font-weight:700">${ch.name}</div><div style="color:var(--muted);font-size:13px">${ch.desc}</div></div></div><div><button class="ch-btn" data-link="${ch.link}">WATCH</button></div>`;
+    sportsList.appendChild(div);
+  });
+
+  iptvList.innerHTML = '';
+  iptvChannels.forEach(ch=>{
+    const div = document.createElement('div');
+    div.className = 'channel';
+    div.innerHTML = `<div class="ch-left"><div class="ch-logo">${ch.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div><div class="ch-meta"><div style="font-weight:700">${ch.name}</div><div style="color:var(--muted);font-size:13px">${ch.desc}</div></div></div><div><button class="ch-btn" data-link="${ch.link}">WATCH</button></div>`;
+    iptvList.appendChild(div);
+  });
+}
+
+/* sanitize link (convert youtube watch to embed, else return as-is) */
+function sanitize(url){
+  if(!url) return '';
+  try{
+    const u = new URL(url);
+    if(u.hostname.includes('youtube.com') && u.searchParams.get('v')){
+      return `https://www.youtube.com/embed/${u.searchParams.get('v')}?autoplay=1`;
     }
-    attachWatchEvents();
+    if(u.hostname === 'youtu.be'){
+      const id = u.pathname.slice(1);
+      return `https://www.youtube.com/embed/${id}?autoplay=1`;
+    }
+  }catch(e){}
+  if(url.includes('youtube.com/embed') && !url.includes('autoplay=1')) url += (url.includes('?')? '&autoplay=1' : '?autoplay=1');
+  return url;
 }
 
-function updateCounts() {
-    document.getElementById('count-all').textContent = eventsData.length;
-    document.getElementById('count-live').textContent = eventsData.filter(e => e.type === 'live').length;
-    document.getElementById('count-upcoming').textContent = eventsData.filter(e => e.type === 'upcoming').length;
-    document.getElementById('count-recent').textContent = eventsData.filter(e => e.type === 'recent').length;
+/* Open modal and play M3U8 via HLS.js if needed */
+function openPlayer(link){
+  if(!link){ alert('ভিডিও লিংক সেট করা নেই'); return; }
+  const modal = modalEl();
+  const src = link;
+  // destroy previous hls instance
+  if(hls){ try{ hls.destroy(); }catch(e){} hls = null; player.src = ''; }
+  if(Hls.isSupported()){
+    hls = new Hls();
+    hls.loadSource(src);
+    hls.attachMedia(player);
+    hls.on(Hls.Events.ERROR, function(event, data){ console.warn('HLS error', data); });
+  } else if(player.canPlayType('application/vnd.apple.mpegurl')){
+    player.src = src;
+  } else {
+    // fallback: open raw link in new tab
+    window.open(src, '_blank');
+    return;
+  }
+  modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); player.play().catch(()=>{});
 }
 
-function attachWatchEvents() {
-    document.querySelectorAll('.watch-btn').forEach(btn => {
-        btn.onclick = () => {
-            const videoSrc = btn.getAttribute('data-video');
-            document.getElementById('video-player').src = videoSrc;
-            document.getElementById('video-modal').style.display = 'flex';
-        };
-    });
+/* close player */
+function closePlayer(){
+  if(hls){ try{ hls.destroy(); }catch(e){} hls = null; }
+  player.pause(); player.src = '';
+  const modal = modalEl();
+  modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
 }
 
-document.getElementById('video-modal').onclick = () => {
-    document.getElementById('video-player').pause();
-    document.getElementById('video-modal').style.display = 'none';
-};
+/* modal element */
+function modalEl(){ return document.getElementById('videoModal'); }
 
-document.getElementById('filter-all').onclick = () => { currentFilter='all'; setActiveFilter('filter-all'); renderCards(); };
-document.getElementById('filter-live').onclick = () => { currentFilter='live'; setActiveFilter('filter-live'); renderCards(); };
-document.getElementById('filter-upcoming').onclick = () => { currentFilter='upcoming'; setActiveFilter('filter-upcoming'); renderCards(); };
-document.getElementById('filter-recent').onclick = () => { currentFilter='recent'; setActiveFilter('filter-recent'); renderCards(); };
+/* Delegated clicks */
+document.addEventListener('click', (e)=>{
+  // chip click
+  const chip = e.target.closest('.chip');
+  if(chip){
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    activeFilter = chip.getAttribute('data-filter');
+    renderEvents();
+    updateCounts();
+    return;
+  }
 
-document.getElementById('tab-events').onclick = () => { currentTab='events'; setActiveTab('tab-events'); renderCards(); };
-document.getElementById('tab-sports').onclick = () => { currentTab='sports'; setActiveTab('tab-sports'); renderCards(); };
-document.getElementById('tab-categories').onclick = () => { currentTab='categories'; setActiveTab('tab-categories'); renderCards(); };
+  // tab click (mobile)
+  const tbtn = e.target.closest('.tab-btn');
+  if(tbtn){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    tbtn.classList.add('active');
+    activeTab = tbtn.getAttribute('data-tab');
+    renderEvents(); // cards area updated
+    return;
+  }
 
-function setActiveFilter(id) {
-    document.querySelectorAll('header button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+  // watch buttons on cards
+  const w = e.target.closest('.btn-watch');
+  if(w && !w.classList.contains('disabled')){
+    const link = w.getAttribute('data-link');
+    openPlayer(link);
+    return;
+  }
+
+  // channel watch buttons
+  const ch = e.target.closest('.ch-btn');
+  if(ch){
+    const link = ch.getAttribute('data-link');
+    openPlayer(link);
+    return;
+  }
+
+  // modal close
+  if(e.target === closeModalBtn || e.target === modalEl()){
+    closePlayer();
+  }
+
+});
+
+/* ESC closes modal */
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && modalEl().classList.contains('open')) closePlayer();
+});
+
+/* status updater: upcoming->live, live->recent; also update countdown texts */
+function updateStatuses(){
+  const t = Date.now();
+  let changed = false;
+  eventsData.forEach(ev=>{
+    if(ev.startTime && ev.endTime){
+      if(t < ev.startTime && ev.type !== 'upcoming'){ ev.type='upcoming'; changed=true; }
+      else if(t >= ev.startTime && t < ev.endTime && ev.type !== 'live'){ ev.type='live'; changed=true; }
+      else if(t >= ev.endTime && ev.type !== 'recent'){ ev.type='recent'; changed=true; }
+    }
+  });
+  // update countdown displays
+  document.querySelectorAll('.countdown').forEach(el=>{
+    const start = parseInt(el.getAttribute('data-start'),10);
+    el.textContent = fmt(start - Date.now());
+  });
+  if(changed){ renderEvents(); updateCounts(); }
 }
 
-function setActiveTab(id) {
-    document.querySelectorAll('.tab-nav button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
+/* initial render */
+renderChannels();
+updateCounts();
+renderEvents();
 
-function updateCountdowns() {
-    eventsData.forEach(e => {
-        if (e.type === 'upcoming') {
-            const diff = e.startTime - Date.now();
-            if (diff <= 0) {
-                e.type = 'live';
-            }
-        }
-    });
-    renderCards();
-}
-setInterval(updateCountdowns, 1000);
+/* periodic */
+setInterval(updateStatuses, 1000);
 
-renderCards();
+/* Helper: clicking outside modal closes */
+document.getElementById('videoModal').addEventListener('click', (e)=>{
+  if(e.target === document.getElementById('videoModal')) closePlayer();
+});
+closeModalBtn.addEventListener('click', closePlayer);
+
+/* NOTE:
+ - Replace all sample m3u8 links (test-streams...) with your real M3U8 URLs.
+ - For production, consider destroying Hls instance carefully and handling CORS/auth if needed.
+ - To load events dynamically, replace eventsData array with fetch() from your API and call renderEvents()/updateCounts().
+*/
 </script>
 </body>
 </html>

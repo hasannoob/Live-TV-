@@ -35,30 +35,30 @@ body{
 /* cards */
 .cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.03);padding:14px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,7,0.6);display:flex;flex-direction:column;gap:12px;transition:transform .16s}
-.card:hover{transform:translateY(-6px)}
-.card-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.team-block{display:flex;align-items:center;gap:12px;min-width:0}
-.logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#062a1d,#08302d);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent);border:1px solid rgba(255,255,255,0.03);flex-shrink:0}
-.team-name{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.team-sub{font-size:13px;color:var(--muted);margin-top:6px}
+.card:hover{transform:translateY(-4px)}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.team-block{display:flex;align-items:center;gap:8px;min-width:0}
+.logo{width:50px;height:50px;border-radius:8px;background:linear-gradient(135deg,#062a1d,#08302d);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent);border:1px solid rgba(255,255,255,0.03);flex-shrink:0}
+.team-name{font-weight:800;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.team-sub{font-size:6px;color:var(--muted);margin-top:4px}
 .center{ text-align:center; min-width:140px}
-.vs{font-weight:900;font-size:18px;color:#ffd875}
-.live-badge{display:inline-block;margin-top:8px;background:linear-gradient(90deg,#ff512f,#ff7a2d);color:white;padding:7px 12px;border-radius:999px;font-weight:900;box-shadow:0 8px 30px rgba(255,122,45,0.12);animation:pulse 1.2s infinite}
+.vs{font-weight:900;font-size:10px;color:#ffd875}
+.live-badge{display:inline-block;margin-top:4px;background:linear-gradient(90deg,#ff512f,#ff7a2d);color:white;padding:4px 8px;border-radius:999px;font-weight:900;box-shadow:0 4px 10px rgba(255,122,45,0.12);animation:pulse 1.2s infinite}
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
-.countdown{font-weight:800;color:var(--muted)}
-.recent-note{font-weight:800;color:#c6cbd0}
-.card-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.btn-watch{background:var(--accent);color:#041014;border:none;padding:10px 14px;border-radius:10px;font-weight:900;cursor:pointer}
+.countdown{font-weight:700;color:var(--muted)}
+.recent-note{font-weight:700;color:#c6cbd0}
+.card-bottom{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.btn-watch{background:var(--accent);color:#041014;border:none;padding:4px 8px;border-radius:6px;font-weight:900;cursor:pointer}
 .btn-watch.disabled{opacity:.35;cursor:not-allowed;background:linear-gradient(90deg,#666,#444);color:#ddd}
 
 /* sidebar */
-.sidebar{display:flex;flex-direction:column;gap:12px}
-.panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
-.panel h3{margin:0 0 8px 0}
-.channel{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02)}
+.sidebar{display:flex;flex-direction:column;gap:10px}
+.panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+.panel h3{margin:0 0 6px 0}
+.channel{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02)}
 .ch-left{display:flex;align-items:center;gap:10px}
 .ch-logo{width:48px;height:48px;border-radius:8px;background:#081815;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent);border:1px solid rgba(255,255,255,0.03)}
-.ch-meta{font-size:13px;color:var(--muted)}
+.ch-meta{font-size:10px;color:var(--muted)}
 .ch-btn{background:transparent;border:2px solid var(--accent);color:var(--accent);padding:8px 10px;border-radius:8px;font-weight:800;cursor:pointer}
 
 /* bottom tabs for mobile */
@@ -89,10 +89,10 @@ body{
 
     <!-- chips -->
     <div class="chips" role="tablist" aria-label="Filters">
-      <button class="chip active" data-filter="all">All <span style="margin-left:8px" id="count-all">0</span></button>
-      <button class="chip" data-filter="live">Live <span style="margin-left:8px" id="count-live">0</span></button>
-      <button class="chip" data-filter="upcoming">Upcoming <span style="margin-left:8px" id="count-upcoming">0</span></button>
-      <button class="chip" data-filter="recent">Recent <span style="margin-left:8px" id="count-recent">0</span></button>
+      <button class="chip active" data-filter="all">All <span style="margin-left:4px" id="count-all">0</span></button>
+      <button class="chip" data-filter="live">Live <span style="margin-left:4px" id="count-live">0</span></button>
+      <button class="chip" data-filter="upcoming">Upcoming <span style="margin-left:4px" id="count-upcoming">0</span></button>
+      <button class="chip" data-filter="recent">Recent <span style="margin-left:4px" id="count-recent">0</span></button>
     </div>
 
     <div class="layout">

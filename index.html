@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livefy TV (English Version)</title>
+    <title>Livefy TV (NS Player Style)</title>
+    
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.11"></script>
+    
     <style>
         /* Base Styles (Tailwind like aesthetic) */
         body {
@@ -228,11 +231,13 @@
             width: 100%;
             padding-top: 56.25%; /* 16:9 Aspect Ratio */
             overflow: hidden;
+            /* PLYR handles the video element, so we style the wrapper */
             border: 2px solid #00ff00; 
             border-radius: 10px; 
             box-shadow: 0 0 15px rgba(0, 255, 0, 0.8); 
         }
 
+        /* Essential for Plyr integration with HLS.js in a responsive container */
         #video {
             position: absolute;
             top: 0;
@@ -325,9 +330,9 @@
             padding-bottom: 10px;
         }
 
-        /* Quality Selector Styles */
+        /* Quality Selector Styles - Hidden by default as Plyr handles it for HLS/MP4 */
         #quality-selector-container {
-            display: flex;
+            display: none; 
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
@@ -423,6 +428,26 @@
         .nav-item svg {
             width: 24px;
             height: 24px;
+        }
+        
+        /* Custom Plyr Style Override for the color theme */
+        .plyr--full-screen { 
+            background: black; 
+        }
+        /* Customize the Plyr color to match your theme (Red/Green) */
+        .plyr--full-screen .plyr__controls { 
+            background: rgba(0, 0, 0, 0.7); 
+        }
+        .plyr--video .plyr__controls .plyr__control.plyr__tab-focus { 
+            box-shadow: 0 0 0 5px rgba(0, 255, 0, 0.5); 
+        }
+        .plyr--video .plyr__controls .plyr__control:hover { 
+            background: rgba(0, 255, 0, 0.1); 
+        }
+        /* Make the range slider green */
+        .plyr__progress--seek,
+        .plyr__volume--display {
+            background: #00ff00 !important; 
         }
 
     </style>
@@ -731,7 +756,7 @@
 
         <div id="video-container-wrapper">
             <div class="video-wrapper">
-                <video id="video" controls autoplay playsinline></video>
+                <video id="video" controls autoplay playsinline data-plyr-config='{"title": "Livefy Stream", "volume": 1, "fullscreen": {"enabled": true, "fallback": true}}'></video>
                 
                 <div id="video-overlay">
                     <span id="livefy-text-animator">LIVEFY TV</span>
@@ -741,7 +766,7 @@
         
         <div id="error-message-box">
             <h3 id="error-title">Error (Playback Failure)</h3>
-            <p id="error-text">The video cannot be loaded. The stream link might be invalid, the server may be down, or your device might not support HLS format. Please try another server.</p>
+            <p id="error-text">The video cannot be loaded. The stream link might be invalid, the server may be down, or your device might not support the stream format. Please try another server.</p>
         </div>
 
 
@@ -750,11 +775,11 @@
                 <label for="quality-select">Video Quality:</label>
                 <select id="quality-select" onchange="changeQuality(this.value)">
                     <option value="-1">Auto</option>
-                    </select>
+                </select>
             </div>
             
             <div id="server-buttons">
-                </div>
+            </div>
         </div>
     </div>
     
@@ -774,10 +799,12 @@
         </div>
     </nav>
     
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     
 <script>    
-        // HLS.js Global Variables
+        // HLS.js and Plyr Global Variables
         let hls = null; 
+        let player = null; // Plyr instance
         const video = document.getElementById('video');
         const qualitySelect = document.getElementById('quality-select');
         const qualityContainer = document.getElementById('quality-selector-container');
@@ -788,7 +815,6 @@
         
         // --- LIVEFY TV ELEMENTS ---
         const livefyTextAnimator = document.getElementById('livefy-text-animator');
-        const videoOverlay = document.getElementById('video-overlay');
         // -----------------------------
         
         /**
@@ -797,6 +823,9 @@
          * @param {string} message - The detailed message.
          */
         function showMessage(title, message) {
+            if (player) {
+                player.pause(); // Stop Plyr playback
+            }
             document.getElementById('video-container-wrapper').style.display = 'none';
             document.getElementById('controls-area').style.display = 'none';
             document.getElementById('error-title').textContent = title;
@@ -815,57 +844,20 @@
             document.getElementById('video-container-wrapper').style.display = 'block';
             document.getElementById('controls-area').style.display = 'block';
         }
-
-        /**
-         * Populates the video quality selector based on HLS levels.
-         */
-        function populateQualitySelector() {
-            // Clear previous options
-            qualitySelect.innerHTML = '';
-            
-            // 1. Add Auto option (HLS.js uses -1 for adaptive/auto)
-            const autoOption = new Option('Auto', -1);
-            qualitySelect.add(autoOption);
-            
-            if (hls && hls.levels && hls.levels.length > 0) {
-                // 2. Add manual options
-                hls.levels.forEach((level, index) => {
-                    const resolution = level.height ? `${level.height}p` : 'Unknown';
-                    // Convert bitrate from bits/s to kbps
-                    const bitrate = level.bitrate ? ` (${Math.round(level.bitrate / 1000)}kbps)` : '';
-                    const option = new Option(resolution + bitrate, index);
-                    qualitySelect.add(option);
-                });
-                qualityContainer.style.display = 'flex';
-            } else {
-                 // If no HLS levels found (maybe native playback used)
-                 qualityContainer.style.display = 'none';
-            }
-            // Set the current selection based on the current level
-            qualitySelect.value = hls ? hls.currentLevel : -1;
-        }
-
-        /**
-         * Changes the HLS playback quality level.
-         * @param {string} index - The index of the HLS level, or -1 for auto.
-         */
-        function changeQuality(index) {
-            if (hls) {
-                hls.currentLevel = parseInt(index, 10);
-            }
-        }
         
         /**
-         * Function to load and play M3U8/MP4/Direct video stream.
-         * This function ensures maximum compatibility (HLS.js or native fallback).
-         * * @param {string} videoSrc - The URL of the video stream.
+         * Function to load and play M3U8/MP4/Direct video stream using Plyr + HLS.js.
+         * This combination gives maximum support (like NS Player).
+         * @param {string} videoSrc - The URL of the video stream.
          * @param {string} channelName - The name of the channel (for error logging/display).
          */
         function loadVideoSource(videoSrc, channelName) {
             hideMessage(); // Reset error message state
 
             if (!videoSrc || videoSrc.startsWith('http://channel-url')) {
+                // Proper cleanup
                 if (hls) { hls.destroy(); hls = null; }
+                if (player) { player.destroy(); player = null; }
                 video.removeAttribute('src'); 
                 video.load(); 
                 qualityContainer.style.display = 'none';
@@ -879,112 +871,118 @@
             livefyTextAnimator.style.display = 'block';
             // -----------------------------------------------------------
             
-            // Destroy previous HLS.js instance if exists
-            if (hls) {
-                hls.destroy();
-                hls = null;
+            // 1. Cleanup previous instance
+            if (hls) { 
+                hls.destroy(); 
+                hls = null; 
             }
-            
+            if (player) {
+                player.destroy();
+                player = null;
+            }
             video.removeAttribute('src'); 
             video.load(); 
-            qualitySelect.innerHTML = '<option value="-1">Auto</option>';
+            qualityContainer.style.display = 'none'; // Hide manual quality selector
 
             const isHls = videoSrc.toLowerCase().endsWith('.m3u8');
             
             if (isHls && Hls.isSupported()) {
-                // --- HLS (Adaptive Streaming) Logic ---
-                qualityContainer.style.display = 'flex';
+                // --- HLS (Adaptive Streaming) Logic (Weak Link Optimization) ---
                 
-                // --- আরও আগ্রাসী কনফিগারেশন: বাফারিং এবং রিকভারি দ্রুত করার জন্য ---
                 hls = new Hls({
-                    // ABR (Adaptive Bitrate) সেটিং: দ্রুততম প্রতিক্রিয়ার জন্য বাফারের গড় সময় কমানো
-                    abrEwmaFastAveragingTime: 0.5,  // আরও aggressive ABR
-                    abrEwmaSlowAveragingTime: 1.0,  // দুর্বল লিঙ্কে দ্রুত মান কমাতে সাহায্য করবে
-                    
-                    // বাফার ম্যানেজমেন্ট: লাইভ স্ট্রিমের জন্য বাফার আরও ছোট রাখা
-                    maxBufferLength: 4,      // মাত্র ৪ সেকেন্ডের বাফার, এতে ল্যাগ কম মনে হবে
-                    maxMaxBufferLength: 10,   // সর্বাধিক বাফার লেন্থ আরও কম রাখা হলো।
-                    
-                    // নেটওয়ার্ক ও পুনরায় চেষ্টা (Retry) এর ক্ষমতা বৃদ্ধি:
-                    fragLoadingMaxRetry: 20,  // সর্বাধিক ২০ বার চেষ্টা
-                    fragLoadingRetryDelay: 100, // দ্রুত পুনরায় চেষ্টা শুরু (মাত্র ১০০ms)
+                    // Aggressive ABR for weak links
+                    abrEwmaFastAveragingTime: 0.5,
+                    abrEwmaSlowAveragingTime: 1.0,
+                    maxBufferLength: 4, 
+                    maxMaxBufferLength: 10,
+                    fragLoadingMaxRetry: 20, 
+                    fragLoadingRetryDelay: 100,
                     levelLoadingMaxRetry: 10, 
-                    
-                    // Fragment Prefetching
                     startFragPrefetch: true
                 });
-                // ----------------------------------------------------------------------------
                 
                 hls.loadSource(videoSrc);
                 hls.attachMedia(video);
 
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    populateQualitySelector(); 
-                    // Attempt to play after manifest is parsed
-                    video.play().catch(e => console.log("Video auto-play blocked:", e));
-                });
+                // Initialize Plyr *after* attaching HLS
+                player = new Plyr(video);
                 
-                hls.on(Hls.Events.LEVEL_SWITCHED, function(event, data) {
-                    qualitySelect.value = data.level; 
-                });
-
+                // HLS Error Handling
                 hls.on(Hls.Events.ERROR, function(event, data) {
                     console.error('HLS Error:', data.details, data.type);
                     
-                    // If stream link is bad, or blocked (HTTP 403, 404, Manifest Load Error)
                     if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR || 
                         data.details === Hls.ErrorDetails.MANIFEST_PARSING_ERROR || 
                         data.details === Hls.ErrorDetails.LEVEL_LOAD_ERROR || 
                         data.details === Hls.ErrorDetails.LEVEL_LOADING_TIMEOUT ||
                         data.fatal) 
                     {
-                        if (hls) { hls.destroy(); hls = null; }
-                        video.removeAttribute('src'); 
-                        video.load(); 
-                        livefyTextAnimator.style.display = 'none'; // Hide loading state
-                        
-                        // Show a clear message to the user
+                        closeVideo(); // Perform full cleanup
                         showMessage(
                             "Link Failed: Try Another Server", 
-                            `'${channelName}' চ্যানেলটি লোড করতে ব্যর্থ হয়েছে। লিংকটি হয় ডেড, অথবা আপনার ইন্টারনেট সার্ভিস প্রোভাইডার (ISP) কর্তৃক ব্লকড। অনুগ্রহ করে অন্য সার্ভার বা চ্যানেলটি ব্যবহার করুন।`
+                            `'${channelName}' চ্যানেলটি লোড করতে ব্যর্থ হয়েছে। লিংকটি হয় ডেড, ব্লকড, অথবা স্ট্রিমিং সার্ভার বন্ধ। অনুগ্রহ করে অন্য সার্ভার বা চ্যানেলটি ব্যবহার করুন।`
                         );
                     }
-                    // For non-fatal errors (like fragment loading, which are common in weak links), HLS.js handles retries.
+                });
+
+                // Playback Attempt
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    player.play().catch(e => console.log("Video auto-play blocked:", e));
                 });
 
             } else {
-                // --- Native/Direct Playback Logic (MP4, non-HLS or Safari/Unsupported Browser) ---
-                qualityContainer.style.display = 'none';
-                console.log('Loading Native/Direct stream:', videoSrc);
+                // --- Native/Direct Playback Logic (MP4, WebM, or Native HLS on Safari) ---
                 
-                // Set the source and load
+                // Set the direct source
                 video.src = videoSrc;
                 video.load();
                 
-                // Check for immediate errors on native load (e.g., 404)
+                // Initialize Plyr
+                player = new Plyr(video);
+
+                // Native Error Handling (for MP4/WebM)
                 const errorHandler = function() {
-                     livefyTextAnimator.style.display = 'none'; // Hide loading state on fatal error
-                     showMessage("Playback Failed", `'${channelName}' লিংকটি লোড হচ্ছে না। এটি হতে পারে একটি নন-HLS লিংক যা আপনার ব্রাউজার বা ডিভাইসে কাজ করছে না। অন্য একটি সার্ভার চেষ্টা করুন।`);
+                     closeVideo(); // Perform full cleanup
+                     showMessage("Playback Failed (Unsupported Link)", `'${channelName}' লিংকটি লোড হচ্ছে না। এটি হয়তো ডেড লিংক অথবা আপনার ডিভাইস/ব্রাউজার এই ফাইল ফরম্যাটটি সাপোর্ট করে না। অন্য একটি সার্ভার চেষ্টা করুন।`);
                      video.removeEventListener('error', errorHandler);
                 };
                 video.addEventListener('error', errorHandler);
                 
-                // Attempt to play
-                video.play().catch(e => {
-                    // Playback was prevented (often by browser policy), but we don't treat this as a fatal URL error.
+                // Playback Attempt
+                player.play().catch(e => {
                     console.log("Native video play blocked or failed:", e);
+                });
+            }
+            
+            // General Plyr Event Listener for loading/playing
+            if(player) {
+                player.on('waiting', () => {
+                    if (!player.paused) {
+                        livefyTextAnimator.textContent = 'LIVEFY TV - LOADING...';
+                        livefyTextAnimator.classList.add('is-loading');
+                        livefyTextAnimator.style.display = 'block';
+                    }
+                });
+
+                player.on('playing', () => {
+                    livefyTextAnimator.textContent = 'LIVEFY TV';
+                    livefyTextAnimator.classList.remove('is-loading');
+                    livefyTextAnimator.style.display = 'block'; 
+                });
+
+                player.on('pause', () => {
+                    livefyTextAnimator.style.display = 'none';
                 });
             }
         }
         
         /**
          * Generates server buttons dynamically and starts playback on the first server.
-         * @param {Array<Object>} channelsData - Array of {name, url} objects for the match channels.
          */
         function openMatchChannels(channelsData) {
             document.getElementById('video-player').style.display = 'flex';
-            serverButtonsContainer.innerHTML = ''; // Clear existing buttons
-            hideMessage(); // Reset view to show video player
+            serverButtonsContainer.innerHTML = ''; 
+            hideMessage(); 
 
             if (!channelsData || channelsData.length === 0) {
                 showMessage("Error", "No channels found for this match.");
@@ -1005,7 +1003,6 @@
             // Automatically start the first channel
             const firstButton = serverButtonsContainer.querySelector('.server-button');
             if (firstButton) {
-                // Pass the name of the first channel
                 const firstChannelName = channelsData[0].name;
                 selectServer(channelsData[0].url, firstChannelName, firstButton);
             }
@@ -1014,9 +1011,6 @@
 
         /**
          * Selects a new server/channel and starts playback.
-         * @param {string} serverSrc - The M3U8 URL.
-         * @param {string} channelName - The name of the channel.
-         * @param {HTMLElement} clickedButton - The button element that was clicked.
          */
         function selectServer(serverSrc, channelName, clickedButton) {
             // Highlight the active button
@@ -1027,17 +1021,22 @@
                 clickedButton.classList.add('active-server');
             }
             
-            // Pass the channelName to loadVideoSource
             loadVideoSource(serverSrc, channelName);
         }
 
         // --- Close Video Function ---
         function closeVideo() {
             document.getElementById('video-player').style.display = 'none';
+            
             if (hls) {
                 hls.destroy();
                 hls = null;
             }
+            if (player) {
+                player.destroy(); // Properly clean up the Plyr instance
+                player = null;
+            }
+            
             video.pause();
             video.removeAttribute('src'); 
             video.load();
@@ -1049,13 +1048,15 @@
 
             // Clear quality and server options upon closing
             qualitySelect.innerHTML = '<option value="-1">Auto</option>';
-            qualityContainer.style.display = 'flex'; 
+            qualityContainer.style.display = 'none'; 
             serverButtonsContainer.innerHTML = '';
             
             // --- Reset LIVEFY TV state on close ---
             livefyTextAnimator.classList.remove('is-loading'); 
             livefyTextAnimator.style.display = 'none';
         }
+        
+        // --- Helper functions (showTab, updateClock, checkMatchStatus) remain the same ---
 
         // --- Tab Switching Logic ---
         function showTab(sectionIdToShow, clickedElement) {
@@ -1153,34 +1154,7 @@
         // Initial setup and recurring tasks
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- VIDEO EVENT LISTENERS FOR LOADING/WATERMARK ---
-            video.addEventListener('waiting', () => {
-                // Video buffered and stalled, show loading text
-                if (!video.paused) {
-                    livefyTextAnimator.textContent = 'LIVEFY TV - LOADING...';
-                    livefyTextAnimator.classList.add('is-loading');
-                    livefyTextAnimator.style.display = 'block';
-                }
-            });
-
-            video.addEventListener('playing', () => {
-                // Video is playing, show the normal watermark
-                livefyTextAnimator.textContent = 'LIVEFY TV'; // Normal text
-                livefyTextAnimator.classList.remove('is-loading'); // Use normal blink animation
-                livefyTextAnimator.style.display = 'block'; 
-            });
-
-            video.addEventListener('pause', () => {
-                // Video is paused, hide watermark
-                livefyTextAnimator.style.display = 'none';
-            });
-            
-            video.addEventListener('loadeddata', () => {
-                // Initial data loaded. If it's not auto-playing, hide the loading text.
-                if(video.paused) {
-                    livefyTextAnimator.style.display = 'none';
-                }
-            });
+            // --- VIDEO EVENT LISTENERS (HLS/Plyr events are handled inside loadVideoSource) ---
             
             // Initial state: Hidden
             livefyTextAnimator.style.display = 'none';

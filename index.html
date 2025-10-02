@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.11"></script>
     
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+    
     <style>
         /* Base Styles (Tailwind like aesthetic) */
         body {
@@ -16,23 +20,22 @@
             color: #fff;
             margin: 0;
             padding: 0;
-            /* Space for Bottom Nav */
             padding-bottom: 70px; 
-            overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+            overflow-x: hidden; 
         }
 
         /* --- HEADER STYLE --- */
         .main-header {
-            background-color: #C80815; /* Red background to stand out */
+            background-color: #C80815; 
             color: white;
             padding: 15px 10px;
             text-align: center;
             font-size: 28px;
-            font-weight: 900; /* Extra bold */
+            font-weight: 900; 
             text-transform: uppercase;
             letter-spacing: 2px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            margin-bottom: 0; /* Remove gap before welcome box */
+            margin-bottom: 0; 
         }
         /* --- END HEADER STYLE --- */
 
@@ -63,29 +66,29 @@
         }
 
         .content {
-            padding: 10px; /* Reduced padding for mobile */
+            padding: 10px; 
             max-width: 600px;
-            margin: 0 auto; /* Center content */
+            margin: 0 auto; 
             padding-top: 20px;
         }
         
-        /* --- HEADER AND TIME STYLES (For Clock) --- */
+        /* --- HEADER AND TIME STYLES --- */
         .section-header {
             display: flex;
-            justify-content: space-between; /* Space out title and time */
+            justify-content: space-between; 
             align-items: center;
             margin-bottom: 15px;
             padding-bottom: 5px;
-            border-bottom: 1px solid #444; /* Separator */
+            border-bottom: 1px solid #444; 
         }
         .section-header h2 {
             font-size: 22px; 
             font-weight: bold; 
             color: white; 
-            margin: 0; /* Remove default margin */
+            margin: 0; 
         }
         .datetime-box {
-            background-color: #C80815; /* Red color for visibility */
+            background-color: #C80815; 
             color: white;
             padding: 5px 10px;
             border-radius: 8px;
@@ -97,11 +100,11 @@
             min-width: 90px;
         }
         .datetime-box .date-text {
-            color: #ffd700; /* Yellow for date */
+            color: #ffd700; 
         }
         /* --- END CLOCK STYLES --- */
 
-        /* Card Styles */
+        /* Card Styles (Same as before) */
         .match-card, .channel-card, .highlight-card, .banner {
             background-color: #222;
             border: 1px solid #00ffc8;
@@ -156,28 +159,6 @@
             border: 1px solid #c80815;
         }
 
-        /* BANNER SPECIFIC STYLES */
-        .banner {
-            padding: 0; 
-            overflow: hidden; 
-            border: 1px solid #C80815; 
-            cursor: default; 
-            transform: none; 
-            transition: none;
-            margin-top: 25px; 
-        }
-        
-        .banner-image {
-            width: 100%; 
-            height: auto;
-            display: block;
-            border-radius: 10px; 
-        }
-        
-        .banner:hover {
-             transform: none; 
-        }
-        
         /* Match Info Styles */
         .match-title { background-color: #000; color: #fff; display: inline-block; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-bottom: 5px; }
         .team { display: flex; justify-content: space-between; align-items: center; margin: 5px 0; }
@@ -191,53 +172,80 @@
             color: #C80815; 
             font-size: 15px; 
             font-weight: bold; 
-            /* Blinking animation for LIVE NOW */
             animation: blink 1s infinite; 
         }
         .hidden { display: none !important; }
         
-        /* LIVE text blink animation */
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
 
-
-        /* Video Player Styles */
+        /* --- NEW: FLOATING VIDEO PLAYER CONTAINER STYLE --- */
         #video-player {
             display: none; 
             position: fixed; 
-            top: 0;
-            left: 0;
-            width: 100vw; 
-            height: 100vh; 
-            background-color: rgba(0, 0, 0, 0.95); 
-            z-index: 1000; 
-            justify-content: center; 
-            align-items: center; 
-            flex-direction: column; 
-            padding: 10px; /* Adjusted padding */
+            /* Initial position (Top Right for pop-up feel) */
+            top: 60px; 
+            right: 10px;
+            
+            /* Initial size (mobile friendly small window) */
+            width: 90%; 
+            max-width: 400px; /* Max size for floating window */
+            height: auto;
+            
+            background-color: #111; 
+            border: 3px solid #00ff00; /* Beautiful green border */
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.5), 0 0 10px rgba(0, 0, 0, 0.8);
+            z-index: 2000; /* Ensure it's always on top */
+            padding: 5px; 
             box-sizing: border-box;
-            overflow-y: auto; /* Allow scrolling if content is too tall */
+            
+            /* Add some padding for the resizable handles */
+            padding-bottom: 40px; 
+            
+            /* Make the whole window draggable (jQuery UI required) */
+            cursor: grab; 
         }
         
-        #video-container-wrapper {
-            width: 100%;
-            max-width: 600px; 
+        /* Draggable Header/Handle */
+        #player-handle {
+            background-color: #333;
+            color: #00ff00;
+            padding: 5px 10px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 10px 10px 0 0;
+            cursor: grab;
+            margin: -5px -5px 5px -5px; /* Pull it to the edges of the box */
+            display: block;
+        }
+
+        /* Position the close button absolutely within the draggable container */
+        #close-btn {
+            position: absolute; 
+            top: 5px;
+            right: 5px;
+            font-size: 20px; 
+            color: red;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 5px;
+            padding: 0 5px;
+            cursor: pointer;
+            z-index: 2001; 
         }
         
+        /* Video Container Wrapper (Holds the 16:9 ratio) */
         .video-wrapper {
             position: relative;
             width: 100%;
             padding-top: 56.25%; /* 16:9 Aspect Ratio */
             overflow: hidden;
-            /* PLYR handles the video element, so we style the wrapper */
-            border: 2px solid #00ff00; 
-            border-radius: 10px; 
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.8); 
+            border-radius: 5px;
         }
 
-        /* Essential for Plyr integration with HLS.js in a responsive container */
         #video {
             position: absolute;
             top: 0;
@@ -246,119 +254,52 @@
             height: 100%;
         }
         
-        /* --- LIVEFY TV Text Styles (Combined for Loading and Watermark) --- */
-        #video-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            /* Make overlay transparent, it's just a container */
-            background-color: transparent; 
-            z-index: 50; 
-            pointer-events: none; /* Allows clicks to pass through */
+        /* Overriding Plyr's fullscreen to stay within the draggable box */
+        /* IMPORTANT: This will make the Plyr fullscreen button ineffective for full screen of the whole phone screen */
+        .plyr--full-screen {
+             position: absolute !important; /* Forces Plyr to stay in the box when in "fullscreen" mode */
+             top: 0 !important;
+             left: 0 !important;
+             width: 100% !important;
+             height: 100% !important;
+             z-index: 1000 !important;
         }
-        
-        /* The single element used for both loading and watermark */
+
+
+        /* Overlay for Watermark/Loading */
         #livefy-text-animator {
             position: absolute;
-            bottom: 5px; /* Bottom right corner */
+            bottom: 5px; 
             right: 5px;
-            color: #00ff00; /* Green color (Watermark color) */
+            color: #00ff00; 
             font-size: 10px; 
             font-weight: bold;
             opacity: 0.7; 
             z-index: 60; 
-            background-color: rgba(0, 0, 0, 0.5); /* Background for readability */
+            background-color: rgba(0, 0, 0, 0.5); 
             padding: 2px 4px;
             border-radius: 3px;
-            
-            /* Default animation: blinking (used when video is PLAYING) */
             animation: watermark-blink 5s infinite; 
-            display: none; /* Hidden by default */
+            display: none; 
+            pointer-events: none; /* Crucial */
         }
 
-        /* Loading animation (More noticeable pulsing, used when video is WAITING/LOADING) */
         .is-loading {
-            color: #C80815; /* Red for loading to stand out */
-            font-size: 12px; /* Slightly larger for loading */
+            color: #C80815; 
+            font-size: 12px; 
             padding: 4px 6px;
             animation: pulse 1s infinite; 
         }
 
-        /* Loading pulse animation */
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* Watermark animation keyframes (used when video is PLAYING) */
-        @keyframes watermark-blink {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 0.4; }
-        }
-        /* --- END OF LIVEFY TV LOADING/WATERMARK STYLES --- */
-
-
-        /* Error Message Box Styles */
-        #error-message-box {
-            background-color: #333;
-            border: 2px solid red;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            max-width: 95%;
-            margin-top: 20px;
-            display: none; /* Hidden by default */
-        }
-        #error-title {
-            color: red;
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-        #error-text {
-            color: white;
-            font-size: 14px;
-        }
-
-        /* Control Area (Quality + Servers) */
-        #controls-area {
-            width: 100%;
-            max-width: 600px;
-            margin-top: 20px;
-            padding-bottom: 10px;
-        }
-
-        /* Quality Selector Styles - Hidden by default as Plyr handles it for HLS/MP4 */
-        #quality-selector-container {
-            display: none; 
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            color: #00ff00;
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #333;
-        }
-
-        #quality-select {
-            background-color: #222;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        
-        /* Server Buttons Styles */
+        /* Server Buttons Styles (placed at the bottom of the floating player) */
         #server-buttons {
             display: flex; 
             justify-content: center; 
             flex-wrap: wrap; 
-            gap: 10px;
+            gap: 5px;
+            padding: 5px 0;
+            border-top: 1px solid #444;
+            margin-top: 5px;
         }
 
         .server-button {
@@ -366,36 +307,54 @@
             color: black; 
             border: none; 
             border-radius: 5px; 
-            padding: 10px 15px; 
-            font-size: 16px; 
+            padding: 5px 10px; 
+            font-size: 12px; 
             font-weight: bold;
             cursor: pointer; 
             transition: background-color 0.5s, transform 0.2s; 
-            flex: 1 1 calc(50% - 10px); /* Responsive button size */
-            box-sizing: border-box;
-            max-width: 250px;
+            flex: 1 1 auto; 
+            max-width: 150px;
         }
 
         .server-button.active-server {
-            background-color: #C80815; /* Active server color */
+            background-color: #C80815; 
             color: white;
             border: 2px solid #00ff00;
-            transform: translateY(-2px);
-        }
-
-        #close-btn {
-            position: absolute; 
-            top: 15px;
-            right: 15px;
-            font-size: 30px; 
-            color: red;
-            background: none;
-            border: none;
-            cursor: pointer;
-            z-index: 1001; 
         }
         
-        /* Bottom Navigation Bar Styles */
+        /* Error Message Box (now inside the floating player) */
+        #error-message-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #333;
+            border: 2px solid red;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 90%;
+            display: none; 
+            z-index: 2002;
+        }
+        
+        /* --- JQUERY UI RESIZE HANDLE STYLING (For the small corner icon) --- */
+        .ui-resizable-handle {
+            background-color: #00ff00 !important;
+            opacity: 0.8;
+            border-radius: 0 0 10px 0;
+            width: 15px !important;
+            height: 15px !important;
+            z-index: 3000;
+        }
+        .ui-resizable-se {
+            bottom: 5px;
+            right: 5px;
+        }
+        /* --- END FLOATING PLAYER STYLES --- */
+
+
+        /* Bottom Navigation Bar Styles (Same as before) */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -418,33 +377,16 @@
             padding: 5px 10px;
         }
         .nav-item.active {
-            color: #00ff00; /* Active tab color */
+            color: #00ff00; 
         }
-        .nav-item span {
-            font-size: 12px;
-            margin-top: 3px;
-            font-weight: bold;
-        }
-        .nav-item svg {
-            width: 24px;
-            height: 24px;
-        }
-        
-        /* Custom Plyr Style Override for the color theme */
-        .plyr--full-screen { 
-            background: black; 
-        }
-        /* Customize the Plyr color to match your theme (Red/Green) */
-        .plyr--full-screen .plyr__controls { 
-            background: rgba(0, 0, 0, 0.7); 
-        }
-        .plyr--video .plyr__controls .plyr__control.plyr__tab-focus { 
+
+        /* Custom Plyr Style Override (Same as before) */
+        .plyr--full-screen .plyr__controls .plyr__control.plyr__tab-focus { 
             box-shadow: 0 0 0 5px rgba(0, 255, 0, 0.5); 
         }
         .plyr--video .plyr__controls .plyr__control:hover { 
             background: rgba(0, 255, 0, 0.1); 
         }
-        /* Make the range slider green */
         .plyr__progress--seek,
         .plyr__volume--display {
             background: #00ff00 !important; 
@@ -472,8 +414,6 @@
             </div>
             
             
-            
-
             <div id="match-card-2" class="match-card" onclick="openMatchChannels([
                 {name: 'WOLLOW', url: 'https://d1.merichunidya.com:1686/hls/willowusa.m3u8?md5=Musyg0ACa5floOv6OgVdWw&expires=1759413222'},
                 {name: 'Gazi TV (GTV)', url: 'http://stvlive.net:8080/channeli/index.m3u8'}
@@ -752,35 +692,24 @@
     </div>
     
     <div id="video-player">
+        <span id="player-handle">LIVEFY Stream (Drag to Move)</span>
         <button id="close-btn" onclick="closeVideo()">❌</button>
 
-        <div id="video-container-wrapper">
-            <div class="video-wrapper">
-                <video id="video" controls autoplay playsinline data-plyr-config='{"title": "Livefy Stream", "volume": 1, "fullscreen": {"enabled": true, "fallback": true}}'></video>
-                
-                <div id="video-overlay">
-                    <span id="livefy-text-animator">LIVEFY TV</span>
-                </div>
+        <div class="video-wrapper">
+            <video id="video" controls autoplay playsinline data-plyr-config='{"title": "Livefy Stream", "volume": 1, "fullscreen": {"enabled": true, "fallback": true}}'></video>
+            
+            <div id="video-overlay">
+                <span id="livefy-text-animator">LIVEFY TV</span>
+            </div>
+            
+            <div id="error-message-box">
+                <h3 id="error-title">Error (Playback Failure)</h3>
+                <p id="error-text">The video cannot be loaded. The stream link might be invalid, the server may be down, or your device might not support the stream format. Please try another server.</p>
             </div>
         </div>
         
-        <div id="error-message-box">
-            <h3 id="error-title">Error (Playback Failure)</h3>
-            <p id="error-text">The video cannot be loaded. The stream link might be invalid, the server may be down, or your device might not support the stream format. Please try another server.</p>
-        </div>
-
-
-        <div id="controls-area">
-            <div id="quality-selector-container">
-                <label for="quality-select">Video Quality:</label>
-                <select id="quality-select" onchange="changeQuality(this.value)">
-                    <option value="-1">Auto</option>
-                </select>
+        <div id="server-buttons">
             </div>
-            
-            <div id="server-buttons">
-            </div>
-        </div>
     </div>
     
     
@@ -794,7 +723,7 @@
             <span>Sports Channels</span>
         </div>
         <div id="nav-highlights" class="nav-item" onclick="showTab('highlights-section', this)">
-            <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 13c-2.34 0-4.59.88-6.23 2.52-1.64 1.64-2.52 3.88-2.52 6.23H5V3h14v10.5h-1.5zm-5.5 3.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5z"></path></svg>
+            <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2004/svg" viewBox="0 0 24 24"><path d="M17.5 13c-2.34 0-4.59.88-6.23 2.52-1.64 1.64-2.52 3.88-2.52 6.23H5V3h14v10.5h-1.5zm-5.5 3.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5z"></path></svg>
             <span>Highlights</span>
         </div>
     </nav>
@@ -802,70 +731,83 @@
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     
 <script>    
-        // HLS.js and Plyr Global Variables
+        // Global Variables
         let hls = null; 
-        let player = null; // Plyr instance
+        let player = null; 
         const video = document.getElementById('video');
-        const qualitySelect = document.getElementById('quality-select');
-        const qualityContainer = document.getElementById('quality-selector-container');
         const serverButtonsContainer = document.getElementById('server-buttons');
         const allSections = document.querySelectorAll('.content > div');
         const navItems = document.querySelectorAll('.nav-item');
         const errorMessageBox = document.getElementById('error-message-box');
-        
-        // --- LIVEFY TV ELEMENTS ---
+        const videoPlayerContainer = document.getElementById('video-player'); // NEW
         const livefyTextAnimator = document.getElementById('livefy-text-animator');
-        // -----------------------------
         
+        // --- JQuery UI Initialization for Draggable/Resizable ---
+        $(function() {
+            // Make the player draggable using the header as the handle
+            $("#video-player").draggable({
+                handle: "#player-handle", // Only the header/handle moves it
+                containment: "window" // Stays within the window boundaries
+            });
+
+            // Make the player resizable
+            $("#video-player").resizable({
+                minWidth: 150,
+                minHeight: 120,
+                maxWidth: $(window).width() - 20, // Max width is almost full screen
+                maxHeight: $(window).height() - 80, // Max height leaves space for nav/header
+                aspectRatio: 16 / 9, // IMPORTANT: Maintain 16:9 ratio
+                handles: 'se' // Only show the South-East handle for resizing
+            });
+            
+             // Fix initial size on mobile load
+             const initialWidth = Math.min($(window).width() * 0.9, 400);
+             $("#video-player").css({
+                 'width': initialWidth + 'px',
+                 'height': initialWidth * (9/16) + 40 + 'px' // Calculate height based on 16:9 ratio + server button area
+             });
+        });
+        // --------------------------------------------------------
+
         /**
-         * Shows a custom message box instead of using alert().
-         * @param {string} title - The title of the error/message.
-         * @param {string} message - The detailed message.
+         * Shows a custom message box.
          */
         function showMessage(title, message) {
             if (player) {
-                player.pause(); // Stop Plyr playback
+                player.pause(); 
             }
-            document.getElementById('video-container-wrapper').style.display = 'none';
-            document.getElementById('controls-area').style.display = 'none';
+            // Hide the video area but keep the floating player container visible
+            document.querySelector('.video-wrapper video').style.display = 'none';
             document.getElementById('error-title').textContent = title;
             document.getElementById('error-text').textContent = message;
             errorMessageBox.style.display = 'block';
-            
-            // Hide all Livefy TV elements on error
             livefyTextAnimator.style.display = 'none';
         }
 
         /**
-         * Hides the custom message box and shows the video player/controls.
+         * Hides the custom message box and shows the video player.
          */
         function hideMessage() {
             errorMessageBox.style.display = 'none';
-            document.getElementById('video-container-wrapper').style.display = 'block';
-            document.getElementById('controls-area').style.display = 'block';
+            document.querySelector('.video-wrapper video').style.display = 'block';
         }
         
         /**
-         * Function to load and play M3U8/MP4/Direct video stream using Plyr + HLS.js.
-         * This combination gives maximum support (like NS Player).
-         * @param {string} videoSrc - The URL of the video stream.
-         * @param {string} channelName - The name of the channel (for error logging/display).
+         * Load and play M3U8/MP4/Direct video stream (Using previous stable HLS.js config)
          */
         function loadVideoSource(videoSrc, channelName) {
-            hideMessage(); // Reset error message state
+            hideMessage(); 
 
             if (!videoSrc || videoSrc.startsWith('http://channel-url')) {
-                // Proper cleanup
                 if (hls) { hls.destroy(); hls = null; }
                 if (player) { player.destroy(); player = null; }
                 video.removeAttribute('src'); 
                 video.load(); 
-                qualityContainer.style.display = 'none';
                 showMessage("Error: No Link Found", "No URL found for the video stream or the link is only a demo.");
                 return;
             }
             
-            // --- SHOW INITIAL LOADING STATE (Bottom Right Animation) ---
+            // --- SHOW INITIAL LOADING STATE ---
             livefyTextAnimator.textContent = 'LIVEFY TV - LOADING...'; 
             livefyTextAnimator.classList.add('is-loading'); 
             livefyTextAnimator.style.display = 'block';
@@ -882,85 +824,60 @@
             }
             video.removeAttribute('src'); 
             video.load(); 
-            qualityContainer.style.display = 'none'; // Hide manual quality selector
 
             const isHls = videoSrc.toLowerCase().endsWith('.m3u8');
             
             if (isHls && Hls.isSupported()) {
-                // --- HLS (Adaptive Streaming) Logic - NEW OPTIMIZATION ---
+                // --- Stable HLS Logic (Restored to previous version's solid config) ---
                 
                 hls = new Hls({
-                    // --- চূড়ান্ত আগ্রাসী কনফিগারেশন ---
-                    
-                    // প্লেব্যাকের সময় কম বাফারিং করে দ্রুত স্টার্ট নিশ্চিত করা
-                    autoStartLoad: true, 
-                    maxBufferLength: 5, // 5 সেকেন্ডের বেশি বাফার করবে না (লাইভ ল্যাগ কমাবে)
-                    maxMaxBufferLength: 10,
-                    
-                    // নেটওয়ার্ক এরর হ্যান্ডলিং আরও বাড়ানো
-                    fragLoadingMaxRetry: 50, // 50 বার ফ্র্যাগমেন্ট লোড করার চেষ্টা করবে
-                    fragLoadingRetryDelay: 50, // মাত্র 50ms পর আবার চেষ্টা করবে
-                    levelLoadingMaxRetry: 10, 
-                    
-                    // ডিকোডারকে দ্রুত কাজ করতে বলা
+                    // Maximum Compatibility Configuration
+                    forceKeyFrameOnDiscontinuity: true,
                     lowLatencyMode: true, 
                     enableWorker: true, 
                     
-                    // কোডেক এরর হলে দ্রুত ডায়াগনোসিসের জন্য
-                    forceKeyFrameOnDiscontinuity: true,
-                    
-                    // --- END FINAL CONFIG ---
+                    // Slightly aggressive networking for weak links
+                    fragLoadingMaxRetry: 10, 
+                    fragLoadingRetryDelay: 500,
+                    maxBufferLength: 8,
+                    maxMaxBufferLength: 15,
                 });
                 
                 hls.loadSource(videoSrc);
                 hls.attachMedia(video);
 
-                // Initialize Plyr *after* attaching HLS
                 player = new Plyr(video);
                 
                 // HLS Error Handling
                 hls.on(Hls.Events.ERROR, function(event, data) {
-                    console.error('HLS Error:', data.details, data.type);
-                    
-                    if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR || 
-                        data.details === Hls.ErrorDetails.MANIFEST_PARSING_ERROR || 
-                        data.details === Hls.ErrorDetails.LEVEL_LOAD_ERROR || 
-                        data.details === Hls.ErrorDetails.LEVEL_LOADING_TIMEOUT ||
-                        data.details === Hls.ErrorDetails.BUFFER_CODEC_ERROR ||
-                        data.fatal) 
+                    if (data.fatal) 
                     {
-                        closeVideo(); // Perform full cleanup
+                        closeVideo();
                         showMessage(
                             "Link Failed: Try Another Server", 
-                            `'${channelName}' চ্যানেলটি লোড করতে ব্যর্থ হয়েছে। **ভিডিও কোডেক সমর্থিত নয় (শুধু অডিও), ডেড লিংক, অথবা দুর্বল নেটওয়ার্ক**। অন্য সার্ভার বা চ্যানেল ব্যবহার করুন।`
+                            `'${channelName}' লোড করতে ব্যর্থ হয়েছে। **ভিডিও কোডেক সমর্থিত নয় (শুধু অডিও)**, ডেড লিংক অথবা সার্ভার বন্ধ। অনুগ্রহ করে অন্য সার্ভার বা চ্যানেলটি ব্যবহার করুন।`
                         );
                     }
                 });
 
-                // Playback Attempt
                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
                     player.play().catch(e => console.log("Video auto-play blocked:", e));
                 });
 
             } else {
-                // --- Native/Direct Playback Logic (MP4, WebM, or Native HLS on Safari) ---
-                
-                // Set the direct source
+                // --- Native/Direct Playback Logic ---
                 video.src = videoSrc;
                 video.load();
                 
-                // Initialize Plyr
                 player = new Plyr(video);
 
-                // Native Error Handling (for MP4/WebM)
                 const errorHandler = function() {
-                     closeVideo(); // Perform full cleanup
+                     closeVideo();
                      showMessage("Playback Failed (Unsupported Link)", `'${channelName}' লিংকটি লোড হচ্ছে না। এটি হয়তো ডেড লিংক অথবা আপনার ডিভাইস/ব্রাউজার এই ফাইল ফরম্যাটটি সাপোর্ট করে না। অন্য একটি সার্ভার চেষ্টা করুন।`);
                      video.removeEventListener('error', errorHandler);
                 };
                 video.addEventListener('error', errorHandler);
                 
-                // Playback Attempt
                 player.play().catch(e => {
                     console.log("Native video play blocked or failed:", e);
                 });
@@ -986,13 +903,25 @@
                     livefyTextAnimator.style.display = 'none';
                 });
             }
+            
+            // Re-apply the initial size after loading to fix the Plyr display issue
+            // This is necessary because jQuery UI resize is active.
+            setTimeout(() => {
+                const initialWidth = Math.min($(window).width() * 0.9, 400);
+                $("#video-player").css({
+                    'width': initialWidth + 'px',
+                    'height': (initialWidth * (9/16)) + 40 + 'px' 
+                });
+                player.stop(); // Stops the player momentarily
+                player.play(); // Restarts play to ensure correct aspect ratio display
+            }, 500);
         }
         
         /**
-         * Generates server buttons dynamically and starts playback on the first server.
+         * Opens the floating player and prepares server buttons.
          */
         function openMatchChannels(channelsData) {
-            document.getElementById('video-player').style.display = 'flex';
+            videoPlayerContainer.style.display = 'block'; // Show the floating player
             serverButtonsContainer.innerHTML = ''; 
             hideMessage(); 
 
@@ -1007,7 +936,6 @@
                 const button = document.createElement('button');
                 button.className = 'server-button';
                 button.textContent = channel.name;
-                // Pass channel.name to selectServer for better error reporting
                 button.onclick = () => selectServer(channel.url, channel.name, button);
                 serverButtonsContainer.appendChild(button);
             });
@@ -1025,7 +953,6 @@
          * Selects a new server/channel and starts playback.
          */
         function selectServer(serverSrc, channelName, clickedButton) {
-            // Highlight the active button
             document.querySelectorAll('.server-button').forEach(btn => {
                 btn.classList.remove('active-server');
             });
@@ -1038,14 +965,14 @@
 
         // --- Close Video Function ---
         function closeVideo() {
-            document.getElementById('video-player').style.display = 'none';
+            videoPlayerContainer.style.display = 'none';
             
             if (hls) {
                 hls.destroy();
                 hls = null;
             }
             if (player) {
-                player.destroy(); // Properly clean up the Plyr instance
+                player.destroy(); 
                 player = null;
             }
             
@@ -1053,50 +980,34 @@
             video.removeAttribute('src'); 
             video.load();
             
-            // Reset player visibility elements
-            document.getElementById('video-container-wrapper').style.display = 'block';
-            document.getElementById('controls-area').style.display = 'block';
+            // Reset visibility elements
             errorMessageBox.style.display = 'none';
-
-            // Clear quality and server options upon closing
-            qualitySelect.innerHTML = '<option value="-1">Auto</option>';
-            qualityContainer.style.display = 'none'; 
             serverButtonsContainer.innerHTML = '';
-            
-            // --- Reset LIVEFY TV state on close ---
-            livefyTextAnimator.classList.remove('is-loading'); 
             livefyTextAnimator.style.display = 'none';
         }
         
-        // --- Helper functions (showTab, updateClock, checkMatchStatus) remain the same ---
-
-        // --- Tab Switching Logic ---
+        // --- Tab Switching Logic (Unchanged) ---
         function showTab(sectionIdToShow, clickedElement) {
-            // 1. Hide all main content sections
             allSections.forEach(section => {
                 section.classList.add('hidden');
             });
 
-            // 2. Show the specific section
             const sectionToShow = document.getElementById(sectionIdToShow);
             if (sectionToShow) {
                 sectionToShow.classList.remove('hidden');
             }
 
-            // 3. Update navigation style
             navItems.forEach(item => {
                 item.classList.remove('active');
             });
             clickedElement.classList.add('active');
             
-            // Scroll to top of content area (for mobile usability)
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- CLOCK AND DATE FUNCTIONALITY ---
+        // --- CLOCK AND DATE FUNCTIONALITY (Unchanged) ---
         function updateClock() {
             const now = new Date();
-            // Options for readable time and date (English locale for HH:MM:SS AM/PM)
             const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
             const dateOptions = { day: 'numeric', month: 'short', year: 'numeric' };
 
@@ -1108,40 +1019,27 @@
                 <span class="date-text" style="display: block;">${dateString}</span>
             `;
 
-            // Update all time display elements
             document.getElementById('time-display-home').innerHTML = html;
             document.getElementById('time-display-channels').innerHTML = html;
             document.getElementById('time-display-highlights').innerHTML = html;
         }
 
-
-        // --- Live Status Check Logic (uses previously set times) ---
-        // আইডি যোগ করা হয়েছে যাতে টাইম পরিবর্তন করা সহজ হয় (যেমন: '6' হল West Indies vs Indian)
+        // --- Live Status Check Logic (Unchanged) ---
         const matches = [
-            // id: '1' - ICC Champions Trophy (PAK vs NZ)
             { id: '1', start: '00:00', end: '00:00' }, 
-            // id: '2' - ICC Champions Trophy (BAN vs IND)
             { id: '2', start: '17:00', end: '23:00' }, 
-            // id: '3' - Cricket | BIG BASH LEAGUE
             { id: '3', start: '00:00', end: '00:00' }, 
-            // id: '4' - 2nd ODI | Ireland Tour Of Zimbabwe
             { id: '4', start: '00:00', end: '00:00' }, 
-            // id: '5' - Cricket / Super Smash 2024/2025
             { id: '5', start: '00:00', end: '00:00' }, 
-            // id: '6' - Cricket 🏏। West Indies vs Indian
             { id: '6', start: '00:00', end: '00:00' }, 
-            // id: '7' - Football | English Premier League
-            { id: '7', start: '06:30', end: '08:30' } // Example: Adjusted to be 'LIVE' in the morning
+            { id: '7', start: '06:30', end: '08:30' }
         ];
 
         function checkMatchStatus() {
             const currentTime = new Date();
-            // Current time in 24-hour format (HH:MM)
             const currentHourMinute = currentTime.toTimeString().slice(0, 5); 
 
             matches.forEach(match => {
-                // Check if current time is within start and end time (24-hour format comparison)
-                // Note: The comparison uses < end time, meaning it becomes 'LIVE' AT start time and stops AT end time.
                 const isLive = currentHourMinute >= match.start && currentHourMinute < match.end; 
                 
                 const timeEl = document.getElementById(`time${match.id}`);
@@ -1152,11 +1050,11 @@
                     if (isLive) {
                         timeEl.classList.add('hidden');
                         dateEl.classList.add('hidden');
-                        liveEl.classList.remove('hidden'); // Show LIVE NOW
+                        liveEl.classList.remove('hidden'); 
                     } else {
                         timeEl.classList.remove('hidden');
                         dateEl.classList.remove('hidden');
-                        liveEl.classList.add('hidden'); // Hide LIVE NOW
+                        liveEl.classList.add('hidden'); 
                     }
                 }
             });
@@ -1165,22 +1063,12 @@
         
         // Initial setup and recurring tasks
         document.addEventListener('DOMContentLoaded', () => {
-            
-            // --- VIDEO EVENT LISTENERS (HLS/Plyr events are handled inside loadVideoSource) ---
-            
-            // Initial state: Hidden
             livefyTextAnimator.style.display = 'none';
-            // -----------------------------------------------------
-
-            // Start clock update immediately and every second
             updateClock();
             setInterval(updateClock, 1000); 
-
-            // Check match status immediately and every second
             checkMatchStatus(); 
             setInterval(checkMatchStatus, 1000);
 
-            // Show Home tab on page load
             const defaultTab = document.getElementById('nav-home');
             showTab('home-section', defaultTab);
         });

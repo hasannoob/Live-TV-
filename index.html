@@ -887,27 +887,29 @@
             const isHls = videoSrc.toLowerCase().endsWith('.m3u8');
             
             if (isHls && Hls.isSupported()) {
-                // --- HLS (Adaptive Streaming) Logic (Weak Link Optimization + Codec Fix) ---
+                // --- HLS (Adaptive Streaming) Logic - NEW OPTIMIZATION ---
                 
                 hls = new Hls({
-                    // --- নতুন কোডেক সামঞ্জস্য সেটিংস (ভিডিও না দেখার সমস্যা সমাধানের জন্য) ---
-                    // এটি HLS.js-কে বলবে যে যদি HLS-এর মাধ্যমে প্লে না হয়, তাহলে ব্রাউজারের ডিকোডিং সামঞ্জস্যের জন্য 
-                    // নিম্নস্তরের বা আরও ইউনিভার্সাল কোডেক ব্যবহার করে পুনরায় চেষ্টা করো।
-                    forceKeyFrameOnDiscontinuity: true,
-                    // যদি না কাজ করে, তবে সবচেয়ে কমন কোডেকটি ট্রাই করা:
-                    lowLatencyMode: true, // লাইভ স্ট্রিমিং এ ল্যাগ কমানোর জন্য
-                    enableWorker: true, // ডিকোডিংয়ের জন্য ডেডিকেটেড থ্রেড ব্যবহার (ভিডিও পারফর্মেন্স উন্নত করে)
-                    // --------------------------------------------------------------------------
+                    // --- চূড়ান্ত আগ্রাসী কনফিগারেশন ---
                     
-                    // Aggressive ABR for weak links (আগের মতো দ্রুত বাফারিং বন্ধ করার জন্য)
-                    abrEwmaFastAveragingTime: 0.5,
-                    abrEwmaSlowAveragingTime: 1.0,
-                    maxBufferLength: 4, 
+                    // প্লেব্যাকের সময় কম বাফারিং করে দ্রুত স্টার্ট নিশ্চিত করা
+                    autoStartLoad: true, 
+                    maxBufferLength: 5, // 5 সেকেন্ডের বেশি বাফার করবে না (লাইভ ল্যাগ কমাবে)
                     maxMaxBufferLength: 10,
-                    fragLoadingMaxRetry: 20, 
-                    fragLoadingRetryDelay: 100,
+                    
+                    // নেটওয়ার্ক এরর হ্যান্ডলিং আরও বাড়ানো
+                    fragLoadingMaxRetry: 50, // 50 বার ফ্র্যাগমেন্ট লোড করার চেষ্টা করবে
+                    fragLoadingRetryDelay: 50, // মাত্র 50ms পর আবার চেষ্টা করবে
                     levelLoadingMaxRetry: 10, 
-                    startFragPrefetch: true
+                    
+                    // ডিকোডারকে দ্রুত কাজ করতে বলা
+                    lowLatencyMode: true, 
+                    enableWorker: true, 
+                    
+                    // কোডেক এরর হলে দ্রুত ডায়াগনোসিসের জন্য
+                    forceKeyFrameOnDiscontinuity: true,
+                    
+                    // --- END FINAL CONFIG ---
                 });
                 
                 hls.loadSource(videoSrc);
@@ -924,14 +926,13 @@
                         data.details === Hls.ErrorDetails.MANIFEST_PARSING_ERROR || 
                         data.details === Hls.ErrorDetails.LEVEL_LOAD_ERROR || 
                         data.details === Hls.ErrorDetails.LEVEL_LOADING_TIMEOUT ||
-                        // Media Decoded Error means codec failure (Audio only issue)
                         data.details === Hls.ErrorDetails.BUFFER_CODEC_ERROR ||
                         data.fatal) 
                     {
                         closeVideo(); // Perform full cleanup
                         showMessage(
                             "Link Failed: Try Another Server", 
-                            `'${channelName}' চ্যানেলটি লোড করতে ব্যর্থ হয়েছে। **ভিডিও কোডেক সমর্থিত নয় (শুধু অডিও)**, ডেড লিংক অথবা সার্ভার বন্ধ। অনুগ্রহ করে অন্য সার্ভার বা চ্যানেলটি ব্যবহার করুন।`
+                            `'${channelName}' চ্যানেলটি লোড করতে ব্যর্থ হয়েছে। **ভিডিও কোডেক সমর্থিত নয় (শুধু অডিও), ডেড লিংক, অথবা দুর্বল নেটওয়ার্ক**। অন্য সার্ভার বা চ্যানেল ব্যবহার করুন।`
                         );
                     }
                 });

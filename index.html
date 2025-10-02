@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live BD 24 TV By HASAN</title>
-    <!-- HLS.js লাইব্রেরি M3U8 স্ট্রিমিং-এর জন্য যোগ করা হয়েছে -->
+    <!-- HLS.js library added for M3U8 streaming -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.11"></script>
     <style>
-        /* বেস স্টাইল */
+        /* Base Styles */
         body {
             font-family: 'Arial', sans-serif;
             background-color: black;
             color: #fff;
             margin: 0;
             padding: 0;
-            /* Bottom Nav এর জন্য নীচের দিকে জায়গা রাখা হয়েছে */
+            /* Space for Bottom Nav */
             padding-bottom: 70px; 
         }
 
@@ -56,10 +56,10 @@
         .content {
             padding: 20px;
             max-width: 600px;
-            margin: 0 auto; /* কন্টেন্টকে কেন্দ্রে রাখা হয়েছে */
+            margin: 0 auto; /* Center content */
         }
 
-        /* Match Card Styles */
+        /* Card Styles */
         .match-card, .channel-card, .highlight-card, .banner {
             background-color: #222;
             border: 1px solid #00ffc8;
@@ -114,7 +114,7 @@
             border: 1px solid #c80815;
         }
 
-        /* BANNER SPECIFIC STYLES (ছোট কার্ড হিসেবে) */
+        /* BANNER SPECIFIC STYLES */
         .banner {
             padding: 0; 
             overflow: hidden; 
@@ -122,7 +122,7 @@
             cursor: default; 
             transform: none; 
             transition: none;
-            margin-top: 25px; /* কন্টেন্ট থেকে একটু বেশি স্পেস */
+            margin-top: 25px; 
         }
         
         .banner-image {
@@ -145,8 +145,21 @@
         .time { font-size: 15px; color: white; font-weight: bold; }
         .date { font-size: 10px; color: #00FF00; margin-top: 2px; }
         .match-stage { background-color: black; color: white; padding: 1px 5px; border-radius: 10px; font-size: 8px; display: inline-block; margin-top: 5px; }
-        .live-animation { color: #C80815; font-size: 15px; font-weight: bold; animation: blink 1s infinite; }
+        .live-animation { 
+            color: #C80815; 
+            font-size: 15px; 
+            font-weight: bold; 
+            /* Blinking animation for LIVE NOW */
+            animation: blink 1s infinite; 
+        }
         .hidden { display: none !important; }
+        
+        /* LIVE text blink animation */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
 
         /* Video Player Styles (existing and modified) */
         #video-player {
@@ -188,13 +201,42 @@
             height: 100%;
         }
 
+        /* Control Area (Quality + Servers) */
+        #controls-area {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+
+        /* Quality Selector Styles */
+        #quality-selector-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            color: #00ff00;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        #quality-select {
+            background-color: #222;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        /* Server Buttons Styles */
         #server-buttons {
             display: flex; 
             justify-content: center; 
-            margin-top: 20px; 
             flex-wrap: wrap; 
             gap: 10px;
-            max-width: 600px;
         }
 
         .server-button {
@@ -209,6 +251,13 @@
             transition: background-color 0.5s, transform 0.2s; 
             flex-grow: 1; 
             min-width: 100px; 
+        }
+
+        .server-button.active-server {
+            background-color: #C80815; /* Active server color */
+            color: white;
+            border: 2px solid #00ff00;
+            transform: translateY(-2px);
         }
 
         #close-btn {
@@ -246,7 +295,7 @@
             padding: 5px 10px;
         }
         .nav-item.active {
-            color: #00ff00; /* অ্যাক্টিভ ট্যাবের রঙ */
+            color: #00ff00; /* Active tab color */
         }
         .nav-item span {
             font-size: 12px;
@@ -270,14 +319,18 @@
     <!-- Content Sections -->
     <div class="content">
         
-        <!-- ১. হোম সেকশন (ম্যাচ কার্ডস) -->
+        <!-- 1. HOME SECTION (MATCH CARDS) -->
         <div id="home-section">
             
-            <h2 style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 15px;">Live Match</h2>
+            <h2 style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 15px;">Current Matches</h2>
             
             
-            <!-- Match Card 6 -->
-            <div class="match-card" onclick="playVideo('http://125.209.88.166:45793/BRN/TenSports.stream/playlist.m3u8')">
+            <!-- Match Card 6 (Afghanistan vs South Africa) - Multiple Channels -->
+            <div class="match-card" onclick="openMatchChannels([
+                {name: 'TSports Live', url: 'http://125.209.88.166:45793/BRN/TenSports.stream/playlist.m3u8'},
+                {name: 'Ten Sports (SD)', url: 'https://c4s22.vfruitfairy.com/com1/index.m3u8'},
+                {name: 'Sony Six HD', url: 'https://www.uspro.click/live.php?id=c58fd7a1e300&e=.m3u8'}
+            ])">
                 <div class="match-title">ICC Champions Trophy 2025</div>
                 <div class="team">
                     <div>
@@ -294,11 +347,14 @@
                         <div class="team-name">South Africa</div>
                     </div>
                 </div>
-                <div class="match-stage">ICC CHAMPIONS TROFY </div>
+                <div class="match-stage">ICC CHAMPIONS TROPHY | 3 Channels</div>
             </div> 
 
-            <!-- Match Card 2 -->
-            <div class="match-card" onclick="playVideo('https://cdn.hoichoi24.com/Nagorik-TV-Hoichoi24.com/tracks-v1a1/mono.ts.m3u8')">
+            <!-- Match Card 2 (BAN vs IND) - Multiple Channels -->
+            <div class="match-card" onclick="openMatchChannels([
+                {name: 'Nagorik TV HD', url: 'https://cdn.hoichoi24.com/Nagorik-TV-Hoichoi24.com/tracks-v1a1/mono.ts.m3u8'},
+                {name: 'Gazi TV (GTV)', url: 'https://linkchur.top/tv/tf/live.php?id=match-2&e=.m3u8'}
+            ])">
                 <div class="match-title">ICC Champions Trophy 2025</div>
                 <div class="team">
                     <div>
@@ -315,11 +371,13 @@
                         <div class="team-name">IND</div>
                     </div>
                 </div>
-                <div class="match-stage">Cricket</div>
+                <div class="match-stage">Cricket | 2 Channels</div>
             </div>
 
-            <!-- অন্যান্য ম্যাচ কার্ড... -->
-            <div class="match-card" onclick="playVideo('https://linkchur.top/tv/tf/live.php?id=match-2&e=.m3u8')">
+            <!-- Match Card 1 (PAK vs NZ) - Single Channel -->
+            <div class="match-card" onclick="openMatchChannels([
+                {name: 'Match Stream 1', url: 'https://linkchur.top/tv/tf/live.php?id=match-2&e=.m3u8'}
+            ])">
                 <div class="match-title">ICC Champions Trophy 2025</div>
                 <div class="team">
                     <div>
@@ -336,10 +394,13 @@
                         <div class="team-name">NZ</div>
                     </div>
                 </div>
-                <div class="match-stage">Match END</div>
+                <div class="match-stage">Match END | 1 Channel</div>
             </div>
 
-            <div class="match-card" onclick="playVideo('https://live.tsports.com/mobile_hls/tsports_live_2/playlist.m3u8')">
+            <!-- Match Card 4 (ZIM vs IRE) - Single Channel -->
+            <div class="match-card" onclick="openMatchChannels([
+                {name: 'TSports HD', url: 'https://live.tsports.com/mobile_hls/tsports_live_2/playlist.m3u8'}
+            ])">
                 <div class="match-title">2nd ODI | Ireland Tour Of Zimbabwe </div>
                 <div class="team">
                     <div>
@@ -356,11 +417,14 @@
                         <div class="team-name">IRE</div>
                     </div>
                 </div>
-                <div class="match-stage">Cricket</div>
+                <div class="match-stage">Cricket | 1 Channel</div>
             </div>
 
-            <div class="match-card" onclick="playVideo('https://besttone.online/m3u8.php/bbtsp3.m3u8')">
-                <div class="match-title">Cricket / Super Smash2024/2025</div>
+            <!-- Match Card 5 (Super Smash) - Single Channel -->
+            <div class="match-card" onclick="openMatchChannels([
+                {name: 'Super Smash Stream', url: 'https://besttone.online/m3u8.php/bbtsp3.m3u8'}
+            ])">
+                <div class="match-title">Cricket / Super Smash 2024/2025</div>
                 <div class="team">
                     <div>
                         <img src="https://upload.wikimedia.org/wikipedia/en/a/af/Dream11SuperSmashKFC.png" alt="Smash Logo">
@@ -376,10 +440,13 @@
                         <div class="team-name">Super Smash</div>
                     </div>
                 </div>
-                <div class="match-stage">Cricket</div>
+                <div class="match-stage">Cricket | 1 Channel</div>
             </div>
 
-            <div class="match-card" onclick="playVideo('https://besttone.online/m3u8.php/willowusa.m3u8')">
+            <!-- Match Card 3 (BBL) - Single Channel -->
+            <div class="match-card" onclick="openMatchChannels([
+                {name: 'Willow HD', url: 'https://besttone.online/m3u8.php/willowusa.m3u8'}
+            ])">
                 <div class="match-title">Cricket | BIG BASH LEAGUE </div>
                 <div class="team">
                     <div>
@@ -396,10 +463,13 @@
                         <div class="team-name">BBL</div>
                     </div>
                 </div>
-                <div class="match-stage">Cricket</div>
+                <div class="match-stage">Cricket | 1 Channel</div>
             </div>
 
-            <div class="match-card" onclick="playVideo('https://11.koora-live.video/hls/0/stream.m3u8')">
+            <!-- Match Card 7 (EPL) - Single Channel -->
+            <div class="match-card" onclick="openMatchChannels([
+                {name: 'Koora Live', url: 'https://11.koora-live.video/hls/0/stream.m3u8'}
+            ])">
                 <div class="match-title">Football | English Premier League </div>
                 <div class="team">
                     <div>
@@ -416,10 +486,10 @@
                         <div class="team-name">Everton</div>
                     </div>
                 </div>
-                <div class="match-stage">Football</div>
+                <div class="match-stage">Football | 1 Channel</div>
             </div>
             
-            <!-- Banner (হোম সেকশনে, নিচে) -->
+            <!-- Banner (Bottom of Home Section) -->
             <div class="banner" id="home-banner">
                 <a href="https://i.imgur.com/fHTkrwg.jpeg" target="_blank" rel="noopener noreferrer">
                     <img src="https://i.imgur.com/R8yUX5u.jpeg" alt="Home Section Banner" class="banner-image">
@@ -429,46 +499,45 @@
         </div> <!-- #home-section end -->
 
 
-        <!-- ২. স্পোর্টস চ্যানেল সেকশন -->
+        <!-- 2. SPORTS CHANNELS SECTION -->
         <div id="sports-channels-section" class="hidden">
-            <h2 style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 15px;">Live Sports Channel</h2>
+            <h2 style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 15px;">Live Sports Channels</h2>
             
-            <div class="channel-card" onclick="playVideo('http://channel-url-1.m3u8')">
+            <div class="channel-card" onclick="openMatchChannels([{name: 'Ten Sports HD', url: 'http://channel-url-1.m3u8'}])">
                 <div>
                     <h4>Ten Sports HD</h4>
-                    <p style="color:#aaa; font-size: 14px;">ক্রিকেট, ফুটবল, রেসলিং</p>
+                    <p style="color:#aaa; font-size: 14px;">Cricket, Football, Wrestling</p>
                 </div>
                 <span class="channel-icon">📺</span>
             </div>
             
-            <div class="channel-card" onclick="playVideo('http://channel-url-2.m3u8')">
+            <div class="channel-card" onclick="openMatchChannels([{name: 'TSports Live', url: 'http://channel-url-2.m3u8'}])">
                 <div>
                     <h4>TSports Live</h4>
-                    <p style="color:#aaa; font-size: 14px;">বাংলাদেশি ক্রিকেট</p>
+                    <p style="color:#aaa; font-size: 14px;">Bangladeshi Cricket</p>
                 </div>
                 <span class="channel-icon">🏏</span>
             </div>
             
-            <div class="channel-card" onclick="playVideo('http://channel-url-3.m3u8')">
+            <div class="channel-card" onclick="openMatchChannels([{name: 'Star Sports 1', url: 'http://channel-url-3.m3u8'}])">
                 <div>
                     <h4>Star Sports 1</h4>
-                    <p style="color:#aaa; font-size: 14px;">আইপিএল, ওয়ার্ল্ড কাপ</p>
+                    <p style="color:#aaa; font-size: 14px;">IPL, World Cup</p>
                 </div>
                 <span class="channel-icon">🥇</span>
             </div>
             
-             <div class="channel-card" onclick="playVideo('http://channel-url-4.m3u8')">
+             <div class="channel-card" onclick="openMatchChannels([{name: 'Sony Six HD', url: 'http://channel-url-4.m3u8'}])">
                 <div>
                     <h4>Sony Six HD</h4>
-                    <p style="color:#aaa; font-size: 14px;">ফুটবল, বাস্কেটবল</p>
+                    <p style="color:#aaa; font-size: 14px;">Football, Basketball</p>
                 </div>
                 <span class="channel-icon">⚽</span>
             </div>
 
-            <!-- Banner (স্পোর্টস চ্যানেল সেকশনে, নিচে) -->
+            <!-- Banner (Bottom of Sports Channel Section) -->
             <div class="banner" id="channels-banner">
                 <a href="https://i.imgur.com/fHTkrwg.jpeg" target="_blank" rel="noopener noreferrer">
-                    <!-- অন্য একটি মক ইমেজ ব্যবহার করা হলো -->
                     <img src="https://placehold.co/600x120/003366/ffffff?text=Ad+Space+%7C+Channel+Promo" alt="Channels Section Banner" class="banner-image">
                 </a>
             </div>
@@ -476,38 +545,37 @@
         </div> <!-- #sports-channels-section end -->
 
 
-        <!-- ৩. হাইলাইট সেকশন -->
+        <!-- 3. HIGHLIGHTS SECTION -->
         <div id="highlights-section" class="hidden">
             <h2 style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 15px;">Recent Highlights</h2>
             
-            <div class="highlight-card" onclick="playVideo('http://highlight-url-1.m3u8')">
+            <div class="highlight-card" onclick="openMatchChannels([{name: 'Highlight 1', url: 'http://highlight-url-1.m3u8'}])">
                 <img src="https://placehold.co/70x70/c80815/ffffff?text=C+vs+I" alt="Highlight 1">
                 <div class="info">
-                    <p style="font-size: 16px; font-weight: bold;">BAN vs IND: রোমাঞ্চকর শেষ ওভার</p>
-                    <p style="color:#aaa; font-size: 12px;">T20 সিরিজ | 5 মিনিট</p>
+                    <p style="font-size: 16px; font-weight: bold;">BAN vs IND: Thrilling Final Over</p>
+                    <p style="color:#aaa; font-size: 12px;">T20 Series | 5 Mins</p>
                 </div>
             </div>
             
-            <div class="highlight-card" onclick="playVideo('http://highlight-url-2.m3u8')">
+            <div class="highlight-card" onclick="openMatchChannels([{name: 'Highlight 2', url: 'http://highlight-url-2.m3u8'}])">
                  <img src="https://placehold.co/70x70/00ff00/000000?text=Goal" alt="Highlight 2">
                 <div class="info">
-                    <p style="font-size: 16px; font-weight: bold;">লিভারপুল বনাম ম্যান সিটি: সব গোল</p>
-                    <p style="color:#aaa; font-size: 12px;">EPL | 8 মিনিট</p>
+                    <p style="font-size: 16px; font-weight: bold;">Liverpool vs Man City: All Goals</p>
+                    <p style="color:#aaa; font-size: 12px;">EPL | 8 Mins</p>
                 </div>
             </div>
             
-            <div class="highlight-card" onclick="playVideo('http://highlight-url-3.m3u8')">
+            <div class="highlight-card" onclick="openMatchChannels([{name: 'Highlight 3', url: 'http://highlight-url-3.m3u8'}])">
                 <img src="https://placehold.co/70x70/ffcc00/000000?text=Wicket" alt="Highlight 3">
                 <div class="info">
-                    <p style="font-size: 16px; font-weight: bold;">সেরা ৫ উইকেট: বিগ ব্যাশ লীগ</p>
-                    <p style="color:#aaa; font-size: 12px;">BBL 2024 | 4 মিনিট</p>
+                    <p style="font-size: 16px; font-weight: bold;">Top 5 Wickets: Big Bash League</p>
+                    <p style="color:#aaa; font-size: 12px;">BBL 2024 | 4 Mins</p>
                 </div>
             </div>
 
-            <!-- Banner (হাইলাইট সেকশনে, নিচে) -->
+            <!-- Banner (Bottom of Highlights Section) -->
             <div class="banner" id="highlights-banner">
                 <a href="https://i.imgur.com/fHTkrwg.jpeg" target="_blank" rel="noopener noreferrer">
-                    <!-- অন্য একটি মক ইমেজ ব্যবহার করা হলো -->
                     <img src="https://placehold.co/600x120/660000/ffffff?text=Ad+Space+%7C+Latest+Highlight+Ad" alt="Highlights Section Banner" class="banner-image">
                 </a>
             </div>
@@ -516,7 +584,7 @@
         
     </div>
     
-    <!-- Video Player Overlay (এটি সব ট্যাবের উপরে থাকবে) -->
+    <!-- Video Player Overlay -->
     <div id="video-player">
         <button id="close-btn" onclick="closeVideo()">❌</button>
         <div id="video-container-wrapper">
@@ -525,11 +593,20 @@
             </div>
         </div>
         
-        <!-- Server Buttons -->
-        <div id="server-buttons">
-            <button class="server-button" onclick="selectServer('https://c4s22.vfruitfairy.com/com1/index.m3u8')">PTV 1</button>
-            <button class="server-button" onclick="selectServer('https://c4s22.vfruitfairy.com/com1/tracks-v1a1/mono.m3u8')">PTV 2</button>
-            <button class="server-button" onclick="selectServer('https://www.uspro.click/live.php?id=c58fd7a1e300&e=.m3u8')">Toffee</button>
+        <div id="controls-area">
+            <!-- 1. Quality Selector -->
+            <div id="quality-selector-container">
+                <label for="quality-select">Video Quality:</label>
+                <select id="quality-select" onchange="changeQuality(this.value)">
+                    <option value="-1">Auto (Adaptive)</option>
+                    <!-- Quality options will be populated by JavaScript -->
+                </select>
+            </div>
+            
+            <!-- 2. Server Buttons (Dynamically Populated) -->
+            <div id="server-buttons">
+                <!-- Dynamic buttons go here -->
+            </div>
         </div>
     </div>
     
@@ -538,11 +615,11 @@
     <nav class="bottom-nav">
         <div id="nav-home" class="nav-item active" onclick="showTab('home-section', this)">
             <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
-            <span>Event</span>
+            <span>Home</span>
         </div>
         <div id="nav-channels" class="nav-item" onclick="showTab('sports-channels-section', this)">
             <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"></path></svg>
-            <span>Sports TV</span>
+            <span>Sports Channels</span>
         </div>
         <div id="nav-highlights" class="nav-item" onclick="showTab('highlights-section', this)">
             <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 13c-2.34 0-4.59.88-6.23 2.52-1.64 1.64-2.52 3.88-2.52 6.23H5V3h14v10.5h-1.5zm-5.5 3.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5z"></path></svg>
@@ -552,35 +629,95 @@
     
     
 <script>    
-        // HLS.js গ্লোবাল ভেরিয়েবল
+        // HLS.js Global Variables
         let hls = null; 
         const video = document.getElementById('video');
+        const qualitySelect = document.getElementById('quality-select');
+        const serverButtonsContainer = document.getElementById('server-buttons');
         const allSections = document.querySelectorAll('.content > div');
         const navItems = document.querySelectorAll('.nav-item');
         
         /**
-         * M3U8 ভিডিও স্ট্রিমিং প্লে করার ফাংশন
+         * Populates the video quality selector based on HLS levels.
+         */
+        function populateQualitySelector() {
+            // Clear previous options
+            qualitySelect.innerHTML = '';
+            
+            // 1. Add Auto option (HLS.js uses -1 for adaptive/auto)
+            const autoOption = new Option('Auto (Adaptive)', -1);
+            qualitySelect.add(autoOption);
+            
+            if (hls && hls.levels) {
+                // 2. Add manual options
+                hls.levels.forEach((level, index) => {
+                    const resolution = level.height ? `${level.height}p` : 'Unknown';
+                    // Convert bitrate from bits/s to kbps
+                    const bitrate = level.bitrate ? ` (${Math.round(level.bitrate / 1000)}kbps)` : '';
+                    const option = new Option(resolution + bitrate, index);
+                    qualitySelect.add(option);
+                });
+            }
+            // Set the current selection based on the current level
+            qualitySelect.value = hls ? hls.currentLevel : -1;
+        }
+
+        /**
+         * Changes the HLS playback quality level.
+         * @param {string} index - The index of the HLS level, or -1 for auto.
+         */
+        function changeQuality(index) {
+            if (hls) {
+                hls.currentLevel = parseInt(index, 10);
+            }
+        }
+        
+        /**
+         * Function to load and play M3U8 video stream
          */
         function loadVideoSource(videoSrc) {
             if (!videoSrc) return;
+            console.log('Attempting to load video source:', videoSrc);
 
-            // যদি আগের কোনো HLS.js ইনস্ট্যান্স থাকে, তবে সেটি বন্ধ করা
+            // Destroy previous HLS.js instance if exists
             if (hls) {
                 hls.destroy();
                 hls = null;
             }
+            
+            // Reset video source before loading new stream
+            video.removeAttribute('src'); 
+            video.load(); 
+            // Clear quality selector until new manifest is parsed
+            qualitySelect.innerHTML = '<option value="-1">Auto (Adaptive)</option>';
 
-            // HLS.js ব্যবহার করে প্লেব্যাক শুরু করা
+
+            // Start playback using HLS.js
             if (Hls.isSupported()) {
-                hls = new Hls();
+                hls = new Hls({
+                    // Configure HLS.js for better low-bandwidth performance (optional, but good practice)
+                    // maxBufferLength: 30, // Max video buffer in seconds
+                    // maxMaxBufferLength: 60, // Max buffer size (unlimited by default)
+                    // lowBufferWatchdog: 5, // time in seconds hls.js will wait before retrying to load a fragment
+                });
                 hls.loadSource(videoSrc);
                 hls.attachMedia(video);
+
                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    populateQualitySelector(); // Populate quality options after manifest is parsed
                     video.play().catch(e => console.log("Video auto-play blocked:", e));
                 });
+                
+                hls.on(Hls.Events.LEVEL_SWITCHED, function(event, data) {
+                    // Update selector to reflect the actual switched level
+                    qualitySelect.value = data.level; 
+                });
+
                 hls.on(Hls.Events.ERROR, function(event, data) {
+                    console.error('HLS Error:', data.details);
                     if (data.fatal) {
                         console.error('HLS Fatal Error, falling back to native:', data);
+                        // Fallback to native video playback if HLS fails critically
                         video.src = videoSrc;
                         video.load();
                         video.play().catch(e => console.log("Native video play blocked:", e));
@@ -588,27 +725,66 @@
                 });
 
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Safari/iOS এর জন্য নেটিভ প্লেব্যাক
+                // Native playback for Safari/iOS
                 video.src = videoSrc;
                 video.load();
                 video.play().catch(e => console.log("Native video play blocked:", e));
             } else {
                 console.error('HLS or Native M3U8 Playback not supported on this browser.');
+                // Optionally show a message box here
             }
         }
         
-        // --- ভিডিও প্লে ফাংশন ---
-        function playVideo(videoSrc) {
+        /**
+         * Generates server buttons dynamically and starts playback on the first server.
+         * @param {Array<Object>} channelsData - Array of {name, url} objects for the match channels.
+         */
+        function openMatchChannels(channelsData) {
             document.getElementById('video-player').style.display = 'flex';
-            loadVideoSource(videoSrc);
+            serverButtonsContainer.innerHTML = ''; // Clear existing buttons
+
+            if (!channelsData || channelsData.length === 0) {
+                console.error("No channels provided for this match.");
+                // Load a blank/error screen or placeholder if no channels are available
+                loadVideoSource(''); 
+                return;
+            }
+
+            // Generate buttons
+            channelsData.forEach((channel, index) => {
+                const button = document.createElement('button');
+                button.className = 'server-button';
+                button.textContent = channel.name;
+                button.onclick = () => selectServer(channel.url, button);
+                serverButtonsContainer.appendChild(button);
+            });
+
+            // Automatically start the first channel
+            const firstButton = serverButtonsContainer.querySelector('.server-button');
+            if (firstButton) {
+                selectServer(channelsData[0].url, firstButton);
+            }
         }
 
-        // --- সার্ভার পরিবর্তন ফাংশন ---
-        function selectServer(serverSrc) {
+
+        /**
+         * Selects a new server/channel and starts playback.
+         * @param {string} serverSrc - The M3U8 URL.
+         * @param {HTMLElement} clickedButton - The button element that was clicked.
+         */
+        function selectServer(serverSrc, clickedButton) {
+            // Highlight the active button
+            document.querySelectorAll('.server-button').forEach(btn => {
+                btn.classList.remove('active-server');
+            });
+            if (clickedButton) {
+                clickedButton.classList.add('active-server');
+            }
+            
             loadVideoSource(serverSrc);
         }
 
-        // --- ভিডিও বন্ধ করার ফাংশন ---
+        // --- Close Video Function ---
         function closeVideo() {
             document.getElementById('video-player').style.display = 'none';
             if (hls) {
@@ -618,31 +794,34 @@
             video.pause();
             video.removeAttribute('src'); 
             video.load();
+            // Clear quality and server options upon closing
+            qualitySelect.innerHTML = '<option value="-1">Auto (Adaptive)</option>';
+            serverButtonsContainer.innerHTML = '';
         }
 
-        // --- ট্যাব সুইচিং লজিক ---
+        // --- Tab Switching Logic ---
         function showTab(sectionIdToShow, clickedElement) {
-            // ১. সব সেকশন লুকানো
+            // 1. Hide all sections
             allSections.forEach(section => {
                 section.classList.add('hidden');
             });
 
-            // ২. নির্দিষ্ট সেকশন দেখানো
+            // 2. Show the specific section
             document.getElementById(sectionIdToShow).classList.remove('hidden');
 
-            // ৩. নেভিগেশন স্টাইল আপডেট করা
+            // 3. Update navigation style
             navItems.forEach(item => {
                 item.classList.remove('active');
             });
             clickedElement.classList.add('active');
             
-            // নতুন ট্যাব লোড হওয়ার পর স্ক্রল টপে আনা
+            // Scroll to top of content area
             document.querySelector('.content').scrollTop = 0;
         }
 
 
-        // --- লাইভ স্ট্যাটাস চেক লজিক (আপনার পূর্বের লজিক) ---
-        // ব্যবহৃত ম্যাচ টাইম ভেরিয়েবল (প্রয়োজনে এগুলি আপডেট করতে পারেন)
+        // --- Live Status Check Logic (uses previously set times) ---
+        // Match time variables (Can be updated as needed)
         const match1StartTime = '03:00'; 
         const match1EndTime = '17:20';   
         const match2StartTime = '00:00'; 
@@ -660,6 +839,7 @@
 
         function checkMatchStatus() {
             const currentTime = new Date();
+            // Current time in 24-hour format (HH:MM)
             const currentHourMinute = currentTime.toTimeString().slice(0, 5); 
 
             const matches = [
@@ -673,6 +853,7 @@
             ];
 
             matches.forEach(match => {
+                // Check if current time is within start and end time
                 const isLive = currentHourMinute >= match.start && currentHourMinute <= match.end;
                 
                 const timeEl = document.getElementById(`time${match.id}`);
@@ -683,20 +864,20 @@
                     if (isLive) {
                         timeEl.classList.add('hidden');
                         dateEl.classList.add('hidden');
-                        liveEl.classList.remove('hidden');
+                        liveEl.classList.remove('hidden'); // Show LIVE NOW
                     } else {
                         timeEl.classList.remove('hidden');
                         dateEl.classList.remove('hidden');
-                        liveEl.classList.add('hidden');
+                        liveEl.classList.add('hidden'); // Hide LIVE NOW
                     }
                 }
             });
         }
      
-        // প্রতি ১ সেকেন্ডে চেক করা হবে ম্যাচের স্ট্যাটাস
+        // Check match status every 1 second
         setInterval(checkMatchStatus, 1000);
         
-        // অ্যাপ্লিকেশন লোড হওয়ার পর ডিফল্টভাবে হোম ট্যাব দেখানো
+        // Show Home tab on page load
         document.addEventListener('DOMContentLoaded', () => {
             checkMatchStatus(); 
             const defaultTab = document.getElementById('nav-home');

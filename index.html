@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live BD 24 TV By HASAN</title>
-    <!-- HLS.js library added for M3U8 streaming -->
+    <title>Livefy TV (English Version)</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.11"></script>
     <style>
-        /* Base Styles */
+        /* Base Styles (Tailwind like aesthetic) */
         body {
             font-family: 'Arial', sans-serif;
             background-color: black;
@@ -16,28 +15,35 @@
             padding: 0;
             /* Space for Bottom Nav */
             padding-bottom: 70px; 
+            overflow-x: hidden; /* Prevent horizontal scroll on mobile */
         }
 
-        /* Toolbar styling */
-        .toolbar {
-            display: flex;
-            align-items: center;
-            background-color: #111;
-            padding: 10px;
-            transition: opacity 0.3s ease;
+        /* --- HEADER STYLE --- */
+        .main-header {
+            background-color: #C80815; /* Red background to stand out */
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 900; /* Extra bold */
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 0; /* Remove gap before welcome box */
         }
+        /* --- END HEADER STYLE --- */
 
         /* Welcome text box styling */
         .welcome-box {
             background-color: #333;
             padding: 5px;
             border: 2px solid Red;
-            margin-top: 15px;
+            margin-top: 5px; 
             overflow: hidden;
             position: relative;
         }
 
-        /* Animated title style */
+        /* Animated title style (Marquee) */
         .welcome-text {
             display: inline-block;
             white-space: nowrap;
@@ -54,10 +60,43 @@
         }
 
         .content {
-            padding: 20px;
+            padding: 10px; /* Reduced padding for mobile */
             max-width: 600px;
             margin: 0 auto; /* Center content */
+            padding-top: 20px;
         }
+        
+        /* --- HEADER AND TIME STYLES (For Clock) --- */
+        .section-header {
+            display: flex;
+            justify-content: space-between; /* Space out title and time */
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #444; /* Separator */
+        }
+        .section-header h2 {
+            font-size: 22px; 
+            font-weight: bold; 
+            color: white; 
+            margin: 0; /* Remove default margin */
+        }
+        .datetime-box {
+            background-color: #C80815; /* Red color for visibility */
+            color: white;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: right;
+            line-height: 1.2;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            min-width: 90px;
+        }
+        .datetime-box .date-text {
+            color: #ffd700; /* Yellow for date */
+        }
+        /* --- END CLOCK STYLES --- */
 
         /* Card Styles */
         .match-card, .channel-card, .highlight-card, .banner {
@@ -136,7 +175,7 @@
              transform: none; 
         }
         
-        /* Match Info Styles (existing) */
+        /* Match Info Styles */
         .match-title { background-color: #000; color: #fff; display: inline-block; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-bottom: 5px; }
         .team { display: flex; justify-content: space-between; align-items: center; margin: 5px 0; }
         .team img { width: 30px; height: 30px; border-radius: 50%; border: 1px solid red; }
@@ -161,7 +200,7 @@
         }
 
 
-        /* Video Player Styles (existing and modified) */
+        /* Video Player Styles */
         #video-player {
             display: none; 
             position: fixed; 
@@ -174,8 +213,9 @@
             justify-content: center; 
             align-items: center; 
             flex-direction: column; 
-            padding: 20px; 
+            padding: 10px; /* Adjusted padding */
             box-sizing: border-box;
+            overflow-y: auto; /* Allow scrolling if content is too tall */
         }
         
         #video-container-wrapper {
@@ -200,12 +240,89 @@
             width: 100%; 
             height: 100%;
         }
+        
+        /* --- LIVEFY TV Text Styles (Combined for Loading and Watermark) --- */
+        #video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Make overlay transparent, it's just a container */
+            background-color: transparent; 
+            z-index: 50; 
+            pointer-events: none; /* Allows clicks to pass through */
+        }
+        
+        /* The single element used for both loading and watermark */
+        #livefy-text-animator {
+            position: absolute;
+            bottom: 5px; /* Bottom right corner */
+            right: 5px;
+            color: #00ff00; /* Green color (Watermark color) */
+            font-size: 10px; 
+            font-weight: bold;
+            opacity: 0.7; 
+            z-index: 60; 
+            background-color: rgba(0, 0, 0, 0.5); /* Background for readability */
+            padding: 2px 4px;
+            border-radius: 3px;
+            
+            /* Default animation: blinking (used when video is PLAYING) */
+            animation: watermark-blink 5s infinite; 
+            display: none; /* Hidden by default */
+        }
+
+        /* Loading animation (More noticeable pulsing, used when video is WAITING/LOADING) */
+        .is-loading {
+            color: #C80815; /* Red for loading to stand out */
+            font-size: 12px; /* Slightly larger for loading */
+            padding: 4px 6px;
+            animation: pulse 1s infinite; 
+        }
+
+        /* Loading pulse animation */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Watermark animation keyframes (used when video is PLAYING) */
+        @keyframes watermark-blink {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.4; }
+        }
+        /* --- END OF LIVEFY TV LOADING/WATERMARK STYLES --- */
+
+
+        /* Error Message Box Styles */
+        #error-message-box {
+            background-color: #333;
+            border: 2px solid red;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 95%;
+            margin-top: 20px;
+            display: none; /* Hidden by default */
+        }
+        #error-title {
+            color: red;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        #error-text {
+            color: white;
+            font-size: 14px;
+        }
 
         /* Control Area (Quality + Servers) */
         #controls-area {
             width: 100%;
             max-width: 600px;
             margin-top: 20px;
+            padding-bottom: 10px;
         }
 
         /* Quality Selector Styles */
@@ -249,8 +366,9 @@
             font-weight: bold;
             cursor: pointer; 
             transition: background-color 0.5s, transform 0.2s; 
-            flex-grow: 1; 
-            min-width: 100px; 
+            flex: 1 1 calc(50% - 10px); /* Responsive button size */
+            box-sizing: border-box;
+            max-width: 250px;
         }
 
         .server-button.active-server {
@@ -311,77 +429,56 @@
 </head>
 <body>
 
-    <!-- Welcome Text -->
+    <header class="main-header">
+        LIVEFY TV
+    </header>
+
     <div class="welcome-box">
-        <div class="welcome-text">Welcome to LIVE BD 24 App! Enjoy Live Matches .....Powered By Live BD 24. visit our website. www.livebd24.xyz</div>
+        <div class="welcome-text">Welcome! Watch live matches. The video may take 10-15 seconds to open (depending on internet speed). If you encounter any issues, please try another server.</div>
     </div>
 
-    <!-- Content Sections -->
     <div class="content">
         
-        <!-- 1. HOME SECTION (MATCH CARDS) -->
         <div id="home-section">
             
-            <h2 style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 15px;">Current Matches</h2>
+            <div class="section-header">
+                <h2>Live Event</h2>
+                <div id="time-display-home" class="datetime-box"></div>
+            </div>
             
             
-            <!-- Match Card 6 (Afghanistan vs South Africa) - Multiple Channels -->
-            <div class="match-card" onclick="openMatchChannels([
-                {name: 'TSports Live', url: 'http://125.209.88.166:45793/BRN/TenSports.stream/playlist.m3u8'},
-                {name: 'Ten Sports (SD)', url: 'https://c4s22.vfruitfairy.com/com1/index.m3u8'},
-                {name: 'Sony Six HD', url: 'https://www.uspro.click/live.php?id=c58fd7a1e300&e=.m3u8'}
-            ])">
-                <div class="match-title">ICC Champions Trophy 2025</div>
-                <div class="team">
-                    <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_the_Taliban.svg" alt="Afghanistan Flag">
-                        <div class="team-name">Afghanistan</div>
-                    </div>
-                    <div class="match-info">
-                        <div class="time" id="time6">03:00 AM</div> 
-                        <div class="date" id="date6">21/02/2025</div> 
-                        <div id="live6" class="live-animation hidden">LIVE NOW</div> 
-                    </div>
-                    <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/Flag_of_South_Africa.svg" alt="South Africa Flag">
-                        <div class="team-name">South Africa</div>
-                    </div>
-                </div>
-                <div class="match-stage">ICC CHAMPIONS TROPHY | 3 Channels</div>
-            </div> 
+            
 
-            <!-- Match Card 2 (BAN vs IND) - Multiple Channels -->
-            <div class="match-card" onclick="openMatchChannels([
-                {name: 'Nagorik TV HD', url: 'https://cdn.hoichoi24.com/Nagorik-TV-Hoichoi24.com/tracks-v1a1/mono.ts.m3u8'},
-                {name: 'Gazi TV (GTV)', url: 'https://linkchur.top/tv/tf/live.php?id=match-2&e=.m3u8'}
+            <div id="match-card-2" class="match-card" onclick="openMatchChannels([
+                {name: 'WOLLOW', url: 'https://d1.merichunidya.com:1686/hls/willowusa.m3u8?md5=Musyg0ACa5floOv6OgVdWw&expires=1759413222'},
+                {name: 'Gazi TV (GTV)', url: 'http://stvlive.net:8080/channeli/index.m3u8'}
             ])">
-                <div class="match-title">ICC Champions Trophy 2025</div>
+                <div class="match-title">WOMAN|ICC World Cup 2025</div>
                 <div class="team">
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Flag_of_Bangladesh.svg" alt="Bangladesh Flag">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Flag_of_Bangladesh.svg" alt="Bangladesh Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=BAN';">
                         <div class="team-name">BAN</div>
                     </div>
                     <div class="match-info">
-                        <div class="time" id="time2">03:00 PM</div> 
-                        <div class="date" id="date2">20/02/2025</div> 
+                        <div class="time" id="time2">12:00 AM</div> 
+                        <div id="date2">02/10/2025</div> 
                         <div id="live2" class="live-animation hidden">LIVE NOW</div> 
                     </div>
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/en/4/41/Flag_of_India.svg" alt="India Flag">
-                        <div class="team-name">IND</div>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Flag_of_Pakistan.svg" alt="India Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=IND';">
+                        <div class="team-name">PAK</div>
                     </div>
                 </div>
                 <div class="match-stage">Cricket | 2 Channels</div>
             </div>
 
-            <!-- Match Card 1 (PAK vs NZ) - Single Channel -->
-            <div class="match-card" onclick="openMatchChannels([
+            <div id="match-card-1" class="match-card" onclick="openMatchChannels([
                 {name: 'Match Stream 1', url: 'https://linkchur.top/tv/tf/live.php?id=match-2&e=.m3u8'}
             ])">
                 <div class="match-title">ICC Champions Trophy 2025</div>
                 <div class="team">
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Flag_of_Pakistan.svg" alt="Pakistan Flag">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Flag_of_Pakistan.svg" alt="Pakistan Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=PAK';">
                         <div class="team-name">PAK</div>
                     </div>
                     <div class="match-info">
@@ -390,21 +487,20 @@
                         <div id="live1" class="live-animation hidden">LIVE NOW</div> 
                     </div>
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Flag_of_New_Zealand.svg" alt="New Zealand Flag">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Flag_of_New_Zealand.svg" alt="New Zealand Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=NZ';">
                         <div class="team-name">NZ</div>
                     </div>
                 </div>
                 <div class="match-stage">Match END | 1 Channel</div>
             </div>
 
-            <!-- Match Card 4 (ZIM vs IRE) - Single Channel -->
-            <div class="match-card" onclick="openMatchChannels([
+            <div id="match-card-4" class="match-card" onclick="openMatchChannels([
                 {name: 'TSports HD', url: 'https://live.tsports.com/mobile_hls/tsports_live_2/playlist.m3u8'}
             ])">
                 <div class="match-title">2nd ODI | Ireland Tour Of Zimbabwe </div>
                 <div class="team">
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/Flag_of_Zimbabwe.svg" alt="Zimbabwe Flag">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/Flag_of_Zimbabwe.svg" alt="Zimbabwe Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=ZIM';">
                         <div class="team-name">ZIM</div>
                     </div>
                     <div class="match-info">
@@ -413,21 +509,20 @@
                         <div id="live4" class="live-animation hidden">LIVE NOW</div> 
                     </div>
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Flag_of_Ireland.svg" alt="Ireland Flag">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Flag_of_Ireland.svg" alt="Ireland Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=IRE';">
                         <div class="team-name">IRE</div>
                     </div>
                 </div>
                 <div class="match-stage">Cricket | 1 Channel</div>
             </div>
 
-            <!-- Match Card 5 (Super Smash) - Single Channel -->
-            <div class="match-card" onclick="openMatchChannels([
+            <div id="match-card-5" class="match-card" onclick="openMatchChannels([
                 {name: 'Super Smash Stream', url: 'https://besttone.online/m3u8.php/bbtsp3.m3u8'}
             ])">
                 <div class="match-title">Cricket / Super Smash 2024/2025</div>
                 <div class="team">
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/en/a/af/Dream11SuperSmashKFC.png" alt="Smash Logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/a/af/Dream11SuperSmashKFC.png" alt="Smash Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=Smash';">
                         <div class="team-name">Super Smash</div>
                     </div>
                     <div class="match-info">
@@ -436,21 +531,20 @@
                         <div id="live5" class="live-animation hidden">LIVE NOW</div> 
                     </div>
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/en/a/af/Dream11SuperSmashKFC.png" alt="Smash Logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/a/af/Dream11SuperSmashKFC.png" alt="Smash Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=Smash';">
                         <div class="team-name">Super Smash</div>
                     </div>
                 </div>
                 <div class="match-stage">Cricket | 1 Channel</div>
             </div>
 
-            <!-- Match Card 3 (BBL) - Single Channel -->
-            <div class="match-card" onclick="openMatchChannels([
+            <div id="match-card-3" class="match-card" onclick="openMatchChannels([
                 {name: 'Willow HD', url: 'https://besttone.online/m3u8.php/willowusa.m3u8'}
             ])">
                 <div class="match-title">Cricket | BIG BASH LEAGUE </div>
                 <div class="team">
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/en/c/c0/Big_Bash_League_%28logo%29.png" alt="BBL Logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/c/c0/Big_Bash_League_%28logo%29.png" alt="BBL Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=BBL';">
                         <div class="team-name">BBL</div>
                     </div>
                     <div class="match-info">
@@ -459,21 +553,20 @@
                         <div id="live3" class="live-animation hidden">LIVE NOW</div> 
                     </div>
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/en/c/c0/Big_Bash_League_%28logo%29.png" alt="BBL Logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/c/c0/Big_Bash_League_%28logo%29.png" alt="BBL Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=BBL';">
                         <div class="team-name">BBL</div>
                     </div>
                 </div>
                 <div class="match-stage">Cricket | 1 Channel</div>
             </div>
 
-            <!-- Match Card 7 (EPL) - Single Channel -->
-            <div class="match-card" onclick="openMatchChannels([
+            <div id="match-card-7" class="match-card" onclick="openMatchChannels([
                 {name: 'Koora Live', url: 'https://11.koora-live.video/hls/0/stream.m3u8'}
             ])">
                 <div class="match-title">Football | English Premier League </div>
                 <div class="team">
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" alt="Man City Logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" alt="Man City Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=MC';">
                         <div class="team-name">Man City</div>
                     </div>
                     <div class="match-info">
@@ -482,36 +575,87 @@
                         <div id="live7" class="live-animation hidden">LIVE NOW</div> 
                     </div>
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/en/7/7c/Everton_FC_logo.svg" alt="Everton Logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/7/7c/Everton_FC_logo.svg" alt="Everton Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=EV';">
                         <div class="team-name">Everton</div>
                     </div>
                 </div>
                 <div class="match-stage">Football | 1 Channel</div>
             </div>
+
+             <div id="match-card-6" class="match-card" onclick="openMatchChannels([
+                {name: 'Star Sports 1', url: 'https://live.dinesh29.com.np/stream/jiotvplus/starsportshindi1/master.m3u8'},
+                {name: 'Sony Sports 1', url: 'https://globalplay.live/sliv/live.php?id=6ea95e&format=.m3u8'},
+              {name: 'Star Sports Khel', url: 'https://live.dinesh29.com.np/stream/jiotv/starsportskhel/stream_0.m3u8'},
+                {name: 'Sony 5 HD', url: 'https://globalplay.live/sliv/live.php?id=994200&format=.m3u8'}
+            ])">
+                <div class="match-title">Cricket 🏏। West Indies vs Indian</div>
+                <div class="team">
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/9/9b/Cricket_West_Indies_Logo_2017.png" alt="West Indies Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=WI';">
+                        <div class="team-name">WI</div>
+                    </div>
+                    <div class="match-info">
+                        <div class="time" id="time6">10:00 AM</div> 
+                        <div class="date" id="date6">02/10/2025</div> 
+                        <div id="live6" class="live-animation hidden">LIVE NOW</div> 
+                    </div>
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/4/41/Flag_of_India.svg" alt="India Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=IND';">
+                        <div class="team-name">IND</div>
+                    </div>
+                </div>
+                <div class="match-stage">Match End</div>
+            </div> 
             
-            <!-- Banner (Bottom of Home Section) -->
             <div class="banner" id="home-banner">
-                <a href="https://i.imgur.com/fHTkrwg.jpeg" target="_blank" rel="noopener noreferrer">
-                    <img src="https://i.imgur.com/R8yUX5u.jpeg" alt="Home Section Banner" class="banner-image">
+                <a href="https://www.revenuecpmgate.com/p3zdd3e2?key=daa29b7514ba8b9cd04e286e56b7e484" target="_blank" rel="noopener noreferrer">
+                    <img src="https://i.ibb.co.com/3yRrLxfK/20251002-090751.jpg" alt="Home Section Banner" class="banner-image" onerror="this.onerror=null; this.src='https://placehold.co/600x100/C80815/ffffff?text=LIVEFY+AD+SPACE';">
                 </a>
             </div>
 
-        </div> <!-- #home-section end -->
+           
 
-
-        <!-- 2. SPORTS CHANNELS SECTION -->
+        </div> 
+        
         <div id="sports-channels-section" class="hidden">
-            <h2 style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 15px;">Live Sports Channels</h2>
+            <div class="section-header">
+                <h2>Live TV Channels</h2>
+                <div id="time-display-channels" class="datetime-box"></div>
+            </div>
             
-            <div class="channel-card" onclick="openMatchChannels([{name: 'Ten Sports HD', url: 'http://channel-url-1.m3u8'}])">
+            <div class="channel-card" onclick="openMatchChannels([{name: 'Color HD', url: 'https://live.dinesh29.com.np/stream/jiotvplus/colorshd/master.m3u8'}])">
                 <div>
-                    <h4>Ten Sports HD</h4>
-                    <p style="color:#aaa; font-size: 14px;">Cricket, Football, Wrestling</p>
+                    <h4>Color HD</h4>
+                    <p style="color:#aaa; font-size: 14px;">News, Entertainment </p>
+                </div>
+                <span class="channel-icon">📺</span>
+            </div>
+
+            <div class="channel-card" onclick="openMatchChannels([{name: 'Star Gold HD', url: 'https://live.dinesh29.com.np/stream/jiotvplus/stargoldhd/master.m3u8'}])">
+                <div>
+                    <h4>Star Gold HD</h4>
+                    <p style="color:#aaa; font-size: 14px;">News, Entertainment </p>
+                </div>
+                <span class="channel-icon">📺</span>
+            </div>
+
+            <div class="channel-card" onclick="openMatchChannels([{name: 'Star Jalsha HD', url: 'https://live.dinesh29.com.np/stream/jiotvplus/starjalshahd/master.m3u8'}])">
+                <div>
+                    <h4>Star Jalsha HD</h4>
+                    <p style="color:#aaa; font-size: 14px;">News, Entertainment </p>
                 </div>
                 <span class="channel-icon">📺</span>
             </div>
             
-            <div class="channel-card" onclick="openMatchChannels([{name: 'TSports Live', url: 'http://channel-url-2.m3u8'}])">
+            <div class="channel-card" onclick="openMatchChannels([{name: 'Star Movies', url: 'https://live.dinesh29.com.np/stream/jiotvplus/starmovies/master.m3u8'}])">
+                <div>
+                    <h4>Star Movies</h4>
+                    <p style="color:#aaa; font-size: 14px;">News, Entertainment </p>
+                </div>
+                <span class="channel-icon">📺</span>
+            </div>
+
+            <div class="channel-card" onclick="openMatchChannels([{name: 'TSports Live', url: 'https://globalplay.live/sliv/live.php?id=6ea95e&format=.m3u8'}])">
                 <div>
                     <h4>TSports Live</h4>
                     <p style="color:#aaa; font-size: 14px;">Bangladeshi Cricket</p>
@@ -519,7 +663,7 @@
                 <span class="channel-icon">🏏</span>
             </div>
             
-            <div class="channel-card" onclick="openMatchChannels([{name: 'Star Sports 1', url: 'http://channel-url-3.m3u8'}])">
+            <div class="channel-card" onclick="openMatchChannels([{name: 'Star Sports 1', url: 'https://globalplay.live/sliv/live.php?id=6ea95e&format=.m3u8'}])">
                 <div>
                     <h4>Star Sports 1</h4>
                     <p style="color:#aaa; font-size: 14px;">IPL, World Cup</p>
@@ -527,7 +671,7 @@
                 <span class="channel-icon">🥇</span>
             </div>
             
-             <div class="channel-card" onclick="openMatchChannels([{name: 'Sony Six HD', url: 'http://channel-url-4.m3u8'}])">
+             <div class="channel-card" onclick="openMatchChannels([{name: 'Sony Six HD', url: 'https://globalplay.live/sliv/live.php?id=6ea95e&format=.m3u8'}])">
                 <div>
                     <h4>Sony Six HD</h4>
                     <p style="color:#aaa; font-size: 14px;">Football, Basketball</p>
@@ -535,21 +679,21 @@
                 <span class="channel-icon">⚽</span>
             </div>
 
-            <!-- Banner (Bottom of Sports Channel Section) -->
             <div class="banner" id="channels-banner">
-                <a href="https://i.imgur.com/fHTkrwg.jpeg" target="_blank" rel="noopener noreferrer">
-                    <img src="https://placehold.co/600x120/003366/ffffff?text=Ad+Space+%7C+Channel+Promo" alt="Channels Section Banner" class="banner-image">
+                <a href="https://www.revenuecpmgate.com/c7dib9b5v?key=30b9b6d1bac3403228df62e5b4c6a2c3" target="_blank" rel="noopener noreferrer">
+                    <img src="https://i.ibb.co.com/3yRrLxfK/20251002-090751.jpg" alt="Channels Section Banner" class="banner-image" onerror="this.onerror=null; this.src='https://placehold.co/600x100/00ff00/000000?text=SPORTS+AD+SPACE';">
                 </a>
             </div>
             
-        </div> <!-- #sports-channels-section end -->
-
-
-        <!-- 3. HIGHLIGHTS SECTION -->
+        </div> 
+        
         <div id="highlights-section" class="hidden">
-            <h2 style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 15px;">Recent Highlights</h2>
+            <div class="section-header">
+                <h2>Recent Highlights</h2>
+                <div id="time-display-highlights" class="datetime-box"></div>
+            </div>
             
-            <div class="highlight-card" onclick="openMatchChannels([{name: 'Highlight 1', url: 'http://highlight-url-1.m3u8'}])">
+            <div class="highlight-card" onclick="openMatchChannels([{name: 'Highlight 1', url: 'https://globalplay.live/sliv/live.php?id=6ea95e&format=.m3u8'}])">
                 <img src="https://placehold.co/70x70/c80815/ffffff?text=C+vs+I" alt="Highlight 1">
                 <div class="info">
                     <p style="font-size: 16px; font-weight: bold;">BAN vs IND: Thrilling Final Over</p>
@@ -557,7 +701,7 @@
                 </div>
             </div>
             
-            <div class="highlight-card" onclick="openMatchChannels([{name: 'Highlight 2', url: 'http://highlight-url-2.m3u8'}])">
+            <div class="highlight-card" onclick="openMatchChannels([{name: 'Highlight 2', url: 'https://youtu.be/ZfUmm88frRY?si=g3y4wErtMtiAGwUt'}])">
                  <img src="https://placehold.co/70x70/00ff00/000000?text=Goal" alt="Highlight 2">
                 <div class="info">
                     <p style="font-size: 16px; font-weight: bold;">Liverpool vs Man City: All Goals</p>
@@ -565,7 +709,7 @@
                 </div>
             </div>
             
-            <div class="highlight-card" onclick="openMatchChannels([{name: 'Highlight 3', url: 'http://highlight-url-3.m3u8'}])">
+            <div class="highlight-card" onclick="openMatchChannels([{name: 'Highlight 3', url: 'https://globalplay.live/sliv/live.php?id=6ea95e&format=.m3u8'}])">
                 <img src="https://placehold.co/70x70/ffcc00/000000?text=Wicket" alt="Highlight 3">
                 <div class="info">
                     <p style="font-size: 16px; font-weight: bold;">Top 5 Wickets: Big Bash League</p>
@@ -573,45 +717,48 @@
                 </div>
             </div>
 
-            <!-- Banner (Bottom of Highlights Section) -->
             <div class="banner" id="highlights-banner">
-                <a href="https://i.imgur.com/fHTkrwg.jpeg" target="_blank" rel="noopener noreferrer">
-                    <img src="https://placehold.co/600x120/660000/ffffff?text=Ad+Space+%7C+Latest+Highlight+Ad" alt="Highlights Section Banner" class="banner-image">
+                <a href="https://www.revenuecpmgate.com/p3zdd3e2?key=daa29b7514ba8b9cd04e286e56b7e484" target="_blank" rel="noopener noreferrer">
+                    <img src="https://landings-cdn.adsterratech.com/referralBanners/gif/468x120_adsterra_reff.gif" alt="Highlights Section Banner" class="banner-image" onerror="this.onerror=null; this.src='https://placehold.co/600x100/00ffc8/000000?text=HIGHLIGHTS+AD+SPACE';">
                 </a>
             </div>
 
-        </div> <!-- #highlights-section end -->
-        
+        </div> 
     </div>
     
-    <!-- Video Player Overlay -->
     <div id="video-player">
         <button id="close-btn" onclick="closeVideo()">❌</button>
+
         <div id="video-container-wrapper">
             <div class="video-wrapper">
-                <video id="video" controls autoplay></video>
+                <video id="video" controls autoplay playsinline></video>
+                
+                <div id="video-overlay">
+                    <span id="livefy-text-animator">LIVEFY TV</span>
+                </div>
             </div>
         </div>
         
+        <div id="error-message-box">
+            <h3 id="error-title">Error (Playback Failure)</h3>
+            <p id="error-text">The video cannot be loaded. The stream link might be invalid, the server may be down, or your device might not support HLS format. Please try another server.</p>
+        </div>
+
+
         <div id="controls-area">
-            <!-- 1. Quality Selector -->
             <div id="quality-selector-container">
                 <label for="quality-select">Video Quality:</label>
                 <select id="quality-select" onchange="changeQuality(this.value)">
-                    <option value="-1">Auto (Adaptive)</option>
-                    <!-- Quality options will be populated by JavaScript -->
-                </select>
+                    <option value="-1">Auto</option>
+                    </select>
             </div>
             
-            <!-- 2. Server Buttons (Dynamically Populated) -->
             <div id="server-buttons">
-                <!-- Dynamic buttons go here -->
-            </div>
+                </div>
         </div>
     </div>
     
     
-    <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
         <div id="nav-home" class="nav-item active" onclick="showTab('home-section', this)">
             <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
@@ -633,10 +780,42 @@
         let hls = null; 
         const video = document.getElementById('video');
         const qualitySelect = document.getElementById('quality-select');
+        const qualityContainer = document.getElementById('quality-selector-container');
         const serverButtonsContainer = document.getElementById('server-buttons');
         const allSections = document.querySelectorAll('.content > div');
         const navItems = document.querySelectorAll('.nav-item');
+        const errorMessageBox = document.getElementById('error-message-box');
         
+        // --- LIVEFY TV ELEMENTS ---
+        const livefyTextAnimator = document.getElementById('livefy-text-animator');
+        const videoOverlay = document.getElementById('video-overlay');
+        // -----------------------------
+        
+        /**
+         * Shows a custom message box instead of using alert().
+         * @param {string} title - The title of the error/message.
+         * @param {string} message - The detailed message.
+         */
+        function showMessage(title, message) {
+            document.getElementById('video-container-wrapper').style.display = 'none';
+            document.getElementById('controls-area').style.display = 'none';
+            document.getElementById('error-title').textContent = title;
+            document.getElementById('error-text').textContent = message;
+            errorMessageBox.style.display = 'block';
+            
+            // Hide all Livefy TV elements on error
+            livefyTextAnimator.style.display = 'none';
+        }
+
+        /**
+         * Hides the custom message box and shows the video player/controls.
+         */
+        function hideMessage() {
+            errorMessageBox.style.display = 'none';
+            document.getElementById('video-container-wrapper').style.display = 'block';
+            document.getElementById('controls-area').style.display = 'block';
+        }
+
         /**
          * Populates the video quality selector based on HLS levels.
          */
@@ -645,10 +824,10 @@
             qualitySelect.innerHTML = '';
             
             // 1. Add Auto option (HLS.js uses -1 for adaptive/auto)
-            const autoOption = new Option('Auto (Adaptive)', -1);
+            const autoOption = new Option('Auto', -1);
             qualitySelect.add(autoOption);
             
-            if (hls && hls.levels) {
+            if (hls && hls.levels && hls.levels.length > 0) {
                 // 2. Add manual options
                 hls.levels.forEach((level, index) => {
                     const resolution = level.height ? `${level.height}p` : 'Unknown';
@@ -657,6 +836,10 @@
                     const option = new Option(resolution + bitrate, index);
                     qualitySelect.add(option);
                 });
+                qualityContainer.style.display = 'flex';
+            } else {
+                 // If no HLS levels found (maybe native playback used)
+                 qualityContainer.style.display = 'none';
             }
             // Set the current selection based on the current level
             qualitySelect.value = hls ? hls.currentLevel : -1;
@@ -673,65 +856,112 @@
         }
         
         /**
-         * Function to load and play M3U8 video stream
+         * Function to load and play M3U8/MP4/Direct video stream.
+         * This function ensures maximum compatibility (HLS.js or native fallback).
          */
         function loadVideoSource(videoSrc) {
-            if (!videoSrc) return;
-            console.log('Attempting to load video source:', videoSrc);
+            hideMessage(); // Reset error message state
 
+            if (!videoSrc || videoSrc.startsWith('http://channel-url') || videoSrc.startsWith('http://highlight-url')) {
+                if (hls) { hls.destroy(); hls = null; }
+                video.removeAttribute('src'); 
+                video.load(); 
+                qualityContainer.style.display = 'none';
+                showMessage("Error: No Link Found", "No URL found for the video stream or the link is only a demo.");
+                return;
+            }
+            
+            // --- SHOW INITIAL LOADING STATE (Bottom Right Animation) ---
+            livefyTextAnimator.textContent = 'LIVEFY TV - LOADING...'; 
+            livefyTextAnimator.classList.add('is-loading'); 
+            livefyTextAnimator.style.display = 'block';
+            // -----------------------------------------------------------
+            
             // Destroy previous HLS.js instance if exists
             if (hls) {
                 hls.destroy();
                 hls = null;
             }
             
-            // Reset video source before loading new stream
             video.removeAttribute('src'); 
             video.load(); 
-            // Clear quality selector until new manifest is parsed
-            qualitySelect.innerHTML = '<option value="-1">Auto (Adaptive)</option>';
+            qualitySelect.innerHTML = '<option value="-1">Auto</option>';
 
-
-            // Start playback using HLS.js
-            if (Hls.isSupported()) {
+            const isHls = videoSrc.toLowerCase().endsWith('.m3u8');
+            
+            if (isHls && Hls.isSupported()) {
+                // --- HLS (Adaptive Streaming) Logic ---
+                qualityContainer.style.display = 'flex';
+                
+                // --- আরও উন্নত এবং আগ্রাসী কনফিগারেশন: দুর্বল লিঙ্কে প্লেব্যাক উন্নত করার জন্য ---
                 hls = new Hls({
-                    // Configure HLS.js for better low-bandwidth performance (optional, but good practice)
-                    // maxBufferLength: 30, // Max video buffer in seconds
-                    // maxMaxBufferLength: 60, // Max buffer size (unlimited by default)
-                    // lowBufferWatchdog: 5, // time in seconds hls.js will wait before retrying to load a fragment
+                    // 1. ABR (Adaptive Bitrate) সেটিং: দ্রুত ব্যান্ডউইথ পরিবর্তনের সাথে মান পরিবর্তন করা
+                    // Lower values make ABR faster/more aggressive, ensuring quicker drop to a lower quality on a weak link.
+                    abrEwmaFastAveragingTime: 1.0,  // ডিফল্ট ৩.০। এটি দ্রুততম প্রতিক্রিয়ার জন্য কমিয়ে আনা হলো। 
+                    abrEwmaSlowAveragingTime: 3.0,  // ডিফল্ট ৯.০। এটিও কমিয়ে আনা হলো।
+                    
+                    // 2. বাফার ম্যানেজমেন্ট: লাইভ স্ট্রিমের জন্য বাফার ছোট রাখা
+                    maxBufferLength: 8,      // ৮ সেকেন্ডের বেশি বাফার জমতে দেবে না, যা বাফার-মুক্ত অনুভূতির জন্য গুরুত্বপূর্ণ।
+                    maxMaxBufferLength: 15,   // সর্বাধিক বাফার লেন্থ কম রাখা হলো।
+                    
+                    // 3. নেটওয়ার্ক ও পুনরায় চেষ্টা (Retry) এর ক্ষমতা বৃদ্ধি:
+                    fragLoadingMaxRetry: 15,  // ডিফল্ট ৬ থেকে বাড়িয়ে ১৫ করা হলো, যাতে দুর্বল লিঙ্কে অনেকবার চেষ্টা করা যায়।
+                    fragLoadingRetryDelay: 300, // ডিফল্ট ৫০০ms থেকে কমিয়ে ৩০০ms করা হলো, যাতে দ্রুত পুনরায় লোড করার চেষ্টা শুরু হয়।
+                    levelLoadingMaxRetry: 8,  // ডিফল্ট ৪ থেকে বাড়িয়ে ৮ করা হলো।
+                    
+                    // 4. Fragment Prefetching: মসৃণ ট্রানজিশনের জন্য
+                    startFragPrefetch: true
                 });
+                // ----------------------------------------------------------------------------
+                
                 hls.loadSource(videoSrc);
                 hls.attachMedia(video);
 
                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    populateQualitySelector(); // Populate quality options after manifest is parsed
+                    populateQualitySelector(); 
+                    // Attempt to play after manifest is parsed
                     video.play().catch(e => console.log("Video auto-play blocked:", e));
                 });
                 
                 hls.on(Hls.Events.LEVEL_SWITCHED, function(event, data) {
-                    // Update selector to reflect the actual switched level
                     qualitySelect.value = data.level; 
                 });
 
                 hls.on(Hls.Events.ERROR, function(event, data) {
                     console.error('HLS Error:', data.details);
                     if (data.fatal) {
-                        console.error('HLS Fatal Error, falling back to native:', data);
-                        // Fallback to native video playback if HLS fails critically
+                        console.error('HLS Fatal Error. Attempting Native Fallback...');
+                        showMessage("Fatal Error", "HLS stream failed to load. Attempting native playback now.");
+                        // Fallback to native playback 
+                        if (hls) { hls.destroy(); hls = null; }
                         video.src = videoSrc;
                         video.load();
-                        video.play().catch(e => console.log("Native video play blocked:", e));
+                        video.play().catch(e => console.log("Native fallback play blocked:", e));
                     }
                 });
 
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Native playback for Safari/iOS
+            } else {
+                // --- Native/Direct Playback Logic (MP4, non-HLS or Safari/Unsupported Browser) ---
+                qualityContainer.style.display = 'none';
+                console.log('Loading Native/Direct stream:', videoSrc);
+                
+                // Set the source and load
                 video.src = videoSrc;
                 video.load();
-                video.play().catch(e => console.log("Native video play blocked:", e));
-            } else {
-                console.error('HLS or Native M3U8 Playback not supported on this browser.');
-                // Optionally show a message box here
+                
+                // Check for immediate errors on native load (e.g., 404)
+                const errorHandler = function() {
+                     livefyTextAnimator.style.display = 'none'; // Hide loading state on fatal error
+                     showMessage("Playback Failed", "The video cannot be played in this browser or with this link. The link might be down or the format is unsupported.");
+                     video.removeEventListener('error', errorHandler);
+                };
+                video.addEventListener('error', errorHandler);
+                
+                // Attempt to play
+                video.play().catch(e => {
+                    console.log("Native video play blocked or failed:", e);
+                    // 'error' event will handle the failure.
+                });
             }
         }
         
@@ -742,10 +972,10 @@
         function openMatchChannels(channelsData) {
             document.getElementById('video-player').style.display = 'flex';
             serverButtonsContainer.innerHTML = ''; // Clear existing buttons
+            hideMessage(); // Reset view to show video player
 
             if (!channelsData || channelsData.length === 0) {
-                console.error("No channels provided for this match.");
-                // Load a blank/error screen or placeholder if no channels are available
+                showMessage("Error", "No channels found for this match.");
                 loadVideoSource(''); 
                 return;
             }
@@ -794,20 +1024,34 @@
             video.pause();
             video.removeAttribute('src'); 
             video.load();
+            
+            // Reset player visibility elements
+            document.getElementById('video-container-wrapper').style.display = 'block';
+            document.getElementById('controls-area').style.display = 'block';
+            errorMessageBox.style.display = 'none';
+
             // Clear quality and server options upon closing
-            qualitySelect.innerHTML = '<option value="-1">Auto (Adaptive)</option>';
+            qualitySelect.innerHTML = '<option value="-1">Auto</option>';
+            qualityContainer.style.display = 'flex'; 
             serverButtonsContainer.innerHTML = '';
+            
+            // --- Reset LIVEFY TV state on close ---
+            livefyTextAnimator.classList.remove('is-loading'); 
+            livefyTextAnimator.style.display = 'none';
         }
 
         // --- Tab Switching Logic ---
         function showTab(sectionIdToShow, clickedElement) {
-            // 1. Hide all sections
+            // 1. Hide all main content sections
             allSections.forEach(section => {
                 section.classList.add('hidden');
             });
 
             // 2. Show the specific section
-            document.getElementById(sectionIdToShow).classList.remove('hidden');
+            const sectionToShow = document.getElementById(sectionIdToShow);
+            if (sectionToShow) {
+                sectionToShow.classList.remove('hidden');
+            }
 
             // 3. Update navigation style
             navItems.forEach(item => {
@@ -815,46 +1059,60 @@
             });
             clickedElement.classList.add('active');
             
-            // Scroll to top of content area
-            document.querySelector('.content').scrollTop = 0;
+            // Scroll to top of content area (for mobile usability)
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- CLOCK AND DATE FUNCTIONALITY ---
+        function updateClock() {
+            const now = new Date();
+            // Options for readable time and date (English locale for HH:MM:SS AM/PM)
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            const dateOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+
+            const timeString = now.toLocaleTimeString('en-US', timeOptions); 
+            const dateString = now.toLocaleDateString('en-US', dateOptions);
+
+            const html = `
+                <span style="font-size: 14px; display: block;">${timeString}</span>
+                <span class="date-text" style="display: block;">${dateString}</span>
+            `;
+
+            // Update all time display elements
+            document.getElementById('time-display-home').innerHTML = html;
+            document.getElementById('time-display-channels').innerHTML = html;
+            document.getElementById('time-display-highlights').innerHTML = html;
         }
 
 
         // --- Live Status Check Logic (uses previously set times) ---
-        // Match time variables (Can be updated as needed)
-        const match1StartTime = '03:00'; 
-        const match1EndTime = '17:20';   
-        const match2StartTime = '00:00'; 
-        const match2EndTime = '00:00';   
-        const match3StartTime = '00:00'; 
-        const match3EndTime = '00:00';   
-        const match4StartTime = '00:00'; 
-        const match4EndTime = '00:00';   
-        const match5StartTime = '00:00'; 
-        const match5EndTime = '00:00';   
-        const match6StartTime = '00:00'; 
-        const match6EndTime = '00:00';   
-        const match7StartTime = '00:00'; 
-        const match7EndTime = '00:00';   
+        // আইডি যোগ করা হয়েছে যাতে টাইম পরিবর্তন করা সহজ হয় (যেমন: '6' হল West Indies vs Indian)
+        const matches = [
+            // id: '1' - ICC Champions Trophy (PAK vs NZ)
+            { id: '1', start: '00:00', end: '00:00' }, 
+            // id: '2' - ICC Champions Trophy (BAN vs IND)
+            { id: '2', start: '170:00', end: '23:00' }, 
+            // id: '3' - Cricket | BIG BASH LEAGUE
+            { id: '3', start: '00:00', end: '00:00' }, 
+            // id: '4' - 2nd ODI | Ireland Tour Of Zimbabwe
+            { id: '4', start: '00:00', end: '00:00' }, 
+            // id: '5' - Cricket / Super Smash 2024/2025
+            { id: '5', start: '00:00', end: '00:00' }, 
+            // id: '6' - Cricket 🏏। West Indies vs Indian
+            { id: '6', start: '00:00', end: '00:00' }, 
+            // id: '7' - Football | English Premier League
+            { id: '7', start: '00:00', end: '00:00' }
+        ];
 
         function checkMatchStatus() {
             const currentTime = new Date();
             // Current time in 24-hour format (HH:MM)
             const currentHourMinute = currentTime.toTimeString().slice(0, 5); 
 
-            const matches = [
-                { id: '1', start: match1StartTime, end: match1EndTime },
-                { id: '2', start: match2StartTime, end: match2EndTime },
-                { id: '3', start: match3StartTime, end: match3EndTime },
-                { id: '4', start: match4StartTime, end: match4EndTime },
-                { id: '5', start: match5StartTime, end: match5EndTime },
-                { id: '6', start: match6StartTime, end: match6EndTime },
-                { id: '7', start: match7StartTime, end: match7EndTime }
-            ];
-
             matches.forEach(match => {
-                // Check if current time is within start and end time
-                const isLive = currentHourMinute >= match.start && currentHourMinute <= match.end;
+                // Check if current time is within start and end time (24-hour format comparison)
+                // Note: The comparison uses < end time, meaning it becomes 'LIVE' AT start time and stops AT end time.
+                const isLive = currentHourMinute >= match.start && currentHourMinute < match.end; 
                 
                 const timeEl = document.getElementById(`time${match.id}`);
                 const dateEl = document.getElementById(`date${match.id}`);
@@ -874,12 +1132,52 @@
             });
         }
      
-        // Check match status every 1 second
-        setInterval(checkMatchStatus, 1000);
         
-        // Show Home tab on page load
+        // Initial setup and recurring tasks
         document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- VIDEO EVENT LISTENERS FOR LOADING/WATERMARK ---
+            video.addEventListener('waiting', () => {
+                // Video buffered and stalled, show loading text
+                if (!video.paused) {
+                    livefyTextAnimator.textContent = 'LIVEFY TV - LOADING...';
+                    livefyTextAnimator.classList.add('is-loading');
+                    livefyTextAnimator.style.display = 'block';
+                }
+            });
+
+            video.addEventListener('playing', () => {
+                // Video is playing, show the normal watermark
+                livefyTextAnimator.textContent = 'LIVEFY TV'; // Normal text
+                livefyTextAnimator.classList.remove('is-loading'); // Use normal blink animation
+                livefyTextAnimator.style.display = 'block'; 
+            });
+
+            video.addEventListener('pause', () => {
+                // Video is paused, hide watermark
+                livefyTextAnimator.style.display = 'none';
+            });
+            
+            video.addEventListener('loadeddata', () => {
+                // Initial data loaded. If it's not auto-playing, hide the loading text.
+                if(video.paused) {
+                    livefyTextAnimator.style.display = 'none';
+                }
+            });
+            
+            // Initial state: Hidden
+            livefyTextAnimator.style.display = 'none';
+            // -----------------------------------------------------
+
+            // Start clock update immediately and every second
+            updateClock();
+            setInterval(updateClock, 1000); 
+
+            // Check match status immediately and every second
             checkMatchStatus(); 
+            setInterval(checkMatchStatus, 1000);
+
+            // Show Home tab on page load
             const defaultTab = document.getElementById('nav-home');
             showTab('home-section', defaultTab);
         });
@@ -888,4 +1186,3 @@
 
 </body>
 </html>
-

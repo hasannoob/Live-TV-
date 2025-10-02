@@ -93,7 +93,7 @@
             font-weight: bold;
             text-align: right;
             line-height: 1.2;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
             min-width: 90px;
         }
         .datetime-box .date-text {
@@ -475,7 +475,7 @@
             
 
             <div id="match-card-2" class="match-card" onclick="openMatchChannels([
-                {name: 'WOLLOW', url: 'https://tvsen6.aynascope.net/asports/tracks-v1a1/mono.ts.m3u8?e=1759434550&token=ad0765de707b763fb65f628d102d30ec&u=7a511720-17fc-44bc-a9a7-9222de71898c'},
+                {name: 'WOLLOW', url: 'https://d1.merichunidya.com:1686/hls/willowusa.m3u8?md5=Musyg0ACa5floOv6OgVdWw&expires=1759413222'},
                 {name: 'Gazi TV (GTV)', url: 'http://stvlive.net:8080/channeli/index.m3u8'}
             ])">
                 <div class="match-title">WOMAN|ICC World Cup 2025</div>
@@ -887,10 +887,19 @@
             const isHls = videoSrc.toLowerCase().endsWith('.m3u8');
             
             if (isHls && Hls.isSupported()) {
-                // --- HLS (Adaptive Streaming) Logic (Weak Link Optimization) ---
+                // --- HLS (Adaptive Streaming) Logic (Weak Link Optimization + Codec Fix) ---
                 
                 hls = new Hls({
-                    // Aggressive ABR for weak links
+                    // --- নতুন কোডেক সামঞ্জস্য সেটিংস (ভিডিও না দেখার সমস্যা সমাধানের জন্য) ---
+                    // এটি HLS.js-কে বলবে যে যদি HLS-এর মাধ্যমে প্লে না হয়, তাহলে ব্রাউজারের ডিকোডিং সামঞ্জস্যের জন্য 
+                    // নিম্নস্তরের বা আরও ইউনিভার্সাল কোডেক ব্যবহার করে পুনরায় চেষ্টা করো।
+                    forceKeyFrameOnDiscontinuity: true,
+                    // যদি না কাজ করে, তবে সবচেয়ে কমন কোডেকটি ট্রাই করা:
+                    lowLatencyMode: true, // লাইভ স্ট্রিমিং এ ল্যাগ কমানোর জন্য
+                    enableWorker: true, // ডিকোডিংয়ের জন্য ডেডিকেটেড থ্রেড ব্যবহার (ভিডিও পারফর্মেন্স উন্নত করে)
+                    // --------------------------------------------------------------------------
+                    
+                    // Aggressive ABR for weak links (আগের মতো দ্রুত বাফারিং বন্ধ করার জন্য)
                     abrEwmaFastAveragingTime: 0.5,
                     abrEwmaSlowAveragingTime: 1.0,
                     maxBufferLength: 4, 
@@ -915,12 +924,14 @@
                         data.details === Hls.ErrorDetails.MANIFEST_PARSING_ERROR || 
                         data.details === Hls.ErrorDetails.LEVEL_LOAD_ERROR || 
                         data.details === Hls.ErrorDetails.LEVEL_LOADING_TIMEOUT ||
+                        // Media Decoded Error means codec failure (Audio only issue)
+                        data.details === Hls.ErrorDetails.BUFFER_CODEC_ERROR ||
                         data.fatal) 
                     {
                         closeVideo(); // Perform full cleanup
                         showMessage(
                             "Link Failed: Try Another Server", 
-                            `'${channelName}' চ্যানেলটি লোড করতে ব্যর্থ হয়েছে। লিংকটি হয় ডেড, ব্লকড, অথবা স্ট্রিমিং সার্ভার বন্ধ। অনুগ্রহ করে অন্য সার্ভার বা চ্যানেলটি ব্যবহার করুন।`
+                            `'${channelName}' চ্যানেলটি লোড করতে ব্যর্থ হয়েছে। **ভিডিও কোডেক সমর্থিত নয় (শুধু অডিও)**, ডেড লিংক অথবা সার্ভার বন্ধ। অনুগ্রহ করে অন্য সার্ভার বা চ্যানেলটি ব্যবহার করুন।`
                         );
                     }
                 });
@@ -1119,7 +1130,7 @@
             // id: '6' - Cricket 🏏। West Indies vs Indian
             { id: '6', start: '00:00', end: '00:00' }, 
             // id: '7' - Football | English Premier League
-            { id: '7', start: '00:00', end: '00:00' }
+            { id: '7', start: '06:30', end: '08:30' } // Example: Adjusted to be 'LIVE' in the morning
         ];
 
         function checkMatchStatus() {

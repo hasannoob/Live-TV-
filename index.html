@@ -858,11 +858,13 @@
         /**
          * Function to load and play M3U8/MP4/Direct video stream.
          * This function ensures maximum compatibility (HLS.js or native fallback).
+         * * @param {string} videoSrc - The URL of the video stream.
+         * @param {string} channelName - The name of the channel (for error logging/display).
          */
-        function loadVideoSource(videoSrc) {
+        function loadVideoSource(videoSrc, channelName) {
             hideMessage(); // Reset error message state
 
-            if (!videoSrc || videoSrc.startsWith('http://channel-url') || videoSrc.startsWith('http://highlight-url')) {
+            if (!videoSrc || videoSrc.startsWith('http://channel-url')) {
                 if (hls) { hls.destroy(); hls = null; }
                 video.removeAttribute('src'); 
                 video.load(); 
@@ -893,23 +895,22 @@
                 // --- HLS (Adaptive Streaming) Logic ---
                 qualityContainer.style.display = 'flex';
                 
-                // --- আরও উন্নত এবং আগ্রাসী কনফিগারেশন: দুর্বল লিঙ্কে প্লেব্যাক উন্নত করার জন্য ---
+                // --- আরও আগ্রাসী কনফিগারেশন: বাফারিং এবং রিকভারি দ্রুত করার জন্য ---
                 hls = new Hls({
-                    // 1. ABR (Adaptive Bitrate) সেটিং: দ্রুত ব্যান্ডউইথ পরিবর্তনের সাথে মান পরিবর্তন করা
-                    // Lower values make ABR faster/more aggressive, ensuring quicker drop to a lower quality on a weak link.
-                    abrEwmaFastAveragingTime: 1.0,  // ডিফল্ট ৩.০। এটি দ্রুততম প্রতিক্রিয়ার জন্য কমিয়ে আনা হলো। 
-                    abrEwmaSlowAveragingTime: 3.0,  // ডিফল্ট ৯.০। এটিও কমিয়ে আনা হলো।
+                    // ABR (Adaptive Bitrate) সেটিং: দ্রুততম প্রতিক্রিয়ার জন্য বাফারের গড় সময় কমানো
+                    abrEwmaFastAveragingTime: 0.5,  // আরও aggressive ABR
+                    abrEwmaSlowAveragingTime: 1.0,  // দুর্বল লিঙ্কে দ্রুত মান কমাতে সাহায্য করবে
                     
-                    // 2. বাফার ম্যানেজমেন্ট: লাইভ স্ট্রিমের জন্য বাফার ছোট রাখা
-                    maxBufferLength: 8,      // ৮ সেকেন্ডের বেশি বাফার জমতে দেবে না, যা বাফার-মুক্ত অনুভূতির জন্য গুরুত্বপূর্ণ।
-                    maxMaxBufferLength: 15,   // সর্বাধিক বাফার লেন্থ কম রাখা হলো।
+                    // বাফার ম্যানেজমেন্ট: লাইভ স্ট্রিমের জন্য বাফার আরও ছোট রাখা
+                    maxBufferLength: 4,      // মাত্র ৪ সেকেন্ডের বাফার, এতে ল্যাগ কম মনে হবে
+                    maxMaxBufferLength: 10,   // সর্বাধিক বাফার লেন্থ আরও কম রাখা হলো।
                     
-                    // 3. নেটওয়ার্ক ও পুনরায় চেষ্টা (Retry) এর ক্ষমতা বৃদ্ধি:
-                    fragLoadingMaxRetry: 15,  // ডিফল্ট ৬ থেকে বাড়িয়ে ১৫ করা হলো, যাতে দুর্বল লিঙ্কে অনেকবার চেষ্টা করা যায়।
-                    fragLoadingRetryDelay: 300, // ডিফল্ট ৫০০ms থেকে কমিয়ে ৩০০ms করা হলো, যাতে দ্রুত পুনরায় লোড করার চেষ্টা শুরু হয়।
-                    levelLoadingMaxRetry: 8,  // ডিফল্ট ৪ থেকে বাড়িয়ে ৮ করা হলো।
+                    // নেটওয়ার্ক ও পুনরায় চেষ্টা (Retry) এর ক্ষমতা বৃদ্ধি:
+                    fragLoadingMaxRetry: 20,  // সর্বাধিক ২০ বার চেষ্টা
+                    fragLoadingRetryDelay: 100, // দ্রুত পুনরায় চেষ্টা শুরু (মাত্র ১০০ms)
+                    levelLoadingMaxRetry: 10, 
                     
-                    // 4. Fragment Prefetching: মসৃণ ট্রানজিশনের জন্য
+                    // Fragment Prefetching
                     startFragPrefetch: true
                 });
                 // ----------------------------------------------------------------------------
@@ -928,16 +929,27 @@
                 });
 
                 hls.on(Hls.Events.ERROR, function(event, data) {
-                    console.error('HLS Error:', data.details);
-                    if (data.fatal) {
-                        console.error('HLS Fatal Error. Attempting Native Fallback...');
-                        showMessage("Fatal Error", "HLS stream failed to load. Attempting native playback now.");
-                        // Fallback to native playback 
+                    console.error('HLS Error:', data.details, data.type);
+                    
+                    // If stream link is bad, or blocked (HTTP 403, 404, Manifest Load Error)
+                    if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR || 
+                        data.details === Hls.ErrorDetails.MANIFEST_PARSING_ERROR || 
+                        data.details === Hls.ErrorDetails.LEVEL_LOAD_ERROR || 
+                        data.details === Hls.ErrorDetails.LEVEL_LOADING_TIMEOUT ||
+                        data.fatal) 
+                    {
                         if (hls) { hls.destroy(); hls = null; }
-                        video.src = videoSrc;
-                        video.load();
-                        video.play().catch(e => console.log("Native fallback play blocked:", e));
+                        video.removeAttribute('src'); 
+                        video.load(); 
+                        livefyTextAnimator.style.display = 'none'; // Hide loading state
+                        
+                        // Show a clear message to the user
+                        showMessage(
+                            "Link Failed: Try Another Server", 
+                            `'${channelName}' চ্যানেলটি লোড করতে ব্যর্থ হয়েছে। লিংকটি হয় ডেড, অথবা আপনার ইন্টারনেট সার্ভিস প্রোভাইডার (ISP) কর্তৃক ব্লকড। অনুগ্রহ করে অন্য সার্ভার বা চ্যানেলটি ব্যবহার করুন।`
+                        );
                     }
+                    // For non-fatal errors (like fragment loading, which are common in weak links), HLS.js handles retries.
                 });
 
             } else {
@@ -952,15 +964,15 @@
                 // Check for immediate errors on native load (e.g., 404)
                 const errorHandler = function() {
                      livefyTextAnimator.style.display = 'none'; // Hide loading state on fatal error
-                     showMessage("Playback Failed", "The video cannot be played in this browser or with this link. The link might be down or the format is unsupported.");
+                     showMessage("Playback Failed", `'${channelName}' লিংকটি লোড হচ্ছে না। এটি হতে পারে একটি নন-HLS লিংক যা আপনার ব্রাউজার বা ডিভাইসে কাজ করছে না। অন্য একটি সার্ভার চেষ্টা করুন।`);
                      video.removeEventListener('error', errorHandler);
                 };
                 video.addEventListener('error', errorHandler);
                 
                 // Attempt to play
                 video.play().catch(e => {
+                    // Playback was prevented (often by browser policy), but we don't treat this as a fatal URL error.
                     console.log("Native video play blocked or failed:", e);
-                    // 'error' event will handle the failure.
                 });
             }
         }
@@ -985,14 +997,17 @@
                 const button = document.createElement('button');
                 button.className = 'server-button';
                 button.textContent = channel.name;
-                button.onclick = () => selectServer(channel.url, button);
+                // Pass channel.name to selectServer for better error reporting
+                button.onclick = () => selectServer(channel.url, channel.name, button);
                 serverButtonsContainer.appendChild(button);
             });
 
             // Automatically start the first channel
             const firstButton = serverButtonsContainer.querySelector('.server-button');
             if (firstButton) {
-                selectServer(channelsData[0].url, firstButton);
+                // Pass the name of the first channel
+                const firstChannelName = channelsData[0].name;
+                selectServer(channelsData[0].url, firstChannelName, firstButton);
             }
         }
 
@@ -1000,9 +1015,10 @@
         /**
          * Selects a new server/channel and starts playback.
          * @param {string} serverSrc - The M3U8 URL.
+         * @param {string} channelName - The name of the channel.
          * @param {HTMLElement} clickedButton - The button element that was clicked.
          */
-        function selectServer(serverSrc, clickedButton) {
+        function selectServer(serverSrc, channelName, clickedButton) {
             // Highlight the active button
             document.querySelectorAll('.server-button').forEach(btn => {
                 btn.classList.remove('active-server');
@@ -1011,7 +1027,8 @@
                 clickedButton.classList.add('active-server');
             }
             
-            loadVideoSource(serverSrc);
+            // Pass the channelName to loadVideoSource
+            loadVideoSource(serverSrc, channelName);
         }
 
         // --- Close Video Function ---
@@ -1091,7 +1108,7 @@
             // id: '1' - ICC Champions Trophy (PAK vs NZ)
             { id: '1', start: '00:00', end: '00:00' }, 
             // id: '2' - ICC Champions Trophy (BAN vs IND)
-            { id: '2', start: '170:00', end: '23:00' }, 
+            { id: '2', start: '17:00', end: '23:00' }, 
             // id: '3' - Cricket | BIG BASH LEAGUE
             { id: '3', start: '00:00', end: '00:00' }, 
             // id: '4' - 2nd ODI | Ireland Tour Of Zimbabwe

@@ -8,10 +8,6 @@
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.11"></script>
     
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
-    
     <style>
         /* Base Styles (Tailwind like aesthetic) */
         body {
@@ -181,35 +177,29 @@
             50% { opacity: 0.3; }
         }
 
-        /* --- NEW: FLOATING VIDEO PLAYER CONTAINER STYLE --- */
+        /* --- FIXED, SMALLER VIDEO PLAYER CONTAINER STYLE (NEW) --- */
         #video-player {
             display: none; 
             position: fixed; 
-            /* Initial position (Top Right for pop-up feel) */
+            /* Fixed Position (Top Right Corner) */
             top: 60px; 
             right: 10px;
             
-            /* Initial size (mobile friendly small window) */
+            /* Fixed Size (Standard mobile pop-up size) */
             width: 90%; 
-            max-width: 400px; /* Max size for floating window */
+            max-width: 350px; 
             height: auto;
             
             background-color: #111; 
-            border: 3px solid #00ff00; /* Beautiful green border */
+            border: 3px solid #00ff00; 
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.5), 0 0 10px rgba(0, 0, 0, 0.8);
-            z-index: 2000; /* Ensure it's always on top */
+            box-shadow: 0 8px 20px rgba(0, 255, 0, 0.5);
+            z-index: 2000; 
             padding: 5px; 
             box-sizing: border-box;
-            
-            /* Add some padding for the resizable handles */
-            padding-bottom: 40px; 
-            
-            /* Make the whole window draggable (jQuery UI required) */
-            cursor: grab; 
         }
         
-        /* Draggable Header/Handle */
+        /* Player Header/Title */
         #player-handle {
             background-color: #333;
             color: #00ff00;
@@ -217,12 +207,10 @@
             text-align: center;
             font-weight: bold;
             border-radius: 10px 10px 0 0;
-            cursor: grab;
-            margin: -5px -5px 5px -5px; /* Pull it to the edges of the box */
+            margin: -5px -5px 5px -5px; 
             display: block;
         }
 
-        /* Position the close button absolutely within the draggable container */
         #close-btn {
             position: absolute; 
             top: 5px;
@@ -253,18 +241,6 @@
             width: 100%; 
             height: 100%;
         }
-        
-        /* Overriding Plyr's fullscreen to stay within the draggable box */
-        /* IMPORTANT: This will make the Plyr fullscreen button ineffective for full screen of the whole phone screen */
-        .plyr--full-screen {
-             position: absolute !important; /* Forces Plyr to stay in the box when in "fullscreen" mode */
-             top: 0 !important;
-             left: 0 !important;
-             width: 100% !important;
-             height: 100% !important;
-             z-index: 1000 !important;
-        }
-
 
         /* Overlay for Watermark/Loading */
         #livefy-text-animator {
@@ -281,7 +257,7 @@
             border-radius: 3px;
             animation: watermark-blink 5s infinite; 
             display: none; 
-            pointer-events: none; /* Crucial */
+            pointer-events: none; 
         }
 
         .is-loading {
@@ -291,7 +267,7 @@
             animation: pulse 1s infinite; 
         }
 
-        /* Server Buttons Styles (placed at the bottom of the floating player) */
+        /* Server Buttons Styles (placed at the bottom of the fixed player) */
         #server-buttons {
             display: flex; 
             justify-content: center; 
@@ -338,22 +314,6 @@
             z-index: 2002;
         }
         
-        /* --- JQUERY UI RESIZE HANDLE STYLING (For the small corner icon) --- */
-        .ui-resizable-handle {
-            background-color: #00ff00 !important;
-            opacity: 0.8;
-            border-radius: 0 0 10px 0;
-            width: 15px !important;
-            height: 15px !important;
-            z-index: 3000;
-        }
-        .ui-resizable-se {
-            bottom: 5px;
-            right: 5px;
-        }
-        /* --- END FLOATING PLAYER STYLES --- */
-
-
         /* Bottom Navigation Bar Styles (Same as before) */
         .bottom-nav {
             position: fixed;
@@ -692,8 +652,7 @@
     </div>
     
     <div id="video-player">
-        <span id="player-handle">LIVEFY Stream (Drag to Move)</span>
-        <button id="close-btn" onclick="closeVideo()">❌</button>
+        <span id="player-handle">LIVEFY Stream</span> <button id="close-btn" onclick="closeVideo()">❌</button>
 
         <div class="video-wrapper">
             <video id="video" controls autoplay playsinline data-plyr-config='{"title": "Livefy Stream", "volume": 1, "fullscreen": {"enabled": true, "fallback": true}}'></video>
@@ -739,36 +698,10 @@
         const allSections = document.querySelectorAll('.content > div');
         const navItems = document.querySelectorAll('.nav-item');
         const errorMessageBox = document.getElementById('error-message-box');
-        const videoPlayerContainer = document.getElementById('video-player'); // NEW
+        const videoPlayerContainer = document.getElementById('video-player'); 
         const livefyTextAnimator = document.getElementById('livefy-text-animator');
         
-        // --- JQuery UI Initialization for Draggable/Resizable ---
-        $(function() {
-            // Make the player draggable using the header as the handle
-            $("#video-player").draggable({
-                handle: "#player-handle", // Only the header/handle moves it
-                containment: "window" // Stays within the window boundaries
-            });
-
-            // Make the player resizable
-            $("#video-player").resizable({
-                minWidth: 150,
-                minHeight: 120,
-                maxWidth: $(window).width() - 20, // Max width is almost full screen
-                maxHeight: $(window).height() - 80, // Max height leaves space for nav/header
-                aspectRatio: 16 / 9, // IMPORTANT: Maintain 16:9 ratio
-                handles: 'se' // Only show the South-East handle for resizing
-            });
-            
-             // Fix initial size on mobile load
-             const initialWidth = Math.min($(window).width() * 0.9, 400);
-             $("#video-player").css({
-                 'width': initialWidth + 'px',
-                 'height': initialWidth * (9/16) + 40 + 'px' // Calculate height based on 16:9 ratio + server button area
-             });
-        });
-        // --------------------------------------------------------
-
+        
         /**
          * Shows a custom message box.
          */
@@ -776,7 +709,6 @@
             if (player) {
                 player.pause(); 
             }
-            // Hide the video area but keep the floating player container visible
             document.querySelector('.video-wrapper video').style.display = 'none';
             document.getElementById('error-title').textContent = title;
             document.getElementById('error-text').textContent = message;
@@ -793,7 +725,7 @@
         }
         
         /**
-         * Load and play M3U8/MP4/Direct video stream (Using previous stable HLS.js config)
+         * Load and play M3U8/MP4/Direct video stream 
          */
         function loadVideoSource(videoSrc, channelName) {
             hideMessage(); 
@@ -828,7 +760,7 @@
             const isHls = videoSrc.toLowerCase().endsWith('.m3u8');
             
             if (isHls && Hls.isSupported()) {
-                // --- Stable HLS Logic (Restored to previous version's solid config) ---
+                // --- Stable HLS Logic (Restored to stable performance config) ---
                 
                 hls = new Hls({
                     // Maximum Compatibility Configuration
@@ -903,25 +835,13 @@
                     livefyTextAnimator.style.display = 'none';
                 });
             }
-            
-            // Re-apply the initial size after loading to fix the Plyr display issue
-            // This is necessary because jQuery UI resize is active.
-            setTimeout(() => {
-                const initialWidth = Math.min($(window).width() * 0.9, 400);
-                $("#video-player").css({
-                    'width': initialWidth + 'px',
-                    'height': (initialWidth * (9/16)) + 40 + 'px' 
-                });
-                player.stop(); // Stops the player momentarily
-                player.play(); // Restarts play to ensure correct aspect ratio display
-            }, 500);
         }
         
         /**
-         * Opens the floating player and prepares server buttons.
+         * Opens the fixed player and prepares server buttons.
          */
         function openMatchChannels(channelsData) {
-            videoPlayerContainer.style.display = 'block'; // Show the floating player
+            videoPlayerContainer.style.display = 'block'; // Show the fixed player
             serverButtonsContainer.innerHTML = ''; 
             hideMessage(); 
 
@@ -980,7 +900,6 @@
             video.removeAttribute('src'); 
             video.load();
             
-            // Reset visibility elements
             errorMessageBox.style.display = 'none';
             serverButtonsContainer.innerHTML = '';
             livefyTextAnimator.style.display = 'none';

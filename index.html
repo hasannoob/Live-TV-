@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Livefy TV (Create By HASAN)</title>
-    
-    <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
-
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.11"></script>
     <style>
         /* BASE STYLES & ORIGINAL STYLES (NO CHANGE) */
         /* Base Styles (Tailwind like aesthetic) */
@@ -269,8 +267,7 @@
             box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.5); /* Inner shadow for depth */
         }
 
-        /* --- MODIFIED: Video tag now uses Video.js class --- */
-        #video, .video-js {
+        #video {
             position: absolute;
             top: 0;
             left: 0;
@@ -279,7 +276,6 @@
             /* Minimalist black controls for a cleaner look */
             filter: brightness(1); /* Ensure video looks sharp */
         }
-        /* --- END MODIFIED --- */
 
         /* --- LIVEFY TV Text Styles (Combined for Loading and Watermark) --- */
         #video-overlay {
@@ -567,202 +563,278 @@
                 <div id="time-display-home" class="datetime-box"></div>
             </div>
 
-            <div id="match-card-1" class="match-card" onclick="openMatchChannels([
-                {name: 'TAPMAD', url: 'https://bldcmprod-cdn.toffeelive.com/cdn/live/hum_tv/playlist.m3u8'},
-                {name: 'T SPORTS', url: 'https://cdn.bdixtv24.vip/tsports/index.m3u8'}
+
+
+             <div id="match-card-1" class="match-card" onclick="openMatchChannels([
+                {name: 'TAPMAD', url: 'https://fl25.moveonjoy.com/WILLOW_CRICKET/tracks-v1a1/mono.ts.m3u8'},
+                {name: 'T SPORTS', url: 'https://in-mc-fdlive.fancode.com/mumbai/137700_hindi_hls_83f0f8d7fe54956ta-di_h264/index.m3u8'}
             ])">
-                <div class="match-title">Cricket || Bangladesh VS West_Indies 1st ODI</div>
+                <div class="match-title">Cricket || India vs Australia 1st ODI</div>
                 <div class="team">
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Flag_of_Bangladesh.svg" alt="Pakistan Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=PAK';">
-                        <div class="team-name">Bangladesh</div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/4/41/Flag_of_India.svg" alt="Pakistan Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=PAK';">
+                        <div class="team-name">India</div>
                     </div>
                     <div class="match-info">
-                        <div class="time" id="time1">01:30 PM</div> 
-                        <div class="date" id="date1">18/10/2025</div> 
+                        <div class="time" id="time1">10:00 AM</div> 
+                        <div class="date" id="date1">19/10/2025</div> 
                         <div id="live1" class="live-animation hidden">LIVE NOW</div> 
                     </div>
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/en/9/9b/Cricket_West_Indies_Logo_2017.png" alt="New Zealand Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=NZ';">
-                        <div class="team-name">West_Indies</div>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/8/88/Flag_of_Australia_%28converted%29.svg" alt="New Zealand Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=NZ';">
+                        <div class="team-name">Australia</div>
                     </div>
                 </div>
                 <div class="match-stage">Live Match</div>
                  </div>
             
-            
-         <div id="match-card-7" class="match-card" onclick="openMatchChannels([
-                {name: 'T Sports', url: 'https://cdn.bdixtv24.vip/tsports/index.m3u8'},
-                {name: 'T Sports', url: 'https://cdn.bdixtv24.vip/tsports/tracks-v1a1/mono.ts.m3u8'}
-            ])">
-                <div class="match-title">Cricket 🏏|| Woman World Cup 2026</div>
-                <div class="team">
-                    <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Flag_of_Pakistan.svg" alt="Man City Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=MC';">
-                        <div class="team-name">Pakistan</div>
-                    </div>
-                    <div class="match-info">
-                        <div class="time" id="time7">03:15 AM</div> 
-                        <div class="date" id="date7">15/10/2025</div> 
-                        <div id="live7" class="live-animation hidden">LIVE NOW</div> 
-                    </div>
-                    <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/be/Flag_of_England.svg" alt="Everton Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=EV';">
-                        <div class="team-name">England</div>
-                    </div>
-                </div>
-                <div class="match-stage">Cricket 🏏 live match</div>
-            </div>
 
-            
-            
-             <div id="match-card-6" class="match-card" onclick="openMatchChannels([
-                {name: 'Star Sports 1', url: 'https://saseries.akamaized.net/hls/live/2110097/tappak/hdntl=exp=1760553331~acl=%2f*~data=hdntl~hmac=160b0065c8288862960ce0c1f8461304b4c964b3be814c3868143e3e79697d0e/level_0.m3u8'},])">
-                <div class="match-title">Football || European Qualifiers 2026</div>
-                <div class="team">
-                    <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_Portugal.svg" alt="West Indies Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=WI';">
-                        <div class="team-name">Portugal</div>
-                    </div>
-                    <div class="match-info">
-                        <div class="time" id="time6">12:45 AM</div> 
-                        <div class="date" id="date6">15/10/2025</div> 
-                        <div id="live6" class="live-animation hidden">LIVE NOW</div> 
-                    </div>
-                    <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Flag_of_Hungary.svg" alt="India Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=IND';">
-                        <div class="team-name">Hungary</div>
-                    </div>
-                </div>
-                <div class="match-stage">Football⚽ live match</div>
-            </div> 
-
-
-            
-         <div id="match-card-3" class="match-card" onclick="openMatchChannels([
-                {name: 'Star Sports 1', url: 'https://saseries.akamaized.net/hls/live/2110097/T56A87p03/hdntl=exp=1760553388~acl=%2f*~data=hdntl~hmac=7f7bff0d34cdaeb4b605b8ba5397b6651455c33789a261ff0689b45fb237206b/level_0.m3u8'},])">
-                <div class="match-title">Football || European Qualifiers 2026</div>
-                <div class="team">
-                    <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/en/9/9a/Flag_of_Spain.svg" alt="West Indies Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=WI';">
-                        <div class="team-name">Spain</div>
-                    </div>
-                    <div class="match-info">
-                        <div class="time" id="time3">12:45 AM</div> 
-                        <div class="date" id="date3">15/10/2025</div> 
-                        <div id="live3" class="live-animation hidden">LIVE NOW</div> 
-                    </div>
-                    <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Bulgaria.svg" alt="India Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=IND';">
-                        <div class="team-name">Bulgaria</div>
-                    </div>
-                </div>
-                <div class="match-stage">Football⚽ live match</div>
-            </div> 
-
-            
-            
+               
             <div id="match-card-2" class="match-card" onclick="openMatchChannels([
-                {name: 'TAPMAD', url: 'https://saseries.akamaized.net/hls/live/2110097/T@p305t@P!23@25!95/hdntl=exp=1760553435~acl=%2f*~data=hdntl~hmac=91acb820e13d75f3994124d7ef945d150819346f718cead726ed11ad1af83938/level_0.m3u8'},
+                {name: 'TAPMAD', url: 'https://premierleageplnew2.akamaized.net/hls/live/2107109/tapmadenc-1/hdntl=exp=1760872410~acl=%2f*~data=hdntl~hmac=3f07cf5ccc797ca119ddf572226a9adb359724711384342111ae2e31530f0895/level_3.m3u8'},
+                {name: 'Toffee', url: 'https://mprod-cdn.toffeelive.com/live/match-1/index.m3u8'},
             ])">
-                <div class="match-title">Football || European Qualifiers 2026</div>
+                <div class="match-title">Football || English Premier League</div>
                 <div class="team">
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/en/0/03/Flag_of_Italy.svg" alt="Bangladesh Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=BAN';">
-                        <div class="team-name">Italy</div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg" alt="Bangladesh Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=BAN';">
+                        <div class="team-name">Chelsea_FC</div>
                     </div>
                     <div class="match-info">
-                        <div class="time" id="time2">12:45 AM</div> 
-                        <div id="date2">15/10/2025</div> 
+                        <div class="time" id="time2">05:00 PM</div> 
+                        <div id="date2">18/10/2025</div> 
                         <div id="live2" class="live-animation hidden">LIVE NOW</div> 
                     </div>
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d4/Flag_of_Israel.svg" alt="India Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=IND';">
-                        <div class="team-name">Israel</div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_F.C._logo.svg" alt="India Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=IND';">
+                        <div class="team-name">Forest_F.C.</div>
                     </div>
                 </div>
                 <div class="match-stage">Football⚽ live match</div>
             </div>
 
-               
 
-         <div id="match-card-5" class="match-card" onclick="openMatchChannels([
-                 {name: 'Server 1', url: 'https://premierleagpl23.akamaized.net/hls/live/2107108/TapSerie-1@2025/level_0.m3u8'}
-            ])">
-                <div class="match-title">Football || European Qualifiers 2026</div>
+                   
+         <div id="match-card-3" class="match-card" onclick="openMatchChannels([
+                {name: 'Star Sports 1', url: 'https://saseries.akamaized.net/hls/live/2110097/T56A87p03/hdntl=exp=1760553388~acl=%2f*~data=hdntl~hmac=7f7bff0d34cdaeb4b605b8ba5397b6651455c33789a261ff0689b45fb237206b/level_0.m3u8'},])">
+                <div class="match-title">Football || Bundesliga League</div>
                 <div class="team">
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b4/Flag_of_Turkey.svg" alt="Smash Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=Smash';">
-                        <div class="team-name">Turkey</div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/5/59/Bayer_04_Leverkusen_logo.svg" alt="West Indies Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=WI';">
+                        <div class="team-name">Bayer_04_Leverkusen</div>
                     </div>
                     <div class="match-info">
-                        <div class="time" id="time5">12:45 AM</div> 
-                        <div class="date" id="date5">15/10/2025</div> 
-                        <div id="live5" class="live-animation hidden">LIVE NOW</div> 
+                        <div class="time" id="time3">07:30 PM</div> 
+                        <div class="date" id="date3">18/10/2025</div> 
+                        <div id="live3" class="live-animation hidden">LIVE NOW</div> 
                     </div>
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Flag_of_Georgia.svg" alt="Smash Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=Smash';">
-                        <div class="team-name">Georgia</div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/8/83/Mainz_05_crest.svg" alt="India Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=IND';">
+                        <div class="team-name">Mainz_05_crest</div>
                     </div>
                 </div>
                 <div class="match-stage">Football⚽ live match</div>
-            </div>
-            
-        
-    <div id="match-card-8" class="match-card" onclick="openMatchChannels([
-                {name: 'Tapmad', url: 'https://premierleagpl23.akamaized.net/hls/live/2107108/TapAsiaCup-Main/level_0.m3u8'}
-            ])">
-                <div class="match-title">Football || European Qualifiers 2026</div>
-                <div class="team">
-                    <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Flag_of_Ireland.svg" alt="Man City Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=MC';">
-                        <div class="team-name">Ireland</div>
-                    </div>
-                    <div class="match-info">
-                        <div class="time" id="time8">12:45 AM</div> 
-                        <div class="date" id="date8">15/10/2025</div> 
-                        <div id="live8" class="live-animation hidden">LIVE NOW</div> 
-                    </div>
-                    <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Flag_of_Armenia.svg" alt="Everton Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=EV';">
-                        <div class="team-name">Armenia</div>
-                    </div>
-                </div>
-                <div class="match-stage">Football⚽ live match</div>
-            </div>
-                
-
+            </div> 
 
 
             
             <div id="match-card-4" class="match-card" onclick="openMatchChannels([
                 {name: 'Server 1', url: 'https://premierleagpl23.akamaized.net/hls/live/2107108/TapSerie-1@2025/master.m3u8'}
             ])">
-                <div class="match-title">Football || European Qualifiers 2026</div>
+                <div class="match-title">Football || Bundesliga League</div>
                 <div class="team">
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/8/8f/Flag_of_Estonia.svg" alt="Zimbabwe Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=ZIM';">
-                        <div class="team-name">Estonia</div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/0/04/RB_Leipzig_2014_logo.svg" alt="Zimbabwe Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=ZIM';">
+                        <div class="team-name">RB_Leipzig</div>
                     </div>
                     <div class="match-info">
-                        <div class="time" id="time4">10:00 PM</div> 
-                        <div class="date" id="date4">14/10/2025</div> 
+                        <div class="time" id="time4">07:30 PM</div> 
+                        <div class="date" id="date4">18/10/2025</div> 
                         <div id="live4" class="live-animation hidden">LIVE NOW</div> 
                     </div>
                     <div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/27/Flag_of_Moldova.svg" alt="Ireland Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=IRE';">
-                        <div class="team-name">Moldova</div>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Hamburger_SV_logo.svg" alt="Ireland Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=IRE';">
+                        <div class="team-name">Hamburger_SV</div>
                     </div>
                 </div>
-                <div class="match-stage">Football⚽ END match</div>
+                <div class="match-stage">Football⚽ Live match</div>
             </div>
 
+
+            
+
+         <div id="match-card-5" class="match-card" onclick="openMatchChannels([
+                 {name: 'Server 1', url: 'https://premierleagpl23.akamaized.net/hls/live/2107108/TapSerie-1@2025/level_0.m3u8'}
+            ])">
+                <div class="match-title">Football || Bundesliga League</div>
+                <div class="team">
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/01/1._FC_Koeln_Logo_2014%E2%80%93.svg" alt="Smash Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=Smash';">
+                        <div class="team-name">FC_Koeln</div>
+                    </div>
+                    <div class="match-info">
+                        <div class="time" id="time5">07:30 PM</div> 
+                        <div class="date" id="date5">18/10/2025</div> 
+                        <div id="live5" class="live-animation hidden">LIVE NOW</div> 
+                    </div>
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/c/c5/FC_Augsburg_logo.svg" alt="Smash Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=Smash';">
+                        <div class="team-name">FC_Augsburg</div>
+                    </div>
+                </div>
+                <div class="match-stage">Football⚽ live match</div>
+            </div>
         
 
             
             
+             <div id="match-card-6" class="match-card" onclick="openMatchChannels([
+                {name: 'Star Sports 1', url: 'https://saseries.akamaized.net/hls/live/2110097/tappak/hdntl=exp=1760553331~acl=%2f*~data=hdntl~hmac=160b0065c8288862960ce0c1f8461304b4c964b3be814c3868143e3e79697d0e/level_0.m3u8'},])">
+                <div class="match-title">Football || Bundesliga League</div>
+                <div class="team">
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/1._FC_Heidenheim_1846.svg" alt="West Indies Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=WI';">
+                        <div class="team-name">FC_Heidenheim</div>
+                    </div>
+                    <div class="match-info">
+                        <div class="time" id="time6">07:30 PM</div> 
+                        <div class="date" id="date6">18/10/2025</div> 
+                        <div id="live6" class="live-animation hidden">LIVE NOW</div> 
+                    </div>
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/be/SV-Werder-Bremen-Logo.svg" alt="India Flag" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=IND';">
+                        <div class="team-name">Werder-Bremen</div>
+                    </div>
+                </div>
+                <div class="match-stage">Football⚽ live match</div>
+            </div> 
+
+
+          
             
-            <div class="banner" id="home-banner">
+         <div id="match-card-7" class="match-card" onclick="openMatchChannels([
+                {name: 'T Sports', url: 'https://cdn.bdixtv24.vip/tsports/index.m3u8'},
+                {name: 'T Sports', url: 'https://cdn.bdixtv24.vip/tsports/tracks-v1a1/mono.ts.m3u8'}
+            ])">
+                <div class="match-title">Football || English Premier League</div>
+                <div class="team">
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/7/77/Logo_Sunderland.svg" alt="Man City Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=MC';">
+                        <div class="team-name">Sunderland</div>
+                    </div>
+                    <div class="match-info">
+                        <div class="time" id="time7">08:00 PM</div> 
+                        <div class="date" id="date7">18/10/2025</div> 
+                        <div id="live7" class="live-animation hidden">LIVE NOW</div> 
+                    </div>
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/c/c9/Wolverhampton_Wanderers_FC_crest.svg" alt="Everton Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=EV';">
+                        <div class="team-name">Wanderers_FC</div>
+                    </div>
+                </div>
+                <div class="match-stage">Cricket 🏏 live match</div>
+            </div>
+           
+            
+        
+        <div id="match-card-8" class="match-card" onclick="openMatchChannels([
+                {name: 'Tapmad', url: 'https://premierleagpl23.akamaized.net/hls/live/2107108/TapAsiaCup-Main/level_0.m3u8'}
+            ])">
+                <div class="match-title">Football || English Premier League</div>
+                <div class="team">
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/6/6d/Burnley_FC_Logo.svg" alt="Man City Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=MC';">
+                        <div class="team-name">Burnley_FC</div>
+                    </div>
+                    <div class="match-info">
+                        <div class="time" id="time8">08:00 PM</div> 
+                        <div class="date" id="date8">18/10/2025</div> 
+                        <div id="live8" class="live-animation hidden">LIVE NOW</div> 
+                    </div>
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg" alt="Everton Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=EV';">
+                        <div class="team-name">Leeds_United_F.C.</div>
+                    </div>
+                </div>
+                <div class="match-stage">Football⚽ live match</div>
+            </div>
+                
+
+              
+        <div id="match-card-9" class="match-card" onclick="openMatchChannels([
+                {name: 'Tapmad', url: 'https://premierleagpl23.akamaized.net/hls/live/2107108/TapAsiaCup-Main/level_0.m3u8'}
+            ])">
+                <div class="match-title">Football || English Premier League</div>
+                <div class="team">
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/a/a2/Crystal_Palace_FC_logo_%282022%29.svg" alt="Man City Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=MC';">
+                        <div class="team-name">Crystal_Palace_FC</div>
+                    </div>
+                    <div class="match-info">
+                        <div class="time" id="time9">08:00 PM</div> 
+                        <div class="date" id="date9">18/10/2025</div> 
+                        <div id="live9" class="live-animation hidden">LIVE NOW</div> 
+                    </div>
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/e/e5/AFC_Bournemouth_%282013%29.svg" alt="Everton Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=EV';">
+                        <div class="team-name">Bournemouth</div>
+                    </div>
+                </div>
+                <div class="match-stage">Football⚽ live match</div>
+            </div>
+
+
+               <div id="match-card-10" class="match-card" onclick="openMatchChannels([
+                {name: 'Tapmad', url: 'https://premierleagpl23.akamaized.net/hls/live/2107108/TapAsiaCup-Main/level_0.m3u8'}
+            ])">
+                <div class="match-title">Football || English Premier League</div>
+                <div class="team">
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/d/d0/Brighton_and_Hove_Albion_FC_crest.svg" alt="Man City Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=MC';">
+                        <div class="team-name">Brighton</div>
+                    </div>
+                    <div class="match-info">
+                        <div class="time" id="time10">08:00 PM</div> 
+                        <div class="date" id="date10">18/10/2025</div> 
+                        <div id="live10" class="live-animation hidden">LIVE NOW</div> 
+                    </div>
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg" alt="Everton Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=EV';">
+                        <div class="team-name">Newcastle_United</div>
+                    </div>
+                </div>
+                <div class="match-stage">Football⚽ live match</div>
+            </div>
+
+
+            
+            
+               <div id="match-card-11" class="match-card" onclick="openMatchChannels([
+                {name: 'Tapmad', url: 'https://premierleagpl23.akamaized.net/hls/live/2107108/TapAsiaCup-Main/level_0.m3u8'}
+            ])">
+                <div class="match-title">Football || English Premier League</div>
+                <div class="team">
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" alt="Man City Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=MC';">
+                        <div class="team-name">Manchester_City_FC</div>
+                    </div>
+                    <div class="match-info">
+                        <div class="time" id="time11">08:00 PM</div> 
+                        <div class="date" id="date11">18/10/2025</div> 
+                        <div id="live11" class="live-animation hidden">LIVE NOW</div> 
+                    </div>
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/7/7c/Everton_FC_logo.svg" alt="Everton Logo" onerror="this.onerror=null; this.src='https://placehold.co/30x30/222/fff?text=EV';">
+                        <div class="team-name">Everton_FC</div>
+                    </div>
+                </div>
+                <div class="match-stage">Football⚽ live match</div>
+            </div>
+
+            
+            
+            
+         <div class="banner" id="home-banner">
                 <a href="https://www.revenuecpmgate.com/p3zdd3e2?key=daa29b7514ba8b9cd04e286e56b7e484" target="_blank" rel="noopener noreferrer">
                     <img src="https://i.ibb.co.com/3yRrLxfK/20251002-090751.jpg" alt="Home Section Banner" class="banner-image" onerror="this.onerror=null; this.src='https://placehold.co/600x100/C80815/ffffff?text=LIVEFY+AD+SPACE';">
                 </a>
@@ -778,7 +850,7 @@
         
         
         <div id="sports-channels-section" class="hidden">
-             <div class="section-header">
+            <div class="section-header">
                 <h2>Live TV</h2>
                 <a href="https://t.me/livefytv" class="join-now-link" target="_blank" rel="noopener noreferrer">
                     Join Now
@@ -943,7 +1015,7 @@
             </div>
             
 
-            <div class="highlight-card" onclick="openMatchChannels([{name: 'Highlight 1', url: 'https://vodintlv2.in-maa-1.linodeobjects.com/AfgvsBan2025/1stT20I/master.m3u80c1.m3u8'}])">
+            <div class="highlight-card" onclick="openMatchChannels([{name: 'Highlight 1', url: 'https://mprod-cdn.toffeelive.com/live/match-1/index.m3u8'}])">
                 <img src="https://placehold.co/70x70/ffcc00/000000?text=Wicket" alt="Highlight 3">
                 <div class="info">
                     <p style="font-size: 16px; font-weight: bold;">Top 5 Wickets: BANGLADESH WIN</p>
@@ -981,7 +1053,7 @@
         <div id="video-container-wrapper">
             <button id="close-btn" onclick="closeVideo()">❌</button> 
             <div class="video-wrapper">
-                <video id="video" class="video-js vjs-default-skin" controls autoplay playsinline></video>
+                <video id="video" controls autoplay playsinline></video>
                 
                 <div id="video-overlay">
                     <span id="livefy-text-animator">LIVEFY TV</span>
@@ -991,7 +1063,7 @@
         
         <div id="error-message-box">
             <button class="close-error-btn" onclick="closeVideo()">✖</button> <h3 id="error-title">Error (Playback Failure)</h3>
-            <p id="error-text">The video cannot be loaded. The stream link might be invalid, the server may be down, or your device might not support the format. Please try another server.</p>
+            <p id="error-text">The video cannot be loaded. The stream link might be invalid, the server may be down, or your device might not support HLS format. Please try another server.</p>
         </div>
 
 
@@ -1019,22 +1091,16 @@
             <span>Sports Channels</span>
         </div>
         <div id="nav-highlights" class="nav-item" onclick="showTab('highlights-section', this)">
-            <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 13c-2.34 0-4.59.88-6.23 2.52-1.64 1.64-2.52 3.88-6.23 6.23H5V3h14v10.5h-1.5zm-5.5 3.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5-2.5 1.12 2.5-2.5-2.5 1.12-2.5 2.5-2.5z"></path></svg>
+            <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 13c-2.34 0-4.59.88-6.23 2.52-1.64 1.64-2.52 3.88-2.52 6.23H5V3h14v10.5h-1.5zm-5.5 3.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5z"></path></svg>
             <span>Highlights</span>
         </div>
     </nav>
     
     
-<script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
-
 <script>    
-        // *******************************************************
-        // *** HLS.js সম্পর্কিত সব ভ্যারিয়েবল/কোড মুছে ফেলা হয়েছে ***
-        // *******************************************************
-        
-        // --- Video.js Global Variables ---
-        let player = null; // Video.js প্লেয়ার অবজেক্ট
-        const videoElement = document.getElementById('video'); // মূল HTML <video> ট্যাগ
+        // HLS.js Global Variables
+        let hls = null; 
+        const video = document.getElementById('video');
         const qualitySelect = document.getElementById('quality-select');
         const qualityContainer = document.getElementById('quality-selector-container');
         const serverButtonsContainer = document.getElementById('server-buttons');
@@ -1048,10 +1114,27 @@
         const videoOverlay = document.getElementById('video-overlay');
         // -----------------------------
         
-        // ======================================
-        // --- POP-UP LOGIC REMOVED ---
-        // ======================================
-
+        // --- ADDED: Unified Native Error Handler ---
+        let nativeErrorHandler = null;
+        function setupNativeErrorHandler(videoSrc) {
+            // Remove any previous handler
+            if (nativeErrorHandler) {
+                video.removeEventListener('error', nativeErrorHandler);
+            }
+            
+            // Create a new handler
+            nativeErrorHandler = function() {
+                console.error('Native Video Playback Failed for:', videoSrc);
+                hideWatermark();
+                showMessage("Playback Failed", "ভিডিও লোড করা যাচ্ছে না। স্ট্রিম লিঙ্কটি হয়তো কাজ করছে না, সার্ভার বন্ধ আছে, অথবা আপনার ব্রাউজারে ফরম্যাটটি সাপোর্ট করছে না। অন্য সার্ভার চেষ্টা করুন।");
+                video.removeEventListener('error', nativeErrorHandler); // Remove self after execution
+                nativeErrorHandler = null;
+            };
+            
+            // Attach the new handler
+            video.addEventListener('error', nativeErrorHandler);
+        }
+        // ------------------------------------------
 
         /**
          * Shows a custom message box instead of using alert().
@@ -1070,6 +1153,11 @@
             
             // Hide all Livefy TV elements on error
             livefyTextAnimator.style.display = 'none';
+            
+            // Stop video
+            if (video) {
+                video.pause();
+            }
         }
 
         /**
@@ -1082,43 +1170,52 @@
         }
 
         /**
-         * Populates the video quality selector using Video.js/HLS API.
-         * Note: Video.js manages ABR (Auto) by default. Manual quality control is complex
-         * without external plugins like videojs-contrib-quality-menu. For simplicity,
-         * we will rely on Video.js's default quality handling or a simplified menu.
+         * Populates the video quality selector based on HLS levels.
          */
         function populateQualitySelector() {
-            // Video.js handles this automatically for HLS streams, often without manual control
-            // unless a specific plugin is used. To avoid complex code, we'll keep the selector
-            // hidden or remove it unless you add a quality plugin later.
-            qualitySelect.innerHTML = '<option value="-1">Auto (Managed by Player)</option>';
-            qualityContainer.style.display = 'none'; // Hiding the selector as Video.js handles ABR best
+            // Clear previous options
+            qualitySelect.innerHTML = '';
+            
+            // 1. Add Auto option (HLS.js uses -1 for adaptive/auto)
+            const autoOption = new Option('Auto', -1);
+            qualitySelect.add(autoOption);
+            
+            if (hls && hls.levels && hls.levels.length > 0) {
+                // 2. Add manual options
+                hls.levels.forEach((level, index) => {
+                    const resolution = level.height ? `${level.height}p` : 'Unknown';
+                    // Convert bitrate from bits/s to kbps
+                    const bitrate = level.bitrate ? ` (${Math.round(level.bitrate / 1000)}kbps)` : '';
+                    const option = new Option(resolution + bitrate, index);
+                    qualitySelect.add(option);
+                });
+                qualityContainer.style.display = 'flex';
+            } else {
+                 // If no HLS levels found (maybe native playback used)
+                 qualityContainer.style.display = 'none';
+            }
+            // Set the current selection based on the current level
+            qualitySelect.value = hls ? hls.currentLevel : -1;
         }
 
         /**
-         * This function is now mostly a placeholder unless a Quality Plugin is used.
+         * Changes the HLS playback quality level.
+         * @param {string} index - The index of the HLS level, or -1 for auto.
          */
         function changeQuality(index) {
-             console.log("Quality control handled by Video.js ABR (Adaptive Bitrate). Manual change skipped.");
-            // If you later install a quality plugin, add the logic here:
-            // player.qualityLevels().forEach(level => level.enabled = false);
-            // if (index !== -1) player.qualityLevels()[index].enabled = true;
+            if (hls) {
+                hls.currentLevel = parseInt(index, 10);
+            }
         }
         
         // --- CUSTOM LOADING MANAGEMENT FUNCTIONS ---
         function showLoading() {
-            // The video element must exist before trying to use it
-            if (!videoElement) return; 
-
             livefyTextAnimator.textContent = 'LIVEFY TV - LOADING...'; 
             livefyTextAnimator.classList.add('is-loading'); // Apply red color and pulse animation
             livefyTextAnimator.style.display = 'block';
         }
 
         function showWatermark() {
-             // The video element must exist before trying to use it
-            if (!videoElement) return;
-
              livefyTextAnimator.textContent = 'LIVEFY TV'; // Normal text
              livefyTextAnimator.classList.remove('is-loading'); // Reverts to default green style
              livefyTextAnimator.style.display = 'block'; 
@@ -1130,84 +1227,109 @@
         // ------------------------------------------
 
         /**
-         * Function to load and play M3U8/MP4/Direct video stream using Video.js.
+         * Function to load and play M3U8/MP4/Direct video stream.
+         * This function ensures maximum compatibility (HLS.js or native fallback).
          */
         function loadVideoSource(videoSrc) {
             hideMessage(); // Reset error message state
-            showLoading(); // Show loading immediately
+            showLoading(); // <--- MODIFIED: Show loading immediately when link is passed.
 
             if (!videoSrc || videoSrc.startsWith('http://channel-url') || videoSrc.startsWith('http://highlight-url')) {
-                if (player) { player.dispose(); player = null; }
+                if (hls) { hls.destroy(); hls = null; }
+                video.removeAttribute('src'); 
+                video.load(); 
+                qualityContainer.style.display = 'none';
                 showMessage("Error: No Link Found", "No URL found for the video stream or the link is only a demo.");
                 return;
             }
             
-            // Determine the MIME type
-            let mimeType = '';
-            if (videoSrc.toLowerCase().includes('.m3u8')) {
-                // M3U8/HLS type
-                mimeType = 'application/x-mpegURL'; 
-            } else if (videoSrc.toLowerCase().includes('.mp4') || videoSrc.toLowerCase().includes('.mov')) {
-                // MP4 type
-                mimeType = 'video/mp4'; 
-            } else {
-                 // For unknown formats or direct stream links
-                 mimeType = 'application/x-mpegURL'; // Assume HLS for safety, or try direct MP4 (browser fallback)
+            // Destroy previous HLS.js instance if exists
+            if (hls) {
+                hls.destroy();
+                hls = null;
             }
             
-            // 1. Destroy and re-create Video.js instance if needed
-            if (player) {
-                // A safer way is to just change the source
-                player.reset(); // Clear previous state
-            } else {
-                 // Initialize Video.js on the <video> element
-                player = videojs(videoElement.id, {
-                    // Optional: Custom configurations for robust streaming
-                    // techOrder: ["html5"], // Use default (html5)
-                    preload: 'auto',
-                    autoplay: true,
-                    // We explicitly allow un-secure (http) links to load if they are provided
-                    html5: {
-                        hls: {
-                            withCredentials: false
-                        }
+            // Remove previous native error handler
+            if (nativeErrorHandler) {
+                video.removeEventListener('error', nativeErrorHandler);
+                nativeErrorHandler = null;
+            }
+
+            video.removeAttribute('src'); 
+            video.load(); 
+            qualitySelect.innerHTML = '<option value="-1">Auto</option>';
+            qualityContainer.style.display = 'none';
+
+            const isHls = videoSrc.toLowerCase().endsWith('.m3u8');
+            
+            if (isHls && Hls.isSupported()) {
+                // --- HLS (Adaptive Streaming) Logic ---
+                qualityContainer.style.display = 'flex';
+                
+                hls = new Hls({
+                    // Robust config for unstable live streams
+                    maxBufferLength: 10,     
+                    maxMaxBufferLength: 30,  
+                    fragLoadingMaxRetry: 10, 
+                    fragLoadingRetryDelay: 500, 
+                    levelLoadingMaxRetry: 5,  
+                    abrEwmaFastAveragingTime: 3, 
+                    abrEwmaSlowAveragingTime: 9, 
+                    startFragPrefetch: true,
+                    liveSyncDurationCount: 3
+                });
+                
+                hls.loadSource(videoSrc);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    populateQualitySelector(); 
+                    if (hls.live) { // Use hls.live property
+                        video.currentTime = video.duration - 1; // Seek to live edge
+                    }
+                    video.play().catch(e => console.log("Video auto-play blocked:", e));
+                });
+                
+                hls.on(Hls.Events.LEVEL_SWITCHED, function(event, data) {
+                    qualitySelect.value = data.level; 
+                });
+
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    console.error('HLS Error:', data.details);
+                    if (data.fatal) {
+                        console.error('HLS Fatal Error. Attempting Native Fallback...');
+                        if (hls) { hls.destroy(); hls = null; }
+                        
+                        // --- CORE FIX: Fallback to Native HTML5 directly ---
+                        video.src = videoSrc;
+                        video.load();
+                        setupNativeErrorHandler(videoSrc); // Set up native error handler
+                        qualityContainer.style.display = 'none'; // Hide HLS quality control
+                        
+                        video.play().catch(e => {
+                            console.log("Native fallback play blocked:", e);
+                            // Do nothing here, the error handler will catch the failure.
+                        });
+                        // ----------------------------------------------------
+                    } else if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
+                        // Re-show loading on stall/buffering
+                        showLoading();
                     }
                 });
-                
-                // --- Video.js Event Listeners (Simplified Loading/Error Handling) ---
-                player.on('loadstart', showLoading);
-                player.on('waiting', () => { if (!player.paused()) showLoading(); });
-                player.on('canplay', showWatermark);
-                player.on('playing', showWatermark);
-                player.on('pause', hideWatermark);
-                player.on('ended', hideWatermark);
-                
-                player.on('error', (e) => {
-                    console.error('Video.js Error:', player.error());
-                    // 1 = MEDIA_ERR_ABORTED
-                    // 2 = MEDIA_ERR_NETWORK
-                    // 3 = MEDIA_ERR_DECODE
-                    // 4 = MEDIA_ERR_SRC_NOT_SUPPORTED (Most common stream link failure)
-                    hideWatermark();
-                    const error = player.error();
-                    const errMsg = error ? `Error Code ${error.code}: ${error.message}` : "An unknown playback error occurred.";
-                    showMessage("Playback Error (Video.js)", `${errMsg}. The stream link might be down, or the format/token is not accepted by the server. Please try another server.`);
-                });
-                
-            }
-            
-            // 2. Load the new source
-            player.src({
-                src: videoSrc,
-                type: mimeType
-            });
-            
-            // 3. Play the video
-            player.load();
-            player.play().catch(e => console.log("Video play blocked/failed:", e));
 
-            // Hide the default quality selector (Video.js handles ABR automatically)
-            populateQualitySelector(); 
+            } else {
+                // --- Native/Direct Playback Logic (MP4, non-HLS or Safari/Unsupported Browser) ---
+                console.log('Loading Native/Direct stream:', videoSrc);
+                
+                video.src = videoSrc;
+                video.load();
+                setupNativeErrorHandler(videoSrc); // Set up native error handler
+
+                video.play().catch(e => {
+                    console.log("Native video play blocked or failed:", e);
+                    // The 'error' event listener will handle the actual failure.
+                });
+            }
         }
         
         /**
@@ -1244,7 +1366,7 @@
 
         /**
          * Selects a new server/channel and starts playback.
-         * @param {string} serverSrc - The M3U8/MP4 URL.
+         * @param {string} serverSrc - The M3U8 URL.
          * @param {HTMLElement} clickedButton - The button element that was clicked.
          */
         function selectServer(serverSrc, clickedButton) {
@@ -1262,10 +1384,18 @@
         // --- Close Video Function (Used for both video player and error message) ---
         function closeVideo() {
             document.getElementById('video-player').style.display = 'none';
-            if (player) {
-                player.pause();
-                player.reset(); // Safely clear the player state
-                // Note: We don't dispose the player so we can re-use the instance.
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
+            video.pause();
+            video.removeAttribute('src'); 
+            video.load();
+            
+            // Remove native error handler
+            if (nativeErrorHandler) {
+                video.removeEventListener('error', nativeErrorHandler);
+                nativeErrorHandler = null;
             }
             
             // Reset player visibility elements
@@ -1275,7 +1405,7 @@
 
             // Clear quality and server options upon closing
             qualitySelect.innerHTML = '<option value="-1">Auto</option>';
-            qualityContainer.style.display = 'none'; 
+            qualityContainer.style.display = 'flex'; 
             serverButtonsContainer.innerHTML = '';
             
             // --- Reset LIVEFY TV state on close ---
@@ -1308,7 +1438,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- CLOCK AND DATE FUNCTIONALITY (NO CHANGE) ---
+        // --- CLOCK AND DATE FUNCTIONALITY ---
         function updateClock() {
             const now = new Date();
             // Options for readable time and date (English locale for HH:MM:SS AM/PM)
@@ -1330,24 +1460,31 @@
         }
 
 
-        // --- Live Status Check Logic (NO CHANGE) ---
+        // --- Live Status Check Logic (uses previously set times) ---
+        // আইডি যোগ করা হয়েছে যাতে টাইম পরিবর্তন করা সহজ হয় (যেমন: '6' হল West Indies vs Indian)
         const matches = [
-            // id: '1' - ICC Champions Trophy (BAN vs AFG)
-            { id: '1', start: '13:30', end: '22:00' }, 
-            // id: '2' - WOMAN|ICC World Cup (BAN vs PAK)
-            { id: '2', start: '00:45', end: '03:00' }, 
-            // id: '3' - Cricket | T20 (NZ vs AUS)
-            { id: '3', start: '00:45', end: '03:00' }, 
-            // id: '4' - 2nd ODI | Ireland Tour Of Zimbabwe (ZIM vs IRE)
-            { id: '4', start: '22:00', end: '23:59' }, 
-            // id: '5' - Cricket / Super Smash 2024/2025
-            { id: '5', start: '00:45', end: '03:00' }, 
-            // id: '6' - Cricket 🏏। West Indies vs Indian
-            { id: '6', start: '00:45', end: '03:00' }, 
-            // id: '7' - Football | UEFA Europa League
-            { id: '7', start: '15:15', end: '23:00' },
-            // id: '8' - Football | UEFA Europa League
-            { id: '8', start: '00:45', end: '03:00' }
+            // id: '1' - Cricket || India vs Australia 1st ODI
+            { id: '1', start: '10:00', end: '17:00' }, 
+            // id: '2' - Football || English Premier League (Chelsea_FC vs Forest_F.C.)
+            { id: '2', start: '17:00', end: '19:30' }, 
+            // id: '3' - Football || Bundesliga League (Bayer_04_Leverkusen vs Mainz_05_crest)
+            { id: '3', start: '19:30', end: '22:00' }, 
+            // id: '4' - Football || Bundesliga League (RB_Leipzig vs Hamburger_SV)
+            { id: '4', start: '19:30', end: '22:00' }, 
+            // id: '5' - Football || Bundesliga League (FC_Koeln vs FC_Augsburg)
+            { id: '5', start: '19:30', end: '22:00' }, 
+            // id: '6' - Football || Bundesliga League (FC_Heidenheim vs Werder-Bremen)
+            { id: '6', start: '19:30', end: '22:00' }, 
+            // id: '7' - Football || English Premier League (Sunderland vs Wanderers_FC)
+            { id: '7', start: '20:00', end: '22:30' },
+            // id: '8' - Football || English Premier League (Burnley_FC vs Leeds_United_F.C.)
+            { id: '8', start: '20:00', end: '22:30' },
+            // id: '9' - Football || English Premier League (Crystal_Palace_FC vs Bournemouth)
+            { id: '9', start: '20:00', end: '22:30' },
+            // id: '10' - Football || English Premier League (Brighton vs Newcastle_United)
+            { id: '10', start: '20:00', end: '22:30' },
+            // id: '11' - Football || English Premier League (Manchester_City_FC vs Everton_FC)
+            { id: '11', start: '20:00', end: '22:30' }
         ];
 
         function checkMatchStatus() {
@@ -1382,6 +1519,30 @@
         // Initial setup and recurring tasks
         document.addEventListener('DOMContentLoaded', () => {
             
+            // --- VIDEO EVENT LISTENERS FOR LOADING/WATERMARK (Modified for better loading state) ---
+            
+            // 1. Show Red Loading Text when the video/HLS starts processing the source
+            video.addEventListener('loadstart', showLoading); 
+
+            // 2. Show Red Loading Text when the video stalls (buffering/waiting)
+            video.addEventListener('waiting', () => {
+                if (!video.paused) {
+                    showLoading();
+                }
+            });
+
+            // 3. Show Green Watermark when the video is ready to play (canplay)
+            video.addEventListener('canplay', showWatermark);
+
+            // 4. Show Green Watermark when the video is actually playing
+            video.addEventListener('playing', showWatermark);
+
+            // 5. Hide Watermark/Loading when video is paused/closed/error
+            video.addEventListener('pause', hideWatermark);
+            video.addEventListener('ended', hideWatermark); 
+            // -----------------------------------------------------------------------------------
+
+
             // Start clock update immediately and every second
             updateClock();
             setInterval(updateClock, 1000); 

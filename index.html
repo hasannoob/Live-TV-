@@ -3,63 +3,109 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Network Stream Player</title>
+<title>Network Playlist Player</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
 body{margin:0;background:#0a192f;color:#e0e6ed;font-family:'Segoe UI',sans-serif;}
 header{background:#1e3799;padding:12px;text-align:center;font-weight:bold;font-size:1.3em;}
 #video-container{width:90%;max-width:700px;margin:20px auto;position:relative;}
 video{width:100%;border-radius:12px;background:#000;}
-#loader{display:none;border:5px solid rgba(255,255,255,0.1);border-top:5px solid #00bfff;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;}
+.loader{display:none;border:5px solid rgba(255,255,255,0.1);border-top:5px solid #00bfff;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;}
 @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 #status{text-align:center;padding:6px 10px;background:#3498db;border-radius:4px;margin-top:10px;}
-#input-url{width:80%;padding:10px;border-radius:6px;border:none;margin:10px auto;display:block;}
-#play-btn{display:block;width:120px;margin:10px auto;padding:10px;background:#00bfff;color:#fff;border:none;border-radius:6px;cursor:pointer;}
+.main-container{max-width:1100px;margin:0 auto;padding:10px;}
+.channel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+.channel-item{background:#0b2545;border:2px solid #1f6feb;border-radius:10px;text-align:center;padding:10px;cursor:pointer;transition:all 0.3s ease;position:relative;}
+.channel-item:hover{transform:translateY(-5px);border-color:#2ecc71;box-shadow:0 0 10px #2ecc71;}
+.channel-item.active{border-color:#e74c3c;box-shadow:0 0 15px #e74c3c;}
+.play-icon{font-size:2em;color:#00bfff;display:block;margin-bottom:5px;}
+.channel-name{font-size:0.9em;color:#ecf0f1;font-weight:bold;}
+.live-badge{position:absolute;top:6px;right:8px;background:#e74c3c;color:white;padding:2px 6px;border-radius:4px;font-size:0.75em;font-weight:bold;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%{opacity:1;}50%{opacity:0.5;}100%{opacity:1;}}
 </style>
 </head>
 <body>
 
-<header>📺 Network Stream Player</header>
-<input type="text" id="input-url" placeholder="Enter .m3u8 or stream URL"/>
-<button id="play-btn">Play Stream</button>
+<header>📺 Network Playlist Player</header>
 <div id="video-container">
 <video id="video" controls autoplay playsinline></video>
-<div id="loader"></div>
+<div class="loader" id="loader"></div>
 </div>
-<div id="status">Enter a network stream URL to play.</div>
+<div style="text-align:center;"><div id="status">লোড হচ্ছে...</div></div>
+
+<div class="main-container">
+<div id="channel-list" class="channel-grid"></div>
+</div>
 
 <script>
+// 🔹 আপনার M3U playlist URL
+const PLAYLIST_URL = "https://bongoflixbd.top/test/playlist.php"; // এখানে নিজের লিঙ্ক দিন
+
+let streams=[],currentHls=null,lastChannel=null;
 const video=document.getElementById("video");
 const loader=document.getElementById("loader");
 const status=document.getElementById("status");
-const btn=document.getElementById("play-btn");
-const input=document.getElementById("input-url");
-let hls=null;
 
-btn.onclick=function(){
-    const url=input.value.trim();
-    if(!url){ alert("Please enter a valid stream URL"); return; }
-    loader.style.display="block";
-    status.textContent="🔄 Loading stream..."; status.style.background="#f39c12";
+async function loadPlaylist(){
+    status.textContent="📡 Playlist লোড হচ্ছে...";
+    try{
+        const res=await fetch(PLAYLIST_URL);
+        const text=await res.text();
+        parseM3U(text);
+    }catch(e){console.error(e); status.textContent="❌ Playlist load ব্যর্থ";}
+}
 
-    if(Hls.isSupported()){
-        if(hls) hls.destroy();
-        hls=new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED,function(){video.play().catch(()=>{status.textContent="⚠️ Autoplay failed";});});
-        hls.on(Hls.Events.ERROR,function(event,data){loader.style.display="none"; status.textContent="❌ Stream load failed"; status.style.background="#e74c3c"; console.error(data);});
-        video.onplaying=()=>{loader.style.display="none"; status.textContent="✅ Stream playing"; status.style.background="#2ecc71";}
-        video.onwaiting=()=>{loader.style.display="block"; status.textContent="⏳ Buffering..."; status.style.background="#f1c40f";}
-    } else if(video.canPlayType("application/vnd.apple.mpegurl")){
-        video.src=url;
-        video.play();
-    } else{
-        loader.style.display="none";
-        status.textContent="❌ Browser does not support HLS";
-        status.style.background="#e74c3c";
+function parseM3U(data){
+    const lines=data.split("\n").map(l=>l.trim()).filter(l=>l.length>0);
+    streams=[];
+    let current=null;
+    for(const line of lines){
+        if(line.startsWith("#EXTINF:")){
+            current={};
+            const parts=line.split(",");
+            current.name=parts[1]||"Unknown";
+        } else if(current && !line.startsWith("#")){
+            current.url=line;
+            streams.push(current);
+            current=null;
+        }
     }
-};
+    displayStreams();
+}
+
+function displayStreams(){
+    const list=document.getElementById("channel-list");
+    list.innerHTML="";
+    streams.forEach((ch,i)=>{
+        const div=document.createElement("div");
+        div.className="channel-item";
+        div.innerHTML=`<span class='play-icon'>▶️</span><div class='channel-name'>${ch.name}</div><div class='live-badge'>LIVE 🔴</div>`;
+        div.onclick=()=>playStream(ch.url,div);
+        list.appendChild(div);
+    });
+    status.textContent="✅ Playlist লোড হয়েছে!";
+    if(streams.length>0) playStream(streams[0],document.querySelector(".channel-item"));
+}
+
+function playStream(url,item){
+    if(lastChannel) lastChannel.classList.remove("active");
+    if(item) { item.classList.add("active"); lastChannel=item; }
+    loader.style.display="block"; status.textContent="🔄 ভিডিও লোড হচ্ছে...";
+    
+    if(Hls.isSupported()){
+        if(currentHls) currentHls.destroy();
+        currentHls=new Hls();
+        currentHls.loadSource(url);
+        currentHls.attachMedia(video);
+        currentHls.on(Hls.Events.MANIFEST_PARSED,()=>video.play());
+        currentHls.on(Hls.Events.ERROR,()=>{loader.style.display="none"; status.textContent="❌ Stream load failed";});
+        video.onplaying=()=>{loader.style.display="none"; status.textContent="✅ ভিডিও চলছে";}
+        video.onwaiting=()=>{loader.style.display="block"; status.textContent="⏳ Buffering...";}
+    } else if(video.canPlayType("application/vnd.apple.mpegurl")){ video.src=url; video.play();}
+    else{loader.style.display="none"; status.textContent="❌ Browser does not support HLS";}
+}
+
+document.addEventListener("DOMContentLoaded",loadPlaylist);
 </script>
 
 </body>

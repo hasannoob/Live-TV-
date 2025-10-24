@@ -3,117 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LiveFy Pro Player</title>
+<title>Network Stream Player</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
 body{margin:0;background:#0a192f;color:#e0e6ed;font-family:'Segoe UI',sans-serif;}
-header{background:linear-gradient(90deg,#0a3d62,#1e3799);padding:12px 20px;text-align:center;font-weight:bold;font-size:1.3em;box-shadow:0 4px 10px rgba(0,0,0,0.6);}
-#search-box{width:90%;max-width:500px;margin:15px auto;display:block;padding:10px;border-radius:8px;border:none;font-size:1em;background:#0b2545;color:#e0e6ed;text-align:center;outline:none;}
-#video-container{width:100%;max-width:700px;margin:20px auto;position:relative;}
+header{background:#1e3799;padding:12px;text-align:center;font-weight:bold;font-size:1.3em;}
+#video-container{width:90%;max-width:700px;margin:20px auto;position:relative;}
 video{width:100%;border-radius:12px;background:#000;}
-.loader{display:none;border:5px solid rgba(255,255,255,0.1);border-top:5px solid #00bfff;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;}
+#loader{display:none;border:5px solid rgba(255,255,255,0.1);border-top:5px solid #00bfff;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;}
 @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-.main-container{max-width:1100px;margin:0 auto;padding:10px;}
-.channel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
-.channel-item{background:#0b2545;border:2px solid #1f6feb;border-radius:10px;text-align:center;padding:10px;cursor:pointer;transition:all 0.3s ease;position:relative;}
-.channel-item:hover{transform:translateY(-5px);border-color:#2ecc71;box-shadow:0 0 10px #2ecc71;}
-.channel-item.active{border-color:#e74c3c;box-shadow:0 0 15px #e74c3c;}
-.play-icon{font-size:2em;color:#00bfff;display:block;margin-bottom:5px;}
-.channel-name{font-size:0.9em;color:#ecf0f1;font-weight:bold;}
-.live-badge{position:absolute;top:6px;right:8px;background:#e74c3c;color:white;padding:2px 6px;border-radius:4px;font-size:0.75em;font-weight:bold;animation:pulse 1.2s infinite;}
-@keyframes pulse{0%{opacity:1;}50%{opacity:0.5;}100%{opacity:1;}}
-.group-header{grid-column:1/-1;font-size:1.1em;color:#3498db;margin-top:15px;padding-bottom:5px;border-bottom:1px solid #3498db;cursor:pointer;}
-#status{display:inline-block;padding:6px 10px;background:#3498db;border-radius:4px;font-size:0.9em;margin-top:10px;}
-#total-count{text-align:center;color:#7f8c8d;margin:15px 0;}
+#status{text-align:center;padding:6px 10px;background:#3498db;border-radius:4px;margin-top:10px;}
+#input-url{width:80%;padding:10px;border-radius:6px;border:none;margin:10px auto;display:block;}
+#play-btn{display:block;width:120px;margin:10px auto;padding:10px;background:#00bfff;color:#fff;border:none;border-radius:6px;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<header>📺 LiveFy Pro Player</header>
-<input type="text" id="search-box" placeholder="🔍 সার্চ করুন..." onkeyup="filterChannels()"/>
+<header>📺 Network Stream Player</header>
+<input type="text" id="input-url" placeholder="Enter .m3u8 or stream URL"/>
+<button id="play-btn">Play Stream</button>
 <div id="video-container">
 <video id="video" controls autoplay playsinline></video>
-<div class="loader" id="loader"></div>
+<div id="loader"></div>
 </div>
-<div style="text-align:center;"><div id="status">লোড হচ্ছে...</div></div>
-<div class="main-container">
-<div id="channel-list" class="channel-grid"></div>
-<div id="total-count"></div>
-</div>
+<div id="status">Enter a network stream URL to play.</div>
 
 <script>
-const PROXY_URL="https://bongoflixbd.top/test/playlist.php";
-let streams=[],currentHls=null,lastChannel=null;
+const video=document.getElementById("video");
+const loader=document.getElementById("loader");
+const status=document.getElementById("status");
+const btn=document.getElementById("play-btn");
+const input=document.getElementById("input-url");
+let hls=null;
 
-function playStream(url,item){
-  const video=document.getElementById("video");
-  const loader=document.getElementById("loader");
-  const status=document.getElementById("status");
-  if(lastChannel) lastChannel.classList.remove("active");
-  if(item){ item.classList.add("active"); lastChannel=item;}
-  loader.style.display="block"; status.textContent="🔄 ভিডিও লোড হচ্ছে..."; status.style.background="#f39c12";
+btn.onclick=function(){
+    const url=input.value.trim();
+    if(!url){ alert("Please enter a valid stream URL"); return; }
+    loader.style.display="block";
+    status.textContent="🔄 Loading stream..."; status.style.background="#f39c12";
 
-  if(Hls.isSupported()){
-    if(currentHls) currentHls.destroy();
-    currentHls=new Hls();
-    currentHls.loadSource(url);
-    currentHls.attachMedia(video);
-    currentHls.on(Hls.Events.MANIFEST_PARSED,function(){video.play().catch(()=>{status.textContent="⚠️ Autoplay ব্যর্থ";});});
-    currentHls.on(Hls.Events.ERROR,function(){loader.style.display="none"; status.textContent="❌ ভিডিও লোড হচ্ছে না"; status.style.background="#e74c3c";});
-    video.onplaying=()=>{loader.style.display="none"; status.textContent="✅ ভিডিও চলছে"; status.style.background="#2ecc71";}
-    video.onwaiting=()=>{loader.style.display="block"; status.textContent="⏳ বাফারিং হচ্ছে...";}
-  } else if(video.canPlayType("application/vnd.apple.mpegurl")){video.src=url; video.play();}
-  else{loader.style.display="none"; status.textContent="❌ ব্রাউজারে HLS সমর্থিত নয়"; status.style.background="#e74c3c";}
-}
-
-async function loadStreams(){
-  const list=document.getElementById("channel-list");
-  const total=document.getElementById("total-count");
-  const status=document.getElementById("status");
-  list.innerHTML=""; status.textContent="📡 চ্যানেল লোড হচ্ছে...";
-  try{
-    const resp=await fetch(PROXY_URL);
-    streams=await resp.json();
-    const groups={};
-    streams.forEach(ch=>{ const g=ch.group||"General"; if(!groups[g]) groups[g]=[]; groups[g].push(ch); });
-
-    Object.keys(groups).sort().forEach(g=>{
-      const header=document.createElement("div");
-      header.className="group-header";
-      header.textContent=g;
-      header.onclick=()=>{ const items=header.nextSibling; if(items.style.display==="none"){items.style.display="grid";} else{items.style.display="none";} };
-      list.appendChild(header);
-
-      const container=document.createElement("div");
-      container.style.display="grid";
-      container.style.gridTemplateColumns="repeat(auto-fill,minmax(160px,1fr))";
-      container.style.gap="12px";
-
-      groups[g].forEach(ch=>{
-        const div=document.createElement("div");
-        div.className="channel-item";
-        div.innerHTML=`<span class='play-icon'>▶️</span><div class='channel-name'>${ch.name}</div><div class='live-badge'>LIVE 🔴</div>`;
-        div.onclick=()=>playStream(ch.url,div);
-        container.appendChild(div);
-      });
-      list.appendChild(container);
-    });
-
-    total.textContent=`মোট চ্যানেল: ${streams.length}`;
-    if(streams.length>0) playStream(streams[0],document.querySelector(".channel-item"));
-    status.textContent="✅ চ্যানেল রেডি!";
-  } catch(e){console.error(e); status.textContent="❌ প্লেলিস্ট লোড ব্যর্থ";}
-}
-
-function filterChannels(){
-  const val=document.getElementById("search-box").value.toLowerCase();
-  document.querySelectorAll(".channel-item").forEach(ch=>{
-    const name=ch.querySelector(".channel-name").textContent.toLowerCase();
-    ch.style.display=name.includes(val)?"block":"none";
-  });
-}
-
-document.addEventListener("DOMContentLoaded",loadStreams);
+    if(Hls.isSupported()){
+        if(hls) hls.destroy();
+        hls=new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED,function(){video.play().catch(()=>{status.textContent="⚠️ Autoplay failed";});});
+        hls.on(Hls.Events.ERROR,function(event,data){loader.style.display="none"; status.textContent="❌ Stream load failed"; status.style.background="#e74c3c"; console.error(data);});
+        video.onplaying=()=>{loader.style.display="none"; status.textContent="✅ Stream playing"; status.style.background="#2ecc71";}
+        video.onwaiting=()=>{loader.style.display="block"; status.textContent="⏳ Buffering..."; status.style.background="#f1c40f";}
+    } else if(video.canPlayType("application/vnd.apple.mpegurl")){
+        video.src=url;
+        video.play();
+    } else{
+        loader.style.display="none";
+        status.textContent="❌ Browser does not support HLS";
+        status.style.background="#e74c3c";
+    }
+};
 </script>
+
 </body>
 </html>

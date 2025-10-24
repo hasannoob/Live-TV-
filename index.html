@@ -1,244 +1,304 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Livefy - Channel Grid Player (Fixed)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Livefy - Smart Channel Player</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
   <style>
     body {
       margin: 0;
-      background-color: #202020;
-      color: #ecf0f1;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top, #0a192f, #000);
+      color: #e0e6ed;
+      font-family: 'Segoe UI', sans-serif;
+      overflow-x: hidden;
     }
-    .top-section {
-      background-color: #34495e;
-      padding: 10px 20px;
+
+    header {
+      background: linear-gradient(90deg, #0a3d62, #1e3799);
+      padding: 12px 20px;
+      text-align: center;
       color: #fff;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      font-weight: bold;
+      font-size: 1.3em;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
     }
-    #status {
-      padding: 5px 10px;
-      background: #3498db;
-      border-radius: 4px;
-      display: inline-block;
+
+    #search-box {
+      width: 90%;
+      max-width: 500px;
+      margin: 15px auto;
+      display: block;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1em;
+      background: #0b2545;
+      color: #e0e6ed;
+      text-align: center;
+      outline: none;
+      box-shadow: 0 0 10px rgba(0, 183, 255, 0.3);
     }
+
     #video-container {
       width: 100%;
-      max-width: 600px;
-      margin: 10px auto;
+      max-width: 700px;
+      margin: 20px auto;
+      position: relative;
     }
+
     video {
       width: 100%;
-      border-radius: 6px;
+      border-radius: 12px;
       background: #000;
-      min-height: 250px;
+      box-shadow: 0 0 20px rgba(0, 183, 255, 0.3);
     }
+
+    .loader {
+      display: none;
+      border: 5px solid rgba(255,255,255,0.1);
+      border-top: 5px solid #00bfff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     .main-container {
-      max-width: 1200px;
-      margin: auto;
+      max-width: 1100px;
+      margin: 0 auto;
       padding: 10px;
     }
+
     .channel-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
     }
+
     .channel-item {
-      background: #000;
-      border: 2px solid #3498db;
-      border-radius: 8px;
+      background: #0b2545;
+      border: 2px solid #1f6feb;
+      border-radius: 10px;
       text-align: center;
       padding: 10px;
       cursor: pointer;
-      transition: 0.3s;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      position: relative;
     }
+
     .channel-item:hover {
-      transform: scale(1.05);
+      transform: translateY(-5px);
       border-color: #2ecc71;
+      box-shadow: 0 0 10px #2ecc71;
     }
+
     .channel-item.active {
       border-color: #e74c3c;
-      box-shadow: 0 0 15px rgba(231, 76, 60, 0.7);
+      box-shadow: 0 0 15px #e74c3c;
     }
-    .channel-name { font-weight: bold; margin-top: 5px; }
+
+    .play-icon {
+      font-size: 2em;
+      color: #00bfff;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .channel-name {
+      font-size: 0.9em;
+      color: #ecf0f1;
+      font-weight: bold;
+    }
+
+    .live-badge {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      background: #e74c3c;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75em;
+      font-weight: bold;
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    #retry-btn {
+      display: none;
+      background: #3498db;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 20px auto;
+      display: block;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    #retry-btn:hover {
+      background: #2980b9;
+    }
+
+    #status {
+      display: inline-block;
+      padding: 6px 10px;
+      background: #3498db;
+      border-radius: 4px;
+      font-size: 0.9em;
+      margin-top: 10px;
+    }
+
+    #total-count {
+      text-align: center;
+      color: #7f8c8d;
+      margin: 15px 0;
+    }
+
+    @media (max-width: 600px) {
+      .channel-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+      header { font-size: 1.1em; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="top-section">
-    <h1>📺 Live Channel Viewer</h1>
+  <header>📺 Livefy - Smart Channel Viewer</header>
+  <input type="text" id="search-box" placeholder="🔍 সার্চ করুন (যেমন: Nature, Sports...)" onkeyup="filterChannels()" />
+
+  <div id="video-container">
+    <video id="video" controls autoplay playsinline></video>
+    <div class="loader" id="loader"></div>
+  </div>
+
+  <div style="text-align:center;">
     <div id="status">লোড হচ্ছে...</div>
-    <div id="video-container">
-      <video id="video" controls autoplay playsinline></video>
-    </div>
+    <button id="retry-btn" onclick="retryLoad()">🔁 Retry</button>
   </div>
 
   <div class="main-container">
-    <div class="channel-grid" id="channel-list">
-      <p style="grid-column: 1 / -1; text-align: center;">চ্যানেল লোড হচ্ছে...</p>
-    </div>
-    <div id="total-count" style="text-align:center;margin-top:10px;color:#7f8c8d;"></div>
+    <div id="channel-list" class="channel-grid"></div>
+    <div id="total-count"></div>
   </div>
 
   <script>
-    const M3U_URL = "https://bongoflixbd.top/test/playlist.php";
-
-    const PROXIES = [
-      { name: "Fringe", prefix: "https://cors-proxy.fringe.zone/", needsEncode: false },
-      { name: "AllOrigins", prefix: "https://api.allorigins.win/raw?url=", needsEncode: true }
+    const DEMO_STREAMS = [
+      { name: "Livefy Test Channel 1", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+      { name: "Livefy Test Channel 2", url: "https://test-streams.mux.dev/test_001/stream.m3u8" },
+      { name: "Nature Live", url: "https://test-streams.mux.dev/pts_shift/master.m3u8" },
+      { name: "Sports HD", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
     ];
 
-    const TEST_STREAM = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"; // fallback video
-
     let currentHls = null;
-    let lastItem = null;
-    let activeProxyIndex = 0;
+    let lastChannel = null;
 
-    function playStream(streamUrl, channelItem) {
+    function playStream(url, item) {
       const video = document.getElementById("video");
+      const loader = document.getElementById("loader");
       const status = document.getElementById("status");
 
-      if (lastItem) lastItem.classList.remove("active");
-      if (channelItem) {
-        channelItem.classList.add("active");
-        lastItem = channelItem;
-      }
+      if (lastChannel) lastChannel.classList.remove("active");
+      if (item) { item.classList.add("active"); lastChannel = item; }
 
-      const proxy = PROXIES[activeProxyIndex];
-      let finalUrl = proxy.needsEncode
-        ? proxy.prefix + encodeURIComponent(streamUrl)
-        : proxy.prefix + streamUrl;
-
+      loader.style.display = "block";
       status.textContent = "🔄 ভিডিও লোড হচ্ছে...";
       status.style.background = "#f39c12";
 
       if (Hls.isSupported()) {
         if (currentHls) currentHls.destroy();
         currentHls = new Hls();
-        currentHls.loadSource(finalUrl);
+        currentHls.loadSource(url);
         currentHls.attachMedia(video);
-        currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
+        currentHls.on(Hls.Events.MANIFEST_PARSED, function () {
           video.play().catch(() => {
             status.textContent = "⚠️ Autoplay ব্যর্থ — ম্যানুয়ালি প্লে করুন।";
-            status.style.background = "#e67e22";
           });
         });
-        currentHls.on(Hls.Events.ERROR, (e, data) => {
-          console.error("HLS Error:", data);
-          status.textContent = "❌ ভিডিও লোড হচ্ছে না। অন্য প্রক্সি চেষ্টা করা হচ্ছে...";
+        currentHls.on(Hls.Events.ERROR, function () {
+          loader.style.display = "none";
+          status.textContent = "❌ ভিডিও লোড হচ্ছে না।";
           status.style.background = "#e74c3c";
+          document.getElementById("retry-btn").style.display = "block";
         });
         video.onplaying = () => {
+          loader.style.display = "none";
           status.textContent = "✅ ভিডিও চলছে...";
           status.style.background = "#2ecc71";
         };
         video.onwaiting = () => {
+          loader.style.display = "block";
           status.textContent = "⏳ বাফারিং হচ্ছে...";
-          status.style.background = "#f1c40f";
         };
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = finalUrl;
+        video.src = url;
         video.play();
       } else {
-        status.textContent = "❌ HLS সমর্থিত নয়।";
+        loader.style.display = "none";
+        status.textContent = "❌ এই ব্রাউজারে HLS সমর্থিত নয়।";
         status.style.background = "#e74c3c";
       }
     }
 
-    async function loadM3U(proxyIndex = 0) {
+    function loadChannels() {
       const list = document.getElementById("channel-list");
+      const total = document.getElementById("total-count");
       const status = document.getElementById("status");
+      const retry = document.getElementById("retry-btn");
 
-      if (proxyIndex >= PROXIES.length) {
-        status.textContent = "⚠️ সব প্রক্সি ব্যর্থ — fallback stream চালু হচ্ছে।";
-        status.style.background = "#e74c3c";
-        playStream(TEST_STREAM, null);
-        return;
-      }
+      retry.style.display = "none";
+      status.textContent = "📡 চ্যানেল লোড হচ্ছে...";
+      list.innerHTML = "";
 
-      const proxy = PROXIES[proxyIndex];
-      activeProxyIndex = proxyIndex;
-
-      let url = proxy.needsEncode
-        ? proxy.prefix + encodeURIComponent(M3U_URL)
-        : proxy.prefix + M3U_URL;
-
-      status.textContent = `M3U লোড হচ্ছে... (${proxy.name})`;
-      status.style.background = "#3498db";
-
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("HTTP ত্রুটি");
-        const text = await res.text();
-        parseM3U(text);
-      } catch (err) {
-        console.warn(`Proxy ${proxy.name} ব্যর্থ`, err);
-        loadM3U(proxyIndex + 1);
-      }
-    }
-
-    function parseM3U(data) {
-      const lines = data.split("\n").map(l => l.trim()).filter(l => l);
-      const streams = [];
-      let current = null;
-      let count = 0;
-
-      for (const line of lines) {
-        if (line.startsWith("#EXTINF:")) {
-          current = {};
-          const name = line.split(",").pop().trim();
-          const groupMatch = line.match(/group-title="([^"]+)"/);
-          current.name = name || "Unknown";
-          current.group = groupMatch ? groupMatch[1] : "General";
-        } else if (current && !line.startsWith("#")) {
-          current.url = line;
-          streams.push(current);
-          current = null;
-          count++;
-        }
-      }
-      displayStreams(streams, count);
-    }
-
-    function displayStreams(streams, total) {
-      const list = document.getElementById("channel-list");
-      const status = document.getElementById("status");
-      const totalDiv = document.getElementById("total-count");
-
-      if (!streams.length) {
-        status.textContent = "কোনো চ্যানেল পাওয়া যায়নি।";
-        status.style.background = "#e74c3c";
-        return;
-      }
-
-      totalDiv.textContent = `মোট চ্যানেল: ${total} (Proxy: ${PROXIES[activeProxyIndex].name})`;
-      status.textContent = "✅ লোড সম্পূর্ণ — একটি চ্যানেল ক্লিক করুন।";
-      status.style.background = "#2ecc71";
-
-      let html = "";
-      const grouped = {};
-      streams.forEach(s => {
-        if (!grouped[s.group]) grouped[s.group] = [];
-        grouped[s.group].push(s);
-      });
-
-      Object.keys(grouped).forEach(group => {
-        html += `<div style="grid-column:1/-1;color:#3498db;font-weight:bold;border-bottom:1px solid #3498db;margin-top:10px;">${group}</div>`;
-        grouped[group].forEach(s => {
-          html += `
-            <div class="channel-item" onclick="playStream('${s.url}', this)">
-              <span style="font-size:2em;color:#2ecc71;">▶️</span>
-              <div class="channel-name">${s.name}</div>
-            </div>
+      setTimeout(() => {
+        DEMO_STREAMS.forEach(stream => {
+          const div = document.createElement("div");
+          div.className = "channel-item";
+          div.innerHTML = `
+            <span class='play-icon'>▶️</span>
+            <div class='channel-name'>${stream.name}</div>
+            <div class='live-badge'>LIVE 🔴</div>
           `;
+          div.onclick = () => playStream(stream.url, div);
+          list.appendChild(div);
         });
-      });
-      list.innerHTML = html;
+        total.textContent = `মোট চ্যানেল: ${DEMO_STREAMS.length}`;
+        status.textContent = "✅ চ্যানেল রেডি — ক্লিক করে দেখুন!";
+        status.style.background = "#2ecc71";
+      }, 800);
     }
 
-    document.addEventListener("DOMContentLoaded", () => loadM3U());
+    function retryLoad() {
+      document.getElementById("retry-btn").style.display = "none";
+      loadChannels();
+    }
+
+    function filterChannels() {
+      const input = document.getElementById("search-box").value.toLowerCase();
+      const channels = document.querySelectorAll(".channel-item");
+      channels.forEach(ch => {
+        const name = ch.querySelector(".channel-name").textContent.toLowerCase();
+        ch.style.display = name.includes(input) ? "block" : "none";
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", loadChannels);
   </script>
 </body>
 </html>

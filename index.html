@@ -3,180 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Livefy - Full M3U Player</title>
+<title>LiveFy Pro Player</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <style>
-body {
-  margin:0; background:radial-gradient(circle at top,#0a192f,#000);
-  color:#e0e6ed; font-family:'Segoe UI',sans-serif;
-}
-header {
-  background:linear-gradient(90deg,#0a3d62,#1e3799);
-  padding:12px 20px; text-align:center; color:#fff;
-  font-weight:bold; font-size:1.3em; box-shadow:0 4px 10px rgba(0,0,0,0.6);
-}
-#search-box {
-  width:90%; max-width:500px; margin:15px auto; display:block;
-  padding:10px; border-radius:8px; border:none;
-  font-size:1em; background:#0b2545; color:#e0e6ed;
-  text-align:center; outline:none; box-shadow:0 0 10px rgba(0,183,255,0.3);
-}
-#video-container {width:100%; max-width:700px; margin:20px auto; position:relative;}
-video {width:100%; border-radius:12px; background:#000; box-shadow:0 0 20px rgba(0,183,255,0.3);}
-.loader {display:none; border:5px solid rgba(255,255,255,0.1);
-  border-top:5px solid #00bfff; border-radius:50%; width:40px; height:40px;
-  animation:spin 1s linear infinite; margin:20px auto;}
-@keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-
-.main-container {max-width:1100px; margin:0 auto; padding:10px;}
-.channel-grid {display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px;}
-.channel-item {background:#0b2545; border:2px solid #1f6feb; border-radius:10px;
-  text-align:center; padding:10px; cursor:pointer; transition:all 0.3s ease;
-  box-shadow:0 2px 8px rgba(0,0,0,0.4); position:relative;}
-.channel-item:hover {transform:translateY(-5px); border-color:#2ecc71; box-shadow:0 0 10px #2ecc71;}
-.channel-item.active {border-color:#e74c3c; box-shadow:0 0 15px #e74c3c;}
-.play-icon {font-size:2em; color:#00bfff; display:block; margin-bottom:5px;}
-.channel-name {font-size:0.9em; color:#ecf0f1; font-weight:bold;}
-.live-badge {position:absolute; top:6px; right:8px; background:#e74c3c; color:white;
-  padding:2px 6px; border-radius:4px; font-size:0.75em; font-weight:bold;
-  animation:pulse 1.2s infinite;}
-@keyframes pulse {0%{opacity:1;}50%{opacity:0.5;}100%{opacity:1;}}
-#retry-btn {display:none; background:#3498db; color:white; padding:8px 15px;
-  border:none; border-radius:5px; cursor:pointer; margin:20px auto; display:block;
-  font-weight:bold; transition:0.3s;}
-#retry-btn:hover {background:#2980b9;}
-#status {display:inline-block; padding:6px 10px; background:#3498db; border-radius:4px; font-size:0.9em; margin-top:10px;}
-#total-count {text-align:center; color:#7f8c8d; margin:15px 0;}
-@media(max-width:600px){.channel-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));} header{font-size:1.1em;}}
+body{margin:0;background:#0a192f;color:#e0e6ed;font-family:'Segoe UI',sans-serif;}
+header{background:linear-gradient(90deg,#0a3d62,#1e3799);padding:12px 20px;text-align:center;font-weight:bold;font-size:1.3em;box-shadow:0 4px 10px rgba(0,0,0,0.6);}
+#search-box{width:90%;max-width:500px;margin:15px auto;display:block;padding:10px;border-radius:8px;border:none;font-size:1em;background:#0b2545;color:#e0e6ed;text-align:center;outline:none;}
+#video-container{width:100%;max-width:700px;margin:20px auto;position:relative;}
+video{width:100%;border-radius:12px;background:#000;}
+.loader{display:none;border:5px solid rgba(255,255,255,0.1);border-top:5px solid #00bfff;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.main-container{max-width:1100px;margin:0 auto;padding:10px;}
+.channel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+.channel-item{background:#0b2545;border:2px solid #1f6feb;border-radius:10px;text-align:center;padding:10px;cursor:pointer;transition:all 0.3s ease;position:relative;}
+.channel-item:hover{transform:translateY(-5px);border-color:#2ecc71;box-shadow:0 0 10px #2ecc71;}
+.channel-item.active{border-color:#e74c3c;box-shadow:0 0 15px #e74c3c;}
+.play-icon{font-size:2em;color:#00bfff;display:block;margin-bottom:5px;}
+.channel-name{font-size:0.9em;color:#ecf0f1;font-weight:bold;}
+.live-badge{position:absolute;top:6px;right:8px;background:#e74c3c;color:white;padding:2px 6px;border-radius:4px;font-size:0.75em;font-weight:bold;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%{opacity:1;}50%{opacity:0.5;}100%{opacity:1;}}
+.group-header{grid-column:1/-1;font-size:1.1em;color:#3498db;margin-top:15px;padding-bottom:5px;border-bottom:1px solid #3498db;cursor:pointer;}
+#status{display:inline-block;padding:6px 10px;background:#3498db;border-radius:4px;font-size:0.9em;margin-top:10px;}
+#total-count{text-align:center;color:#7f8c8d;margin:15px 0;}
 </style>
 </head>
 <body>
 
-<header>📺 Livefy - M3U IPTV Player</header>
+<header>📺 LiveFy Pro Player</header>
 <input type="text" id="search-box" placeholder="🔍 সার্চ করুন..." onkeyup="filterChannels()"/>
 <div id="video-container">
-  <video id="video" controls autoplay playsinline></video>
-  <div class="loader" id="loader"></div>
+<video id="video" controls autoplay playsinline></video>
+<div class="loader" id="loader"></div>
 </div>
-<div style="text-align:center;">
-  <div id="status">লোড হচ্ছে...</div>
-  <button id="retry-btn" onclick="retryLoad()">🔁 Retry</button>
-</div>
-
+<div style="text-align:center;"><div id="status">লোড হচ্ছে...</div></div>
 <div class="main-container">
-  <div id="channel-list" class="channel-grid"></div>
-  <div id="total-count"></div>
+<div id="channel-list" class="channel-grid"></div>
+<div id="total-count"></div>
 </div>
 
 <script>
-const M3U_URL = "https://tinyurl.com/Airtel-4k-fix";
-const PROXIES = [
-  {name:"Thingproxy", prefix:"https://thingproxy.freeboard.io/fetch/", encode:false},
-  {name:"Allorigins", prefix:"https://api.allorigins.win/raw?url=", encode:true},
-  {name:"YACDN", prefix:"https://yacdn.org/proxy/", encode:false}
-];
-
-let streams=[], currentHls=null, lastChannel=null, activeProxyIndex=0;
+const PROXY_URL="proxy.php";
+let streams=[],currentHls=null,lastChannel=null;
 
 function playStream(url,item){
   const video=document.getElementById("video");
   const loader=document.getElementById("loader");
   const status=document.getElementById("status");
-
   if(lastChannel) lastChannel.classList.remove("active");
   if(item){ item.classList.add("active"); lastChannel=item;}
-
-  loader.style.display="block";
-  status.textContent="🔄 ভিডিও লোড হচ্ছে...";
-  status.style.background="#f39c12";
-
-  const proxy=PROXIES[activeProxyIndex];
-  let fullURL=proxy.prefix + (proxy.encode?encodeURIComponent(url):url);
+  loader.style.display="block"; status.textContent="🔄 ভিডিও লোড হচ্ছে..."; status.style.background="#f39c12";
 
   if(Hls.isSupported()){
     if(currentHls) currentHls.destroy();
     currentHls=new Hls();
-    currentHls.loadSource(fullURL);
+    currentHls.loadSource(url);
     currentHls.attachMedia(video);
-    currentHls.on(Hls.Events.MANIFEST_PARSED,function(){video.play().catch(()=>{status.textContent="⚠️ Autoplay ব্যর্থ — ম্যানুয়ালি প্লে করুন";});});
-    currentHls.on(Hls.Events.ERROR,function(e,data){ loader.style.display="none"; status.textContent="❌ ভিডিও লোড হচ্ছে না"; status.style.background="#e74c3c"; document.getElementById("retry-btn").style.display="block";});
-    video.onplaying=()=>{ loader.style.display="none"; status.textContent="✅ ভিডিও চলছে"; status.style.background="#2ecc71";}
-    video.onwaiting=()=>{ loader.style.display="block"; status.textContent="⏳ বাফারিং হচ্ছে...";}
-  } else if(video.canPlayType("application/vnd.apple.mpegurl")){
-    video.src=fullURL; video.play();
-  } else{
-    loader.style.display="none"; status.textContent="❌ এই ব্রাউজারে HLS সমর্থিত নয়"; status.style.background="#e74c3c";
-  }
+    currentHls.on(Hls.Events.MANIFEST_PARSED,function(){video.play().catch(()=>{status.textContent="⚠️ Autoplay ব্যর্থ";});});
+    currentHls.on(Hls.Events.ERROR,function(){loader.style.display="none"; status.textContent="❌ ভিডিও লোড হচ্ছে না"; status.style.background="#e74c3c";});
+    video.onplaying=()=>{loader.style.display="none"; status.textContent="✅ ভিডিও চলছে"; status.style.background="#2ecc71";}
+    video.onwaiting=()=>{loader.style.display="block"; status.textContent="⏳ বাফারিং হচ্ছে...";}
+  } else if(video.canPlayType("application/vnd.apple.mpegurl")){video.src=url; video.play();}
+  else{loader.style.display="none"; status.textContent="❌ ব্রাউজারে HLS সমর্থিত নয়"; status.style.background="#e74c3c";}
 }
 
-async function loadM3U(proxyIndex=0){
+async function loadStreams(){
   const list=document.getElementById("channel-list");
+  const total=document.getElementById("total-count");
   const status=document.getElementById("status");
-  const total=document.getElementById("total-count");
-  const retry=document.getElementById("retry-btn");
-  retry.style.display="none";
-  activeProxyIndex=proxyIndex;
-  const proxy=PROXIES[proxyIndex];
-  status.textContent=`📡 M3U লোড হচ্ছে (${proxy.name})...`;
-  status.style.background="#f39c12";
-
-  let fullURL=proxy.prefix + (proxy.encode?encodeURIComponent(M3U_URL):M3U_URL);
+  list.innerHTML=""; status.textContent="📡 চ্যানেল লোড হচ্ছে...";
   try{
-    const resp=await fetch(fullURL);
-    if(!resp.ok) throw new Error(`HTTP ত্রুটি! ${resp.status}`);
-    const data=await resp.text();
-    parseM3U(data);
-  } catch(e){
-    console.error("Proxy error:",e);
-    if(proxyIndex<PROXIES.length-1) loadM3U(proxyIndex+1);
-    else{
-      list.innerHTML=`<p style="grid-column:1/-1;color:#e74c3c;text-align:center;padding:20px;border:1px dashed #e74c3c;background:#303030;">
-        🚫 প্লেলিস্ট লোড করা যায়নি।<br>দয়া করে NS Player/VLC এ ${M3U_URL} ব্যবহার করুন
-      </p>`;
-      status.textContent="❌ চূড়ান্ত ব্যর্থতা";
-      status.style.background="#e74c3c";
-    }
-  }
-}
+    const resp=await fetch(PROXY_URL);
+    streams=await resp.json();
+    const groups={};
+    streams.forEach(ch=>{ const g=ch.group||"General"; if(!groups[g]) groups[g]=[]; groups[g].push(ch); });
 
-function parseM3U(data){
-  const lines=data.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
-  streams=[]; let current=null;
-  for(const line of lines){
-    if(line.startsWith("#EXTINF:")){
-      current={}; const parts=line.split(','); current.name=parts.length>1?parts.pop().trim():"Unknown";
-      const attrRegex=/(\w+)=["']?([^"'\s]+)["']?/g; let match;
-      while((match=attrRegex.exec(parts[0]))!==null){ if(match[1]==="group-title") current.group=match[2];}
-      current.group=current.group||"General";
-    } else if(current && !line.startsWith("#")){current.url=line; streams.push(current); current=null;}
-  }
-  displayStreams();
-}
+    Object.keys(groups).sort().forEach(g=>{
+      const header=document.createElement("div");
+      header.className="group-header";
+      header.textContent=g;
+      header.onclick=()=>{ const items=header.nextSibling; if(items.style.display==="none"){items.style.display="grid";} else{items.style.display="none";} };
+      list.appendChild(header);
 
-function displayStreams(){
-  const list=document.getElementById("channel-list");
-  const total=document.getElementById("total-count");
-  list.innerHTML="";
-  if(streams.length===0){ document.getElementById("status").textContent="কোনো স্ট্রীম পাওয়া যায়নি"; return;}
-  total.textContent=`মোট চ্যানেল: ${streams.length}`;
-  const grouped={};
-  streams.forEach(s=>{const g=s.group||"Others"; if(!grouped[g]) grouped[g]=[]; grouped[g].push(s);});
-  Object.keys(grouped).sort().forEach(g=>{
-    const header=document.createElement("div"); header.className="group-header"; header.style.gridColumn="1/-1"; header.style.color="#3498db";
-    header.style.marginTop="15px"; header.style.paddingBottom="5px"; header.style.borderBottom="1px solid #3498db"; header.textContent=g;
-    list.appendChild(header);
-    grouped[g].forEach(ch=>{
-      const div=document.createElement("div");
-      div.className="channel-item";
-      div.innerHTML=`<span class='play-icon'>▶️</span><div class='channel-name'>${ch.name}</div><div class='live-badge'>LIVE 🔴</div>`;
-      div.onclick=()=>playStream(ch.url,div);
-      list.appendChild(div);
+      const container=document.createElement("div");
+      container.style.display="grid";
+      container.style.gridTemplateColumns="repeat(auto-fill,minmax(160px,1fr))";
+      container.style.gap="12px";
+
+      groups[g].forEach(ch=>{
+        const div=document.createElement("div");
+        div.className="channel-item";
+        div.innerHTML=`<span class='play-icon'>▶️</span><div class='channel-name'>${ch.name}</div><div class='live-badge'>LIVE 🔴</div>`;
+        div.onclick=()=>playStream(ch.url,div);
+        container.appendChild(div);
+      });
+      list.appendChild(container);
     });
-  });
-}
 
-function retryLoad(){ loadM3U(); }
+    total.textContent=`মোট চ্যানেল: ${streams.length}`;
+    if(streams.length>0) playStream(streams[0],document.querySelector(".channel-item"));
+    status.textContent="✅ চ্যানেল রেডি!";
+  } catch(e){console.error(e); status.textContent="❌ প্লেলিস্ট লোড ব্যর্থ";}
+}
 
 function filterChannels(){
   const val=document.getElementById("search-box").value.toLowerCase();
@@ -186,7 +113,7 @@ function filterChannels(){
   });
 }
 
-document.addEventListener("DOMContentLoaded",()=>loadM3U());
+document.addEventListener("DOMContentLoaded",loadStreams);
 </script>
 </body>
 </html>

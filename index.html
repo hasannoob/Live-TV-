@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livefy - Final HLS Player (Dual Proxy)</title>
+    <title>Livefy - Final HLS Player (Triple Proxy)</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> 
     
     <style>
-        /* CSS Styling */
+        /* CSS Styling - আগের মতোই থাকবে */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -15,8 +15,6 @@
             background-color: #e5e5e5;
             color: #2c3e50;
         }
-        
-        /* --- হেডার: অ্যানিমেটেড টেক্সট --- */
         .header-container {
             overflow: hidden;
             background-color: #34495e;
@@ -36,8 +34,6 @@
             0%   { transform: translateX(0); }
             100% { transform: translateX(-100%); }
         }
-
-        /* --- মূল লে-আউট --- */
         .main-container {
             display: flex; 
             max-width: 1400px;
@@ -45,7 +41,6 @@
             padding: 10px;
             gap: 20px;
         }
-        
         .video-section {
             flex: 2; 
             background-color: white;
@@ -70,7 +65,6 @@
             border-radius: 4px;
             font-weight: bold;
         }
-        
         .playlist-section {
             flex: 1; 
             background-color: white;
@@ -112,8 +106,6 @@
             font-size: 0.8em;
             margin-left: 10px;
         }
-        
-        /* --- মোবাইল / ছোট স্ক্রিনের জন্য লে-আউট পরিবর্তন --- */
         @media (max-width: 900px) {
             .main-container {
                 flex-direction: column; 
@@ -168,9 +160,11 @@
         // 💡 প্লেলিস্ট এবং স্ট্রিমিং লোড করার জন্য একাধিক প্রক্সির তালিকা
         const PROXIES = [
             // প্রক্সি ১: Thingproxy (URL Encoding লাগে না)
-            { prefix: "https://thingproxy.freeboard.io/fetch/", needsEncode: false }, 
+            { name: "Thingproxy", prefix: "https://thingproxy.freeboard.io/fetch/", needsEncode: false }, 
             // প্রক্সি ২: Allorigins (URL Encoding লাগে)
-            { prefix: "https://api.allorigins.win/raw?url=", needsEncode: true } 
+            { name: "Allorigins", prefix: "https://api.allorigins.win/raw?url=", needsEncode: true },
+            // প্রক্সি ৩: YACDN (শক্তিশালী বিকল্প - URL Encoding লাগে না)
+            { name: "YACDN", prefix: "https://yacdn.org/proxy/", needsEncode: false } 
         ];
         
         let currentHlsInstance = null;
@@ -201,7 +195,7 @@
             }
             
             statusDiv.textContent = 'ভিডিও প্লে করার চেষ্টা চলছে... লোড হচ্ছে...';
-            statusDiv.style.backgroundColor = '#f39c12'; /* লোডিং হলে হলুদ */
+            statusDiv.style.backgroundColor = '#f39c12'; 
 
             if (Hls.isSupported()) {
                 if (currentHlsInstance) {
@@ -236,11 +230,11 @@
                 
                 video.onplaying = () => {
                     statusDiv.textContent = `✅ বর্তমানে চলছে: ${channelItem.querySelector('.channel-name').textContent}`;
-                    statusDiv.style.backgroundColor = '#2ecc71'; /* সফল হলে সবুজ */
+                    statusDiv.style.backgroundColor = '#2ecc71'; 
                 };
                 video.onwaiting = () => {
                      statusDiv.textContent = `⏳ বাফারিং হচ্ছে: ${channelItem.querySelector('.channel-name').textContent}`;
-                     statusDiv.style.backgroundColor = '#f1c40f'; /* বাফারিং হলে হলুদ */
+                     statusDiv.style.backgroundColor = '#f1c40f'; 
                 };
 
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -266,9 +260,10 @@
             if (proxyIndex >= PROXIES.length) {
                 // সমস্ত প্রক্সি ব্যর্থ হয়েছে
                 channelListDiv.innerHTML = `<p style="color:red; text-align:center;">
-                    ❌ প্লেলিস্ট লোড করার জন্য কোনো প্রক্সিই কাজ করছে না। সার্ভার প্রক্সি ব্লক করছে।
+                    ❌ প্লেলিস্ট লোড করার জন্য **সব প্রক্সিই ব্যর্থ হয়েছে**। সার্ভার প্রক্সি ট্র্যাফিক সম্পূর্ণ ব্লক করছে। <br>
+                    সমাধান: **VLC Player বা NS Player-এ সরাসরি লিঙ্কটি ব্যবহার করুন।**
                 </p>`;
-                statusDiv.textContent = '❌ প্লেলিস্ট লোড করতে ব্যর্থ।';
+                statusDiv.textContent = '❌ চূড়ান্ত ব্যর্থতা। কোনো প্রক্সি কাজ করছে না।';
                 statusDiv.style.backgroundColor = '#e74c3c';
                 scrollingText.textContent = '❌ লোড ব্যর্থ। ব্রাউজারে চালানো অসম্ভব।';
                 return;
@@ -277,7 +272,7 @@
             const currentProxy = PROXIES[proxyIndex];
             activeProxyIndex = proxyIndex;
             
-            statusDiv.textContent = `M3U প্লেলিস্ট ডাউনলোড করা হচ্ছে... (প্রক্সি ${proxyIndex + 1}/${PROXIES.length})`;
+            statusDiv.textContent = `M3U প্লেলিস্ট ডাউনলোড করা হচ্ছে... (${currentProxy.name} দিয়ে চেষ্টা চলছে)`;
             statusDiv.style.backgroundColor = '#f39c12'; 
 
             let proxiedM3uUrl = currentProxy.prefix;
@@ -298,7 +293,7 @@
                 parseM3U(data);
                 
             } catch (error) {
-                console.error(`Fetch error with Proxy ${proxyIndex + 1}:`, error);
+                console.error(`Fetch error with Proxy ${currentProxy.name}:`, error);
                 
                 // এই প্রক্সি ব্যর্থ হলে, পরের প্রক্সি দিয়ে চেষ্টা করুন
                 loadM3U(proxyIndex + 1);
@@ -357,9 +352,9 @@
             }
 
             totalCountDiv.textContent = `মোট চ্যানেল: ${totalChannels} টি`;
-            scrollingText.textContent = `Livefy Advanced HLS Player 🚀 | মোট ${totalChannels} টি চ্যানেল লোড হয়েছে! ক্লিক করে প্লে করুন। (সক্রিয় প্রক্সি: ${activeProxyIndex + 1})`;
+            scrollingText.textContent = `Livefy Advanced HLS Player 🚀 | মোট ${totalChannels} টি চ্যানেল লোড হয়েছে! ক্লিক করে প্লে করুন। (সক্রিয় প্রক্সি: ${PROXIES[activeProxyIndex].name})`;
             statusDiv.textContent = 'চ্যানেল সিলেক্ট করার জন্য অপেক্ষা করছে...';
-            statusDiv.style.backgroundColor = '#3498db'; /* অপেক্ষার রঙ নীল */
+            statusDiv.style.backgroundColor = '#3498db'; 
 
             const groupedStreams = streams.reduce((acc, stream) => {
                 const group = stream.group || 'Others';
@@ -391,7 +386,7 @@
             channelListDiv.innerHTML = htmlContent;
         }
 
-        document.addEventListener('DOMContentLoaded', () => loadM3U(0)); // প্রথম প্রক্সি থেকে শুরু
+        document.addEventListener('DOMContentLoaded', () => loadM3U(0)); 
         
     </script>
 </body>

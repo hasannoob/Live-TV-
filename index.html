@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livefy - Final HLS Player Attempt</title>
+    <title>Livefy - Final HLS Player (Dual Proxy)</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> 
     
     <style>
@@ -65,7 +65,7 @@
             text-align: center;
             margin-top: 15px;
             padding: 10px;
-            background-color: #e74c3c; /* স্ট্যাটাস রঙ পরিবর্তন করা হলো */
+            background-color: #3498db; 
             color: white;
             border-radius: 4px;
             font-weight: bold;
@@ -94,7 +94,7 @@
             background-color: #e8f6f8;
         }
         .channel-item.active { 
-            background-color: #2ecc71; /* সক্রিয় চ্যানেলের রঙ সবুজ করা হলো */
+            background-color: #2ecc71; 
             color: white;
             font-weight: bold;
         }
@@ -134,7 +134,7 @@
 
     <div class="header-container">
         <div class="scrolling-text">
-            Livefy Advanced HLS Player 🚀 | শক্তিশালী প্রক্সি ব্যবহার করা হচ্ছে | প্লে করতে ক্লিক করুন।
+            Livefy Advanced HLS Player 🚀 | দ্বৈত প্রক্সি ব্যবহার করা হচ্ছে | প্লে করতে ক্লিক করুন।
         </div>
     </div>
 
@@ -158,7 +158,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> 
     
     <script>
         // --- JavaScript কার্যকারিতা ---
@@ -166,12 +165,17 @@
         // ⚠️ আপনার M3U প্লেলিস্টের URL
         const M3U_URL = "https://spoo.me/z5tvv"; 
         
-        // 💡 চূড়ান্ত শক্তিশালী প্রক্সি ব্যবহার করা হলো: api.allorigins.win
-        // এটি প্রক্সি করা URL এর মূল ডেটা সরাসরি ফিরিয়ে দেয়, যা CORS বাইপাসের জন্য কার্যকর।
-        const CORS_PROXY = "https://api.allorigins.win/raw?url="; 
+        // 💡 প্লেলিস্ট এবং স্ট্রিমিং লোড করার জন্য একাধিক প্রক্সির তালিকা
+        const PROXIES = [
+            // প্রক্সি ১: Thingproxy (URL Encoding লাগে না)
+            { prefix: "https://thingproxy.freeboard.io/fetch/", needsEncode: false }, 
+            // প্রক্সি ২: Allorigins (URL Encoding লাগে)
+            { prefix: "https://api.allorigins.win/raw?url=", needsEncode: true } 
+        ];
         
         let currentHlsInstance = null;
         let lastPlayedChannel = null;
+        let activeProxyIndex = 0; // বর্তমানে ব্যবহৃত প্রক্সির ইনডেক্স
 
         // 💡 ফাংশন: HLS.js ব্যবহার করে ভিডিও প্লে করা
         function playStream(streamUrl, channelItem) {
@@ -186,10 +190,18 @@
                 lastPlayedChannel = channelItem;
             }
             
-            // প্রক্সি ব্যবহার করে স্ট্রিমিং URL তৈরি করুন
-            const proxiedStreamUrl = CORS_PROXY + encodeURIComponent(streamUrl);
+            // বর্তমান সক্রিয় প্রক্সি ব্যবহার করে স্ট্রিমিং URL তৈরি করুন
+            const currentProxy = PROXIES[activeProxyIndex];
+            let proxiedStreamUrl = currentProxy.prefix;
+            
+            if (currentProxy.needsEncode) {
+                proxiedStreamUrl += encodeURIComponent(streamUrl);
+            } else {
+                proxiedStreamUrl += streamUrl;
+            }
             
             statusDiv.textContent = 'ভিডিও প্লে করার চেষ্টা চলছে... লোড হচ্ছে...';
+            statusDiv.style.backgroundColor = '#f39c12'; /* লোডিং হলে হলুদ */
 
             if (Hls.isSupported()) {
                 if (currentHlsInstance) {
@@ -206,13 +218,16 @@
                     video.play().catch(e => {
                         console.warn("Autoplay was prevented:", e);
                         statusDiv.textContent = '⚠️ অটো-প্লে ব্যর্থ হয়েছে। ম্যানুয়ালি প্লে বাটনে ক্লিক করুন।';
+                        statusDiv.style.backgroundColor = '#e67e22';
                     });
                 });
                 
                 hls.on(Hls.Events.ERROR, function (event, data) {
                     if (data.fatal) {
-                        statusDiv.textContent = `❌ প্লেব্যাক ত্রুটি: ${data.details}. (প্রক্সি বা নেটওয়ার্ক)`;
+                        statusDiv.textContent = `❌ প্লেব্যাক ত্রুটি: ${data.details}. (প্রক্সি/নেটওয়ার্ক)`;
+                        statusDiv.style.backgroundColor = '#e74c3c';
                         console.error("HLS Fatal Error:", data);
+                        
                         // ফলব্যাক: সরাসরি ভিডিও ট্যাগে লোড করার চেষ্টা করুন
                         video.src = proxiedStreamUrl;
                         video.play();
@@ -238,41 +253,56 @@
                 };
             } else {
                 statusDiv.textContent = '❌ এই ব্রাউজারে HLS স্ট্রিমিং সমর্থিত নয়।';
+                statusDiv.style.backgroundColor = '#e74c3c';
             }
         }
 
-
-        function loadM3U() {
+        // 💡 ফাংশন: M3U প্লেলিস্ট লোড করা (একাধিক প্রক্সি চেষ্টা করবে)
+        async function loadM3U(proxyIndex = 0) {
             const channelListDiv = document.getElementById('channel-list');
             const statusDiv = document.getElementById('status');
             const scrollingText = document.querySelector('.scrolling-text');
             
-            statusDiv.textContent = 'M3U প্লেলিস্ট ডাউনলোড করা হচ্ছে...';
+            if (proxyIndex >= PROXIES.length) {
+                // সমস্ত প্রক্সি ব্যর্থ হয়েছে
+                channelListDiv.innerHTML = `<p style="color:red; text-align:center;">
+                    ❌ প্লেলিস্ট লোড করার জন্য কোনো প্রক্সিই কাজ করছে না। সার্ভার প্রক্সি ব্লক করছে।
+                </p>`;
+                statusDiv.textContent = '❌ প্লেলিস্ট লোড করতে ব্যর্থ।';
+                statusDiv.style.backgroundColor = '#e74c3c';
+                scrollingText.textContent = '❌ লোড ব্যর্থ। ব্রাউজারে চালানো অসম্ভব।';
+                return;
+            }
+
+            const currentProxy = PROXIES[proxyIndex];
+            activeProxyIndex = proxyIndex;
+            
+            statusDiv.textContent = `M3U প্লেলিস্ট ডাউনলোড করা হচ্ছে... (প্রক্সি ${proxyIndex + 1}/${PROXIES.length})`;
             statusDiv.style.backgroundColor = '#f39c12'; 
 
-            // CORS প্রক্সি ব্যবহার করে প্লেলিস্ট লোড
-            const proxiedM3uUrl = CORS_PROXY + encodeURIComponent(M3U_URL);
+            let proxiedM3uUrl = currentProxy.prefix;
+            if (currentProxy.needsEncode) {
+                proxiedM3uUrl += encodeURIComponent(M3U_URL);
+            } else {
+                proxiedM3uUrl += M3U_URL;
+            }
 
-            fetch(proxiedM3uUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP ত্রুটি! স্ট্যাটাস: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    parseM3U(data);
-                })
-                .catch(error => {
-                    channelListDiv.innerHTML = `<p style="color:red; text-align:center;">
-                        ❌ প্লেলিস্ট লোড করার সময় ত্রুটি: ${error.message}. <br> 
-                        অনুগ্রহ করে নিশ্চিত করুন URL টিতে পাবলিক অ্যাক্সেস রয়েছে।
-                    </p>`;
-                    statusDiv.textContent = '❌ প্লেলিস্ট লোড করতে ব্যর্থ।';
-                    statusDiv.style.backgroundColor = '#e74c3c';
-                    console.error('Fetch error:', error);
-                    scrollingText.textContent = '❌ লোড ব্যর্থ। প্লেলিস্ট URL বা প্রক্সি কাজ করছে না।';
-                });
+            try {
+                const response = await fetch(proxiedM3uUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ত্রুটি! স্ট্যাটাস: ${response.status}`);
+                }
+                
+                const data = await response.text();
+                parseM3U(data);
+                
+            } catch (error) {
+                console.error(`Fetch error with Proxy ${proxyIndex + 1}:`, error);
+                
+                // এই প্রক্সি ব্যর্থ হলে, পরের প্রক্সি দিয়ে চেষ্টা করুন
+                loadM3U(proxyIndex + 1);
+            }
         }
 
         // --- (parseM3U এবং displayStreams ফাংশনগুলো আগের মতোই থাকবে) ---
@@ -327,7 +357,7 @@
             }
 
             totalCountDiv.textContent = `মোট চ্যানেল: ${totalChannels} টি`;
-            scrollingText.textContent = `Livefy Advanced HLS Player 🚀 | মোট ${totalChannels} টি চ্যানেল লোড হয়েছে! ক্লিক করে প্লে করুন।`;
+            scrollingText.textContent = `Livefy Advanced HLS Player 🚀 | মোট ${totalChannels} টি চ্যানেল লোড হয়েছে! ক্লিক করে প্লে করুন। (সক্রিয় প্রক্সি: ${activeProxyIndex + 1})`;
             statusDiv.textContent = 'চ্যানেল সিলেক্ট করার জন্য অপেক্ষা করছে...';
             statusDiv.style.backgroundColor = '#3498db'; /* অপেক্ষার রঙ নীল */
 
@@ -361,7 +391,7 @@
             channelListDiv.innerHTML = htmlContent;
         }
 
-        document.addEventListener('DOMContentLoaded', loadM3U);
+        document.addEventListener('DOMContentLoaded', () => loadM3U(0)); // প্রথম প্রক্সি থেকে শুরু
         
     </script>
 </body>

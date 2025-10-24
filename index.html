@@ -147,22 +147,18 @@
         // --- JavaScript কার্যকারিতা ---
         
         // ⚠️ আপনার M3U প্লেলিস্টের URL
-        const M3U_URL = "https://tinyurl.com/Airtel-4k-fix"; 
+        const M3U_URL = "https://spoo.me/z5tvv"; 
         
         // 💡 প্লেলিস্ট এবং স্ট্রিমিং লোড করার জন্য একাধিক প্রক্সির তালিকা
-        // এই তিনটি প্রক্সিই বাজারে সবচেয়ে জনপ্রিয় এবং শক্তিশালী।
         const PROXIES = [
-            // প্রক্সি ১: Thingproxy (URL Encoding লাগে না)
             { name: "Thingproxy", prefix: "https://thingproxy.freeboard.io/fetch/", needsEncode: false }, 
-            // প্রক্সি ২: Allorigins (URL Encoding লাগে)
             { name: "Allorigins", prefix: "https://api.allorigins.win/raw?url=", needsEncode: true },
-            // প্রক্সি ৩: YACDN (URL Encoding লাগে না)
             { name: "YACDN", prefix: "https://yacdn.org/proxy/", needsEncode: false } 
         ];
         
         let currentHlsInstance = null;
         let lastPlayedChannel = null;
-        let activeProxyIndex = 0; // বর্তমানে ব্যবহৃত প্রক্সির ইনডেক্স
+        let activeProxyIndex = 0; 
 
         // 💡 ফাংশন: HLS.js ব্যবহার করে ভিডিও প্লে করা
         function playStream(streamUrl, channelItem) {
@@ -177,7 +173,6 @@
                 lastPlayedChannel = channelItem;
             }
             
-            // বর্তমান সক্রিয় প্রক্সি ব্যবহার করে স্ট্রিমিং URL তৈরি করুন
             const currentProxy = PROXIES[activeProxyIndex];
             let proxiedStreamUrl = currentProxy.prefix;
             
@@ -210,7 +205,6 @@
                 
                 hls.on(Hls.Events.ERROR, function (event, data) {
                     if (data.fatal) {
-                        // ভিডিও স্ট্রিম লোড করতে ব্যর্থ
                         statusDiv.textContent = `❌ **ভিডিও ব্লক!** এটি ব্রাউজারে চলবে না। প্রক্সি ব্যর্থ।`;
                         statusDiv.style.backgroundColor = '#e74c3c';
                         console.error("HLS Fatal Error: Stream Blocked", data);
@@ -227,7 +221,6 @@
                 };
 
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Safari/iOS এর জন্য ডিফল্ট সাপোর্ট
                 video.src = proxiedStreamUrl;
                 video.play();
                 video.onplaying = () => {

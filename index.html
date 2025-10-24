@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livefy - Channel Grid Player</title>
+    <title>Livefy - Channel Grid Player (Final Attempt)</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> 
     
     <style>
-        /* CSS Styling */
+        /* CSS Styling: NS Player-এর মতো কালো ব্যাকগ্রাউন্ড এবং নীল বর্ডার */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #202020; /* NS Player এর মতো ব্যাকগ্রাউন্ড */
+            background-color: #202020; /* কালো ব্যাকগ্রাউন্ড */
             color: #ecf0f1;
         }
         
-        /* --- হেডার এবং প্লেয়ার সেকশন (উপরে ছোট) --- */
+        /* --- হেডার এবং প্লেয়ার সেকশন --- */
         .top-section {
             background-color: #34495e;
             color: white;
@@ -45,7 +45,7 @@
         /* --- ভিডিও টপ প্লেয়ার --- */
         #video-container {
             width: 100%;
-            max-width: 600px; /* ছোট করে উপরে রাখা হলো */
+            max-width: 600px; 
             margin: 10px 0;
         }
         #video {
@@ -56,7 +56,7 @@
             border-radius: 4px;
         }
         
-        /* --- মূল চ্যানেল গ্রিড (স্ক্রিনশটের মতো) --- */
+        /* --- মূল চ্যানেল গ্রিড --- */
         .main-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -64,13 +64,12 @@
         }
         .channel-grid {
             display: grid;
-            /* তিনটি কলামের জন্য, স্ক্রিনশটের মতো */
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
             gap: 10px;
             padding: 10px;
         }
         
-        /* --- চ্যানেল আইটেম স্টাইল (স্ক্রিনশটের মতো নীল বর্ডার ও কালো ব্যাকগ্রাউন্ড) --- */
+        /* --- চ্যানেল আইটেম স্টাইল --- */
         .channel-item {
             background-color: #000;
             border: 2px solid #3498db; /* নীল বর্ডার */
@@ -105,8 +104,6 @@
             font-size: 2.5em;
             margin: 5px auto;
         }
-        
-        /* --- গ্রুপ হেডার (স্ক্রিনশটে নেই, কিন্তু ডেটা অনুযায়ী দরকার হতে পারে) --- */
         .group-header {
             grid-column: 1 / -1; 
             font-size: 1.2em;
@@ -119,7 +116,7 @@
         /* --- মোবাইল / ছোট স্ক্রিন --- */
         @media (max-width: 600px) {
             .channel-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* মোবাইলে ছোট কলাম */
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
             }
         }
     </style>
@@ -150,15 +147,16 @@
         // --- JavaScript কার্যকারিতা ---
         
         // ⚠️ আপনার M3U প্লেলিস্টের URL
-        const M3U_URL = "https://yeash.yflix.top/MsMTV/playlists/drvTkvCDGqVkY179u7wZbBM7ojh1.m3u"; 
+        const M3U_URL = "https://spoo.me/z5tvv"; 
         
         // 💡 প্লেলিস্ট এবং স্ট্রিমিং লোড করার জন্য একাধিক প্রক্সির তালিকা
+        // এই তিনটি প্রক্সিই বাজারে সবচেয়ে জনপ্রিয় এবং শক্তিশালী।
         const PROXIES = [
             // প্রক্সি ১: Thingproxy (URL Encoding লাগে না)
             { name: "Thingproxy", prefix: "https://thingproxy.freeboard.io/fetch/", needsEncode: false }, 
             // প্রক্সি ২: Allorigins (URL Encoding লাগে)
             { name: "Allorigins", prefix: "https://api.allorigins.win/raw?url=", needsEncode: true },
-            // প্রক্সি ৩: YACDN (শক্তিশালী বিকল্প - URL Encoding লাগে না)
+            // প্রক্সি ৩: YACDN (URL Encoding লাগে না)
             { name: "YACDN", prefix: "https://yacdn.org/proxy/", needsEncode: false } 
         ];
         
@@ -189,7 +187,7 @@
                 proxiedStreamUrl += streamUrl;
             }
             
-            statusDiv.textContent = 'ভিডিও লোড হচ্ছে...';
+            statusDiv.textContent = 'ভিডিও লোড হচ্ছে... (প্রক্সি দিয়ে চলছে)';
             statusDiv.style.backgroundColor = '#f39c12'; 
 
             if (Hls.isSupported()) {
@@ -205,24 +203,22 @@
                 
                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
                     video.play().catch(e => {
-                        console.warn("Autoplay was prevented:", e);
-                        statusDiv.textContent = '⚠️ প্লে করতে Failed, প্লে বাটনে ক্লিক করুন।';
+                        statusDiv.textContent = '⚠️ প্লে করতে Failed, ম্যানুয়ালি ক্লিক করুন বা ভিডিও ব্লক হচ্ছে।';
                         statusDiv.style.backgroundColor = '#e67e22';
                     });
                 });
                 
                 hls.on(Hls.Events.ERROR, function (event, data) {
                     if (data.fatal) {
-                        statusDiv.textContent = `❌ প্লেব্যাক ত্রুটি: ${data.details}. (প্রক্সি/নেটওয়ার্ক)`;
+                        // ভিডিও স্ট্রিম লোড করতে ব্যর্থ
+                        statusDiv.textContent = `❌ **ভিডিও ব্লক!** এটি ব্রাউজারে চলবে না। প্রক্সি ব্যর্থ।`;
                         statusDiv.style.backgroundColor = '#e74c3c';
-                        console.error("HLS Fatal Error:", data);
-                        video.src = proxiedStreamUrl; // ফলব্যাক
-                        video.play();
+                        console.error("HLS Fatal Error: Stream Blocked", data);
                     }
                 });
                 
                 video.onplaying = () => {
-                    statusDiv.textContent = `✅ চলছে: ${channelItem.querySelector('.channel-name').textContent}`;
+                    statusDiv.textContent = `✅ চলছে: ${channelItem.querySelector('.channel-name').textContent} (প্রক্সি: ${currentProxy.name})`;
                     statusDiv.style.backgroundColor = '#2ecc71'; 
                 };
                 video.onwaiting = () => {
@@ -231,6 +227,7 @@
                 };
 
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Safari/iOS এর জন্য ডিফল্ট সাপোর্ট
                 video.src = proxiedStreamUrl;
                 video.play();
                 video.onplaying = () => {
@@ -247,15 +244,18 @@
         async function loadM3U(proxyIndex = 0) {
             const channelListDiv = document.getElementById('channel-list');
             const statusDiv = document.getElementById('status');
-            const scrollingText = document.querySelector('.scrolling-text');
             
             if (proxyIndex >= PROXIES.length) {
-                // সমস্ত প্রক্সি ব্যর্থ হয়েছে
-                channelListDiv.innerHTML = `<p style="grid-column: 1 / -1; color:#e74c3c; text-align:center;">
-                    ❌ **সব প্রক্সি ব্যর্থ হয়েছে!** সার্ভারটি পাবলিক অ্যাক্সেস ব্লক করেছে। <br>
-                    সমাধান: **VLC Player-এ সরাসরি লিঙ্কটি ব্যবহার করুন।**
+                // সমস্ত প্রক্সি ব্যর্থ হয়েছে: ব্যবহারকারীকে নির্দেশনা দিন
+                channelListDiv.innerHTML = `<p style="grid-column: 1 / -1; color:#e74c3c; text-align:center; font-size: 1.1em; padding: 20px; border: 1px dashed #e74c3c; background-color: #303030;">
+                    🚫 **দুঃখিত! এই চ্যানেলগুলো এখানে চলবে না।** 🚫<br>
+                    **কারণ:** স্ট্রিমিং সার্ভারের শক্তিশালী নিরাপত্তার (CORS) কারণে ব্রাউজারে চালানো যাচ্ছে না।<br>
+                    <br>
+                    **সমাধান:** ভিডিও দেখতে হলে, দয়া করে এই M3U লিঙ্কটি কপি করুন:<br>
+                    <code style="color: #2ecc71; font-weight: bold;">${M3U_URL}</code><br>
+                    এবং এটি **NS Player, VLC Player,** অথবা অন্য কোনো ডেডিকেটেড **IPTV Player** এ পেস্ট করে দেখুন।
                 </p>`;
-                statusDiv.textContent = '❌ লোড ব্যর্থতা';
+                statusDiv.textContent = '❌ চূড়ান্ত ব্যর্থতা। দেখুন সমাধান কী।';
                 statusDiv.style.backgroundColor = '#e74c3c';
                 return;
             }
@@ -263,7 +263,7 @@
             const currentProxy = PROXIES[proxyIndex];
             activeProxyIndex = proxyIndex;
             
-            statusDiv.textContent = `ডাউনলোড চলছে... (${currentProxy.name} দিয়ে চেষ্টা)`;
+            statusDiv.textContent = `M3U ডাউনলোড চলছে... (${currentProxy.name} দিয়ে চেষ্টা)`;
             statusDiv.style.backgroundColor = '#f39c12'; 
 
             let proxiedM3uUrl = currentProxy.prefix;
@@ -338,7 +338,7 @@
                 return;
             }
 
-            totalCountDiv.textContent = `মোট চ্যানেল: ${totalChannels} টি`;
+            totalCountDiv.textContent = `মোট চ্যানেল: ${totalChannels} টি। (সক্রিয় প্রক্সি: ${PROXIES[activeProxyIndex].name})`;
             statusDiv.textContent = 'চ্যানেল সিলেক্ট করার জন্য অপেক্ষা করছে...';
             statusDiv.style.backgroundColor = '#3498db'; 
 
@@ -355,7 +355,6 @@
             const sortedGroups = Object.keys(groupedStreams).sort();
 
             sortedGroups.forEach(group => {
-                // গ্রুপ হেডার স্ক্রিনশটে নেই, কিন্তু ডেটা স্ট্রাকচার অনুযায়ী এটি রাখা হলো
                 htmlContent += `<div class="group-header">${group}</div>`;
                 
                 groupedStreams[group].forEach(stream => {

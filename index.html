@@ -103,23 +103,29 @@
 
     <div class="header-container">
         <div class="scrolling-text">
-            Livefy ওয়েব প্লেলিস্ট প্লেয়ার 🚀 | M3U প্লেলিস্ট লোড হচ্ছে... | চ্যানেল দেখতে আইকনে ক্লিক করুন।
+            Livefy ওয়েব প্লেলিস্ট প্লেয়ার 🚀 | চ্যানেল প্লে করতে যেকোনো আইটেমে ক্লিক করুন।
         </div>
     </div>
 
     <div class="container">
         <h1>Livefy ওয়েব প্লেলিস্ট ভিউয়ার</h1>
         
+        <div style="margin-bottom: 20px; text-align: center;">
+            <video id="video" controls style="width: 100%; max-width: 640px; background-color: black; border-radius: 8px;"></video>
+        </div>
+
         <div id="status">প্লেলিস্ট লোড হচ্ছে, দয়া করে অপেক্ষা করুন...</div>
         
         <div class="channel-grid" id="channel-list">
             </div>
         
-        <div style="margin-top: 40px; text-align: center; font-size: 0.9em; color: #e74c3c;">
-            ⚠️ যদি ভিডিও প্লে না হয়, তবে আপনার সিস্টেমে **VLC Media Player** ইনস্টল করুন এবং প্লেব্যাক VLC-এর মাধ্যমে শুরু করুন।
+        <div style="margin-top: 40px; text-align: center; font-size: 0.9em; color: #3498db;">
+            ✅ চ্যানেল প্লে করার জন্য যেকোনো আইটেমে ক্লিক করুন।
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> 
+    
     <script>
         // --- JavaScript কার্যকারিতা ---
         
@@ -127,9 +133,51 @@
         const M3U_URL = "https://spoo.me/z5tvv"; 
         
         // CORS সমস্যা এড়ানোর জন্য একটি পাবলিক প্রক্সি
-        // এই প্রক্সি URL টি স্ট্রিমিং লিঙ্কগুলোতে যুক্ত হবে
         const CORS_PROXY_STREAM = "https://corsproxy.io/?"; 
-        // 🚨 সতর্কতা: পাবলিক প্রক্সি ১০০% নির্ভরযোগ্য নয়, কিন্তু এটি অধিকাংশ ক্ষেত্রে কাজ করে।
+        
+        // 💡 নতুন ফাংশন: HLS.js ব্যবহার করে ভিডিও প্লে করা
+        function playStream(streamUrl) {
+            const video = document.getElementById('video');
+            const statusDiv = document.getElementById('status');
+            
+            // প্রক্সি ব্যবহার করে স্ট্রিমিং URL তৈরি করুন
+            const proxiedStreamUrl = CORS_PROXY_STREAM + encodeURIComponent(streamUrl);
+        
+            statusDiv.textContent = 'ভিডিও প্লে করার চেষ্টা চলছে...';
+            
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                
+                // যদি আগে থেকে কোনো HLS লোড করা থাকে, তবে তা ধ্বংস করুন
+                if (video.hls) {
+                    video.hls.destroy();
+                }
+                video.hls = hls; // HLS অবজেক্ট সংরক্ষণ করুন
+                
+                hls.loadSource(proxiedStreamUrl);
+                hls.attachMedia(video);
+                
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play();
+                    statusDiv.textContent = '✅ ভিডিও প্লে হচ্ছে!';
+                });
+                
+                hls.on(Hls.Events.ERROR, function (event, data) {
+                    statusDiv.textContent = `❌ প্লেব্যাক ত্রুটি: ${data.details}. (প্রক্সি বা CORS সমস্যা থাকতে পারে)`;
+                    console.error("HLS Error:", data);
+                    // fallback: যদি HLS.js কাজ না করে, তবে সরাসরি URL এ প্লে করার চেষ্টা করুন
+                    video.src = proxiedStreamUrl;
+                    video.play();
+                });
+        
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Safari/iOS এর জন্য ডিফল্ট সাপোর্ট
+                video.src = proxiedStreamUrl;
+                video.play();
+            } else {
+                statusDiv.textContent = '❌ এই ব্রাউজারে HLS স্ট্রিমিং সমর্থিত নয়।';
+            }
+        }
 
         function loadM3U() {
             const channelListDiv = document.getElementById('channel-list');
@@ -176,7 +224,6 @@
                 if (line.startsWith('#EXTINF:')) {
                     currentStream = {};
                     
-                    // #EXTINF: থেকে নাম, গ্রুপ এবং অন্যান্য তথ্য পার্স করা
                     const parts = line.split(',');
                     currentStream.name = parts.length > 1 ? parts.pop().trim() : 'Unknown Stream';
                     
@@ -193,7 +240,6 @@
                     currentStream.group = currentStream.group || 'General';
 
                 } else if (currentStream && !line.startsWith('#')) {
-                    // এটি স্ট্রিমিং URL
                     currentStream.url = line;
                     streams.push(currentStream);
                     currentStream = null; 
@@ -236,11 +282,9 @@
                                 </div>`;
                 
                 groupedStreams[group].forEach(stream => {
-                    // 💡 স্ট্রিমিং URL কে প্রক্সি দিয়ে মোড়ক করা হলো (প্লে করার জন্য)
-                    const proxiedStreamUrl = CORS_PROXY_STREAM + encodeURIComponent(stream.url);
                     
-                    // প্লে অ্যাকশন: নতুন ট্যাবে প্রক্সি করা URL ওপেন হবে
-                    const playAction = `window.open('${proxiedStreamUrl}', '_blank');`;
+                    // প্লে অ্যাকশন: playStream ফাংশনকে কল করবে
+                    const playAction = `playStream('${stream.url}')`;
                     
                     htmlContent += `
                         <div class="channel-item" title="Click to Play" onclick="${playAction}">

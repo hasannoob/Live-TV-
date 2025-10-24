@@ -1,371 +1,244 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livefy - Channel Grid Player (Final Attempt)</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> 
-    
-    <style>
-        /* CSS Styling: NS Player-এর মতো কালো ব্যাকগ্রাউন্ড এবং নীল বর্ডার */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #202020; /* কালো ব্যাকগ্রাউন্ড */
-            color: #ecf0f1;
-        }
-        
-        /* --- হেডার এবং প্লেয়ার সেকশন --- */
-        .top-section {
-            background-color: #34495e;
-            color: white;
-            padding: 10px 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            margin-bottom: 10px;
-        }
-        .header-status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        h1 {
-            font-size: 1.5em;
-            margin: 0;
-        }
-        #status {
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 0.9em;
-            background-color: #3498db; 
-        }
-        
-        /* --- ভিডিও টপ প্লেয়ার --- */
-        #video-container {
-            width: 100%;
-            max-width: 600px; 
-            margin: 10px 0;
-        }
-        #video {
-            width: 100%;
-            height: auto;
-            min-height: 250px; 
-            background-color: #000;
-            border-radius: 4px;
-        }
-        
-        /* --- মূল চ্যানেল গ্রিড --- */
-        .main-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 10px;
-        }
-        .channel-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-            gap: 10px;
-            padding: 10px;
-        }
-        
-        /* --- চ্যানেল আইটেম স্টাইল --- */
-        .channel-item {
-            background-color: #000;
-            border: 2px solid #3498db; /* নীল বর্ডার */
-            border-radius: 8px;
-            padding: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-        }
-        .channel-item:hover {
-            transform: scale(1.05);
-            border-color: #2ecc71; /* হোভার করলে সবুজ বর্ডার */
-        }
-        .channel-item.active { 
-            border-color: #e74c3c; /* সক্রিয় হলে লাল বর্ডার */
-            background-color: #1a1a1a;
-            box-shadow: 0 0 15px rgba(231, 76, 60, 0.7);
-        }
-        .channel-name {
-            font-weight: bold;
-            color: #ecf0f1;
-            margin-top: 5px;
-            font-size: 0.9em;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .play-icon {
-            display: block;
-            color: #2ecc71;
-            font-size: 2.5em;
-            margin: 5px auto;
-        }
-        .group-header {
-            grid-column: 1 / -1; 
-            font-size: 1.2em;
-            color: #3498db;
-            margin-top: 15px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #3498db;
-        }
-        
-        /* --- মোবাইল / ছোট স্ক্রিন --- */
-        @media (max-width: 600px) {
-            .channel-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Livefy - Channel Grid Player (Fixed)</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: #202020;
+      color: #ecf0f1;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .top-section {
+      background-color: #34495e;
+      padding: 10px 20px;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    #status {
+      padding: 5px 10px;
+      background: #3498db;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    #video-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 10px auto;
+    }
+    video {
+      width: 100%;
+      border-radius: 6px;
+      background: #000;
+      min-height: 250px;
+    }
+    .main-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px;
+    }
+    .channel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .channel-item {
+      background: #000;
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .channel-item:hover {
+      transform: scale(1.05);
+      border-color: #2ecc71;
+    }
+    .channel-item.active {
+      border-color: #e74c3c;
+      box-shadow: 0 0 15px rgba(231, 76, 60, 0.7);
+    }
+    .channel-name { font-weight: bold; margin-top: 5px; }
+  </style>
 </head>
 <body>
 
-    <div class="top-section">
-        <div class="header-status">
-            <h1>📺 Live Channel Viewer</h1>
-            <div id="status">প্লেলিস্ট লোড হচ্ছে...</div>
-        </div>
-        
-        <div id="video-container">
-            <video id="video" controls autoplay></video>
-        </div>
+  <div class="top-section">
+    <h1>📺 Live Channel Viewer</h1>
+    <div id="status">লোড হচ্ছে...</div>
+    <div id="video-container">
+      <video id="video" controls autoplay playsinline></video>
     </div>
-    
-    <div class="main-container">
-        <div class="channel-grid" id="channel-list">
-            <p style="grid-column: 1 / -1; text-align: center;">M3U প্লেলিস্ট লোড হচ্ছে, দয়া করে অপেক্ষা করুন...</p>
-        </div>
-        
-        <div style="margin-top: 15px; text-align: center; font-size: 0.9em; color: #7f8c8d;" id="total-count"></div>
+  </div>
+
+  <div class="main-container">
+    <div class="channel-grid" id="channel-list">
+      <p style="grid-column: 1 / -1; text-align: center;">চ্যানেল লোড হচ্ছে...</p>
     </div>
+    <div id="total-count" style="text-align:center;margin-top:10px;color:#7f8c8d;"></div>
+  </div>
 
-    
-    <script>
-        // --- JavaScript কার্যকারিতা ---
-        
-        // ⚠️ আপনার M3U প্লেলিস্টের URL
-        const M3U_URL = "https://bongoflixbd.top/test/playlist.php"; 
-        
-        // 💡 প্লেলিস্ট এবং স্ট্রিমিং লোড করার জন্য একাধিক প্রক্সির তালিকা
-        const PROXIES = [
-            { name: "Thingproxy", prefix: "https://thingproxy.freeboard.io/fetch/", needsEncode: false }, 
-            { name: "Allorigins", prefix: "https://api.allorigins.win/raw?url=", needsEncode: true },
-            { name: "YACDN", prefix: "https://yacdn.org/proxy/", needsEncode: false } 
-        ];
-        
-        let currentHlsInstance = null;
-        let lastPlayedChannel = null;
-        let activeProxyIndex = 0; 
+  <script>
+    const M3U_URL = "https://bongoflixbd.top/test/playlist.php";
 
-        // 💡 ফাংশন: HLS.js ব্যবহার করে ভিডিও প্লে করা
-        function playStream(streamUrl, channelItem) {
-            const video = document.getElementById('video');
-            const statusDiv = document.getElementById('status');
-            
-            if (lastPlayedChannel) {
-                lastPlayedChannel.classList.remove('active');
-            }
-            if (channelItem) {
-                channelItem.classList.add('active');
-                lastPlayedChannel = channelItem;
-            }
-            
-            const currentProxy = PROXIES[activeProxyIndex];
-            let proxiedStreamUrl = currentProxy.prefix;
-            
-            if (currentProxy.needsEncode) {
-                proxiedStreamUrl += encodeURIComponent(streamUrl);
-            } else {
-                proxiedStreamUrl += streamUrl;
-            }
-            
-            statusDiv.textContent = 'ভিডিও লোড হচ্ছে... (প্রক্সি দিয়ে চলছে)';
-            statusDiv.style.backgroundColor = '#f39c12'; 
+    const PROXIES = [
+      { name: "Fringe", prefix: "https://cors-proxy.fringe.zone/", needsEncode: false },
+      { name: "AllOrigins", prefix: "https://api.allorigins.win/raw?url=", needsEncode: true }
+    ];
 
-            if (Hls.isSupported()) {
-                if (currentHlsInstance) {
-                    currentHlsInstance.destroy();
-                }
-                
-                const hls = new Hls();
-                currentHlsInstance = hls;
-                
-                hls.loadSource(proxiedStreamUrl);
-                hls.attachMedia(video);
-                
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play().catch(e => {
-                        statusDiv.textContent = '⚠️ প্লে করতে Failed, ম্যানুয়ালি ক্লিক করুন বা ভিডিও ব্লক হচ্ছে।';
-                        statusDiv.style.backgroundColor = '#e67e22';
-                    });
-                });
-                
-                hls.on(Hls.Events.ERROR, function (event, data) {
-                    if (data.fatal) {
-                        statusDiv.textContent = `❌ **ভিডিও ব্লক!** এটি ব্রাউজারে চলবে না। প্রক্সি ব্যর্থ।`;
-                        statusDiv.style.backgroundColor = '#e74c3c';
-                        console.error("HLS Fatal Error: Stream Blocked", data);
-                    }
-                });
-                
-                video.onplaying = () => {
-                    statusDiv.textContent = `✅ চলছে: ${channelItem.querySelector('.channel-name').textContent} (প্রক্সি: ${currentProxy.name})`;
-                    statusDiv.style.backgroundColor = '#2ecc71'; 
-                };
-                video.onwaiting = () => {
-                     statusDiv.textContent = `⏳ বাফারিং: ${channelItem.querySelector('.channel-name').textContent}`;
-                     statusDiv.style.backgroundColor = '#f1c40f'; 
-                };
+    const TEST_STREAM = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"; // fallback video
 
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = proxiedStreamUrl;
-                video.play();
-                video.onplaying = () => {
-                    statusDiv.textContent = `✅ চলছে: ${channelItem.querySelector('.channel-name').textContent}`;
-                    statusDiv.style.backgroundColor = '#2ecc71';
-                };
-            } else {
-                statusDiv.textContent = '❌ এই ব্রাউজারে HLS স্ট্রিমিং সমর্থিত নয়।';
-                statusDiv.style.backgroundColor = '#e74c3c';
-            }
+    let currentHls = null;
+    let lastItem = null;
+    let activeProxyIndex = 0;
+
+    function playStream(streamUrl, channelItem) {
+      const video = document.getElementById("video");
+      const status = document.getElementById("status");
+
+      if (lastItem) lastItem.classList.remove("active");
+      if (channelItem) {
+        channelItem.classList.add("active");
+        lastItem = channelItem;
+      }
+
+      const proxy = PROXIES[activeProxyIndex];
+      let finalUrl = proxy.needsEncode
+        ? proxy.prefix + encodeURIComponent(streamUrl)
+        : proxy.prefix + streamUrl;
+
+      status.textContent = "🔄 ভিডিও লোড হচ্ছে...";
+      status.style.background = "#f39c12";
+
+      if (Hls.isSupported()) {
+        if (currentHls) currentHls.destroy();
+        currentHls = new Hls();
+        currentHls.loadSource(finalUrl);
+        currentHls.attachMedia(video);
+        currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {
+            status.textContent = "⚠️ Autoplay ব্যর্থ — ম্যানুয়ালি প্লে করুন।";
+            status.style.background = "#e67e22";
+          });
+        });
+        currentHls.on(Hls.Events.ERROR, (e, data) => {
+          console.error("HLS Error:", data);
+          status.textContent = "❌ ভিডিও লোড হচ্ছে না। অন্য প্রক্সি চেষ্টা করা হচ্ছে...";
+          status.style.background = "#e74c3c";
+        });
+        video.onplaying = () => {
+          status.textContent = "✅ ভিডিও চলছে...";
+          status.style.background = "#2ecc71";
+        };
+        video.onwaiting = () => {
+          status.textContent = "⏳ বাফারিং হচ্ছে...";
+          status.style.background = "#f1c40f";
+        };
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = finalUrl;
+        video.play();
+      } else {
+        status.textContent = "❌ HLS সমর্থিত নয়।";
+        status.style.background = "#e74c3c";
+      }
+    }
+
+    async function loadM3U(proxyIndex = 0) {
+      const list = document.getElementById("channel-list");
+      const status = document.getElementById("status");
+
+      if (proxyIndex >= PROXIES.length) {
+        status.textContent = "⚠️ সব প্রক্সি ব্যর্থ — fallback stream চালু হচ্ছে।";
+        status.style.background = "#e74c3c";
+        playStream(TEST_STREAM, null);
+        return;
+      }
+
+      const proxy = PROXIES[proxyIndex];
+      activeProxyIndex = proxyIndex;
+
+      let url = proxy.needsEncode
+        ? proxy.prefix + encodeURIComponent(M3U_URL)
+        : proxy.prefix + M3U_URL;
+
+      status.textContent = `M3U লোড হচ্ছে... (${proxy.name})`;
+      status.style.background = "#3498db";
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("HTTP ত্রুটি");
+        const text = await res.text();
+        parseM3U(text);
+      } catch (err) {
+        console.warn(`Proxy ${proxy.name} ব্যর্থ`, err);
+        loadM3U(proxyIndex + 1);
+      }
+    }
+
+    function parseM3U(data) {
+      const lines = data.split("\n").map(l => l.trim()).filter(l => l);
+      const streams = [];
+      let current = null;
+      let count = 0;
+
+      for (const line of lines) {
+        if (line.startsWith("#EXTINF:")) {
+          current = {};
+          const name = line.split(",").pop().trim();
+          const groupMatch = line.match(/group-title="([^"]+)"/);
+          current.name = name || "Unknown";
+          current.group = groupMatch ? groupMatch[1] : "General";
+        } else if (current && !line.startsWith("#")) {
+          current.url = line;
+          streams.push(current);
+          current = null;
+          count++;
         }
+      }
+      displayStreams(streams, count);
+    }
 
-        // 💡 ফাংশন: M3U প্লেলিস্ট লোড করা (একাধিক প্রক্সি চেষ্টা করবে)
-        async function loadM3U(proxyIndex = 0) {
-            const channelListDiv = document.getElementById('channel-list');
-            const statusDiv = document.getElementById('status');
-            
-            if (proxyIndex >= PROXIES.length) {
-                // সমস্ত প্রক্সি ব্যর্থ হয়েছে: ব্যবহারকারীকে নির্দেশনা দিন
-                channelListDiv.innerHTML = `<p style="grid-column: 1 / -1; color:#e74c3c; text-align:center; font-size: 1.1em; padding: 20px; border: 1px dashed #e74c3c; background-color: #303030;">
-                    🚫 **দুঃখিত! এই চ্যানেলগুলো এখানে চলবে না।** 🚫<br>
-                    **কারণ:** স্ট্রিমিং সার্ভারের শক্তিশালী নিরাপত্তার (CORS) কারণে ব্রাউজারে চালানো যাচ্ছে না।<br>
-                    <br>
-                    **সমাধান:** ভিডিও দেখতে হলে, দয়া করে এই M3U লিঙ্কটি কপি করুন:<br>
-                    <code style="color: #2ecc71; font-weight: bold;">${M3U_URL}</code><br>
-                    এবং এটি **NS Player, VLC Player,** অথবা অন্য কোনো ডেডিকেটেড **IPTV Player** এ পেস্ট করে দেখুন।
-                </p>`;
-                statusDiv.textContent = '❌ চূড়ান্ত ব্যর্থতা। দেখুন সমাধান কী।';
-                statusDiv.style.backgroundColor = '#e74c3c';
-                return;
-            }
+    function displayStreams(streams, total) {
+      const list = document.getElementById("channel-list");
+      const status = document.getElementById("status");
+      const totalDiv = document.getElementById("total-count");
 
-            const currentProxy = PROXIES[proxyIndex];
-            activeProxyIndex = proxyIndex;
-            
-            statusDiv.textContent = `M3U ডাউনলোড চলছে... (${currentProxy.name} দিয়ে চেষ্টা)`;
-            statusDiv.style.backgroundColor = '#f39c12'; 
+      if (!streams.length) {
+        status.textContent = "কোনো চ্যানেল পাওয়া যায়নি।";
+        status.style.background = "#e74c3c";
+        return;
+      }
 
-            let proxiedM3uUrl = currentProxy.prefix;
-            if (currentProxy.needsEncode) {
-                proxiedM3uUrl += encodeURIComponent(M3U_URL);
-            } else {
-                proxiedM3uUrl += M3U_URL;
-            }
+      totalDiv.textContent = `মোট চ্যানেল: ${total} (Proxy: ${PROXIES[activeProxyIndex].name})`;
+      status.textContent = "✅ লোড সম্পূর্ণ — একটি চ্যানেল ক্লিক করুন।";
+      status.style.background = "#2ecc71";
 
-            try {
-                const response = await fetch(proxiedM3uUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ত্রুটি! স্ট্যাটাস: ${response.status}`);
-                }
-                
-                const data = await response.text();
-                parseM3U(data);
-                
-            } catch (error) {
-                console.error(`Fetch error with Proxy ${currentProxy.name}:`, error);
-                // এই প্রক্সি ব্যর্থ হলে, পরের প্রক্সি দিয়ে চেষ্টা করুন
-                loadM3U(proxyIndex + 1);
-            }
-        }
+      let html = "";
+      const grouped = {};
+      streams.forEach(s => {
+        if (!grouped[s.group]) grouped[s.group] = [];
+        grouped[s.group].push(s);
+      });
 
-        // --- প্লেলিস্ট ডেটা পার্স ও ডিসপ্লে ফাংশন (আগের মতোই) ---
-        function parseM3U(data) {
-            const lines = data.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-            const streams = [];
-            let currentStream = null;
-            let totalChannels = 0;
+      Object.keys(grouped).forEach(group => {
+        html += `<div style="grid-column:1/-1;color:#3498db;font-weight:bold;border-bottom:1px solid #3498db;margin-top:10px;">${group}</div>`;
+        grouped[group].forEach(s => {
+          html += `
+            <div class="channel-item" onclick="playStream('${s.url}', this)">
+              <span style="font-size:2em;color:#2ecc71;">▶️</span>
+              <div class="channel-name">${s.name}</div>
+            </div>
+          `;
+        });
+      });
+      list.innerHTML = html;
+    }
 
-            for (const line of lines) {
-                if (line.startsWith('#EXTINF:')) {
-                    currentStream = {};
-                    
-                    const parts = line.split(',');
-                    currentStream.name = parts.length > 1 ? parts.pop().trim() : 'Unknown Stream';
-                    
-                    const attributes = parts[0];
-                    const attrRegex = /(\w+)=["']?([^"'\s]+)["']?/g;
-                    let attrMatch;
-                    
-                    while ((attrMatch = attrRegex.exec(attributes)) !== null) {
-                        if (attrMatch[1] === 'group-title') {
-                            currentStream.group = attrMatch[2];
-                        }
-                    }
-                    
-                    currentStream.group = currentStream.group || 'General';
-
-                } else if (currentStream && !line.startsWith('#')) {
-                    currentStream.url = line;
-                    streams.push(currentStream);
-                    currentStream = null; 
-                    totalChannels++;
-                }
-            }
-            displayStreams(streams, totalChannels);
-        }
-        
-        function displayStreams(streams, totalChannels) {
-            const channelListDiv = document.getElementById('channel-list');
-            const statusDiv = document.getElementById('status');
-            const totalCountDiv = document.getElementById('total-count');
-            
-            channelListDiv.innerHTML = '';
-            
-            if (streams.length === 0) {
-                statusDiv.textContent = 'কোনো স্ট্রীম খুঁজে পাওয়া যায়নি।';
-                return;
-            }
-
-            totalCountDiv.textContent = `মোট চ্যানেল: ${totalChannels} টি। (সক্রিয় প্রক্সি: ${PROXIES[activeProxyIndex].name})`;
-            statusDiv.textContent = 'চ্যানেল সিলেক্ট করার জন্য অপেক্ষা করছে...';
-            statusDiv.style.backgroundColor = '#3498db'; 
-
-            const groupedStreams = streams.reduce((acc, stream) => {
-                const group = stream.group || 'Others';
-                if (!acc[group]) {
-                    acc[group] = [];
-                }
-                acc[group].push(stream);
-                return acc;
-            }, {});
-
-            let htmlContent = '';
-            const sortedGroups = Object.keys(groupedStreams).sort();
-
-            sortedGroups.forEach(group => {
-                htmlContent += `<div class="group-header">${group}</div>`;
-                
-                groupedStreams[group].forEach(stream => {
-                    const playAction = `playStream('${stream.url}', this)`;
-                    
-                    htmlContent += `
-                        <div class="channel-item" title="${stream.name}" onclick="${playAction}">
-                            <span class="play-icon">▶️</span>
-                            <span class="channel-name">${stream.name}</span>
-                        </div>
-                    `;
-                });
-            });
-
-            channelListDiv.innerHTML = htmlContent;
-        }
-
-        document.addEventListener('DOMContentLoaded', () => loadM3U(0)); 
-    </script>
+    document.addEventListener("DOMContentLoaded", () => loadM3U());
+  </script>
 </body>
 </html>

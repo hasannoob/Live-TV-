@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livefy - Advanced HLS Player (New List)</title>
+    <title>Livefy - Final HLS Player Attempt</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> 
     
     <style>
@@ -37,28 +37,27 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* --- মূল লে-আউট: ভিডিও উপরে, তালিকা নিচে --- */
+        /* --- মূল লে-আউট --- */
         .main-container {
-            display: flex; /* ফ্ল্যাক্সবক্স লে-আউট ব্যবহার করা হয়েছে */
+            display: flex; 
             max-width: 1400px;
             margin: 20px auto;
             padding: 10px;
             gap: 20px;
         }
         
-        /* --- ভিডিও প্লেয়ার সেকশন (উপরে বড় অংশ) --- */
         .video-section {
-            flex: 2; /* প্লেয়ারটি বেশি জায়গা নেবে (৬৬%) */
+            flex: 2; 
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             padding: 15px;
-            order: 1; /* প্রথমে থাকবে */
+            order: 1; 
         }
         #video {
             width: 100%;
             height: auto;
-            min-height: 400px; /* প্লেয়ারের উচ্চতা নিশ্চিত করা হয়েছে */
+            min-height: 400px; 
             background-color: black;
             border-radius: 8px;
         }
@@ -66,22 +65,21 @@
             text-align: center;
             margin-top: 15px;
             padding: 10px;
-            background-color: #f1c40f;
-            color: #34495e;
+            background-color: #e74c3c; /* স্ট্যাটাস রঙ পরিবর্তন করা হলো */
+            color: white;
             border-radius: 4px;
             font-weight: bold;
         }
         
-        /* --- প্লেলিস্ট সেকশন (ডান দিকে/পাশে) --- */
         .playlist-section {
-            flex: 1; /* প্লেলিস্টটি কম জায়গা নেবে (৩৩%) */
+            flex: 1; 
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             padding: 15px;
-            overflow-y: auto; /* অতিরিক্ত কন্টেন্ট স্ক্রোল করার জন্য */
-            max-height: 80vh; /* স্ক্রিনের উচ্চতার ৮০% পর্যন্ত */
-            order: 2; /* দ্বিতীয় স্থানে থাকবে */
+            overflow-y: auto; 
+            max-height: 80vh; 
+            order: 2; 
         }
         .channel-item {
             padding: 10px;
@@ -95,8 +93,8 @@
         .channel-item:hover {
             background-color: #e8f6f8;
         }
-        .channel-item.active { /* বর্তমানে প্লে হওয়া চ্যানেলের জন্য */
-            background-color: #3498db;
+        .channel-item.active { 
+            background-color: #2ecc71; /* সক্রিয় চ্যানেলের রঙ সবুজ করা হলো */
             color: white;
             font-weight: bold;
         }
@@ -118,7 +116,7 @@
         /* --- মোবাইল / ছোট স্ক্রিনের জন্য লে-আউট পরিবর্তন --- */
         @media (max-width: 900px) {
             .main-container {
-                flex-direction: column; /* ছোট স্ক্রিনে প্লেয়ার উপরে, তালিকা নিচে থাকবে */
+                flex-direction: column; 
             }
             .video-section, .playlist-section {
                 flex: none; 
@@ -127,7 +125,7 @@
                 order: initial; 
             }
             .playlist-section {
-                max-height: 50vh; /* মোবাইলে তালিকা স্ক্রোল করা সহজ হবে */
+                max-height: 50vh; 
             }
         }
     </style>
@@ -136,7 +134,7 @@
 
     <div class="header-container">
         <div class="scrolling-text">
-            Livefy Advanced HLS Player 🚀 | নতুন প্লেলিস্ট লোড হচ্ছে... | চ্যানেল দেখতে ক্লিক করুন।
+            Livefy Advanced HLS Player 🚀 | শক্তিশালী প্রক্সি ব্যবহার করা হচ্ছে | প্লে করতে ক্লিক করুন।
         </div>
     </div>
 
@@ -146,7 +144,7 @@
             <h2 style="text-align: center; color: #34495e;">ভিডিও প্লেয়ার</h2>
             <video id="video" controls autoplay></video>
             
-            <div id="status">প্লেলিস্ট লোড হওয়ার পর চ্যানেল সিলেক্ট করুন।</div>
+            <div id="status">প্লেলিস্ট লোড হচ্ছে...</div>
         </div>
         
         <div class="playlist-section">
@@ -160,15 +158,17 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> 
     
     <script>
         // --- JavaScript কার্যকারিতা ---
         
-        // ⚠️ আপনার নতুন M3U প্লেলিস্টের URL এখানে সেট করা হলো
+        // ⚠️ আপনার M3U প্লেলিস্টের URL
         const M3U_URL = "https://spoo.me/z5tvv"; 
         
-        // CORS সমস্যা এড়ানোর জন্য একটি পাবলিক প্রক্সি
-        const CORS_PROXY_STREAM = "https://corsproxy.io/?"; 
+        // 💡 চূড়ান্ত শক্তিশালী প্রক্সি ব্যবহার করা হলো: api.allorigins.win
+        // এটি প্রক্সি করা URL এর মূল ডেটা সরাসরি ফিরিয়ে দেয়, যা CORS বাইপাসের জন্য কার্যকর।
+        const CORS_PROXY = "https://api.allorigins.win/raw?url="; 
         
         let currentHlsInstance = null;
         let lastPlayedChannel = null;
@@ -178,29 +178,26 @@
             const video = document.getElementById('video');
             const statusDiv = document.getElementById('status');
             
-            // পূর্ববর্তী সক্রিয় চ্যানেল থেকে 'active' ক্লাস সরান
             if (lastPlayedChannel) {
                 lastPlayedChannel.classList.remove('active');
             }
-            // বর্তমান চ্যানেলটিকে সক্রিয় করুন
             if (channelItem) {
                 channelItem.classList.add('active');
                 lastPlayedChannel = channelItem;
             }
             
             // প্রক্সি ব্যবহার করে স্ট্রিমিং URL তৈরি করুন
-            const proxiedStreamUrl = CORS_PROXY_STREAM + encodeURIComponent(streamUrl);
+            const proxiedStreamUrl = CORS_PROXY + encodeURIComponent(streamUrl);
             
             statusDiv.textContent = 'ভিডিও প্লে করার চেষ্টা চলছে... লোড হচ্ছে...';
 
             if (Hls.isSupported()) {
-                // যদি HLS অবজেক্ট আগে থেকেই থাকে, তবে তা ধ্বংস করুন
                 if (currentHlsInstance) {
                     currentHlsInstance.destroy();
                 }
                 
                 const hls = new Hls();
-                currentHlsInstance = hls; // নতুন HLS অবজেক্ট সংরক্ষণ করুন
+                currentHlsInstance = hls;
                 
                 hls.loadSource(proxiedStreamUrl);
                 hls.attachMedia(video);
@@ -208,24 +205,27 @@
                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
                     video.play().catch(e => {
                         console.warn("Autoplay was prevented:", e);
-                        statusDiv.textContent = '⚠️ প্লে করতে Failed, প্লে বাটনে ক্লিক করুন।';
+                        statusDiv.textContent = '⚠️ অটো-প্লে ব্যর্থ হয়েছে। ম্যানুয়ালি প্লে বাটনে ক্লিক করুন।';
                     });
                 });
                 
                 hls.on(Hls.Events.ERROR, function (event, data) {
                     if (data.fatal) {
-                        statusDiv.textContent = `❌ প্লেব্যাক ত্রুটি: ${data.details}. (নেটওয়ার্ক বা ফাইল সমস্যা)`;
+                        statusDiv.textContent = `❌ প্লেব্যাক ত্রুটি: ${data.details}. (প্রক্সি বা নেটওয়ার্ক)`;
                         console.error("HLS Fatal Error:", data);
-                        
-                        // যদি ফ্যাটাল এরর হয়, তবে ফলব্যাক হিসেবে সরাসরি ভিডিও ট্যাগে লোড করার চেষ্টা করুন
+                        // ফলব্যাক: সরাসরি ভিডিও ট্যাগে লোড করার চেষ্টা করুন
                         video.src = proxiedStreamUrl;
                         video.play();
                     }
                 });
                 
-                // ভিডিও প্লে হচ্ছে স্ট্যাটাস
                 video.onplaying = () => {
-                    statusDiv.textContent = `▶️ বর্তমানে চলছে: ${channelItem.querySelector('.channel-name').textContent}`;
+                    statusDiv.textContent = `✅ বর্তমানে চলছে: ${channelItem.querySelector('.channel-name').textContent}`;
+                    statusDiv.style.backgroundColor = '#2ecc71'; /* সফল হলে সবুজ */
+                };
+                video.onwaiting = () => {
+                     statusDiv.textContent = `⏳ বাফারিং হচ্ছে: ${channelItem.querySelector('.channel-name').textContent}`;
+                     statusDiv.style.backgroundColor = '#f1c40f'; /* বাফারিং হলে হলুদ */
                 };
 
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -233,10 +233,11 @@
                 video.src = proxiedStreamUrl;
                 video.play();
                 video.onplaying = () => {
-                    statusDiv.textContent = `▶️ বর্তমানে চলছে: ${channelItem.querySelector('.channel-name').textContent}`;
+                    statusDiv.textContent = `✅ বর্তমানে চলছে: ${channelItem.querySelector('.channel-name').textContent}`;
+                    statusDiv.style.backgroundColor = '#2ecc71';
                 };
             } else {
-                statusDiv.textContent = '❌ এই ব্রাউজারে HLS স্ট্রিমিং সমর্থিত নয়। VLC ব্যবহার করুন।';
+                statusDiv.textContent = '❌ এই ব্রাউজারে HLS স্ট্রিমিং সমর্থিত নয়।';
             }
         }
 
@@ -247,10 +248,10 @@
             const scrollingText = document.querySelector('.scrolling-text');
             
             statusDiv.textContent = 'M3U প্লেলিস্ট ডাউনলোড করা হচ্ছে...';
-            scrollingText.textContent = 'Livefy Advanced HLS Player 🚀 | M3U প্লেলিস্ট ডাউনলোড করা হচ্ছে...';
+            statusDiv.style.backgroundColor = '#f39c12'; 
 
-            // CORS সমস্যা এড়াতে প্রক্সি ব্যবহার করে প্লেলিস্ট লোড
-            const proxiedM3uUrl = CORS_PROXY_STREAM + encodeURIComponent(M3U_URL);
+            // CORS প্রক্সি ব্যবহার করে প্লেলিস্ট লোড
+            const proxiedM3uUrl = CORS_PROXY + encodeURIComponent(M3U_URL);
 
             fetch(proxiedM3uUrl)
                 .then(response => {
@@ -264,15 +265,17 @@
                 })
                 .catch(error => {
                     channelListDiv.innerHTML = `<p style="color:red; text-align:center;">
-                        প্লেলিস্ট লোড করার সময় ত্রুটি: ${error.message}. <br> 
-                        প্রক্সি বা সার্ভার সমস্যা থাকতে পারে।
+                        ❌ প্লেলিস্ট লোড করার সময় ত্রুটি: ${error.message}. <br> 
+                        অনুগ্রহ করে নিশ্চিত করুন URL টিতে পাবলিক অ্যাক্সেস রয়েছে।
                     </p>`;
                     statusDiv.textContent = '❌ প্লেলিস্ট লোড করতে ব্যর্থ।';
+                    statusDiv.style.backgroundColor = '#e74c3c';
                     console.error('Fetch error:', error);
-                    scrollingText.textContent = '❌ প্লেলিস্ট লোড করতে ব্যর্থ। প্রক্সি বা URL চেক করুন।';
+                    scrollingText.textContent = '❌ লোড ব্যর্থ। প্লেলিস্ট URL বা প্রক্সি কাজ করছে না।';
                 });
         }
 
+        // --- (parseM3U এবং displayStreams ফাংশনগুলো আগের মতোই থাকবে) ---
         function parseM3U(data) {
             const lines = data.split('\n').map(line => line.trim()).filter(line => line.length > 0);
             const streams = [];
@@ -326,6 +329,7 @@
             totalCountDiv.textContent = `মোট চ্যানেল: ${totalChannels} টি`;
             scrollingText.textContent = `Livefy Advanced HLS Player 🚀 | মোট ${totalChannels} টি চ্যানেল লোড হয়েছে! ক্লিক করে প্লে করুন।`;
             statusDiv.textContent = 'চ্যানেল সিলেক্ট করার জন্য অপেক্ষা করছে...';
+            statusDiv.style.backgroundColor = '#3498db'; /* অপেক্ষার রঙ নীল */
 
             const groupedStreams = streams.reduce((acc, stream) => {
                 const group = stream.group || 'Others';
@@ -343,8 +347,6 @@
                 htmlContent += `<h3 style="color: #2980b9; margin-top: 15px; margin-bottom: 5px;">${group}</h3>`;
                 
                 groupedStreams[group].forEach(stream => {
-                    
-                    // প্লে অ্যাকশন: playStream ফাংশনকে কল করবে এবং বর্তমান DOM এলিমেন্ট পাস করবে
                     const playAction = `playStream('${stream.url}', this)`;
                     
                     htmlContent += `
@@ -359,7 +361,6 @@
             channelListDiv.innerHTML = htmlContent;
         }
 
-        // প্রাথমিক লোডের সময় M3U লোড করুন
         document.addEventListener('DOMContentLoaded', loadM3U);
         
     </script>

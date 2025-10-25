@@ -3,263 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LiveFy TV — Watch Live</title>
+<title>LiveFy TV</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<link id="rmp-dress-code" type="text/css" rel="stylesheet" href="https://cdn.radiantmediatechs.com/rmp/5.9.2/css/rmp-s4.min.css">
 
 <style>
-body {
-  margin: 0;
-  background: #000;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  padding-bottom: 70px;
-}
-
-/* ====== Top Player ====== */
-#player-wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 260px;
-  background: linear-gradient(180deg, #006400 0%, #ff0000 100%);
-  border-bottom: 3px solid #fff;
-  z-index: 9999;
-  text-align: center;
-  box-shadow: 0 0 20px #ff0000;
-}
-.logo-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 6px 0;
-}
-.logo-section img {
-  height: 40px;
-  width: 40px;
-  border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 0 10px #00ff00;
-}
-.logo-section h1 {
-  font-size: 22px;
-  color: #fff;
-  font-weight: bold;
-  text-shadow: 0 0 10px #ff0000, 0 0 15px #00ff00;
-  margin: 0;
-}
-#video {
-  width: 100%;
-  height: 210px;
-  background: #000;
-}
-
-/* ====== Main Section ====== */
-.section {
-  display: none;
-  margin-top: 270px;
-  padding: 15px;
-}
-.active-section {
-  display: block;
-}
-
-/* ====== Home Section ====== */
-.marquee {
-  border: 2px solid #ff0000;
-  background: #111;
-  padding: 5px;
-  width: 95%;
-  margin: 10px auto;
-  border-radius: 5px;
-  text-align: center;
-  box-shadow: 0 0 10px #008000;
-}
-.category {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 10px 0;
-}
-.category button {
-  background: linear-gradient(90deg, #ff0000, #006400);
-  color: white;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.category button:hover {
-  background: #00ff00;
-  color: black;
-}
-.print {
-  height: 70px;
-  width: 70px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  margin: 5px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.print:hover {
-  transform: scale(1.15);
-  border-color: #00ff00;
-  box-shadow: 0 0 15px #ff0000;
-}
-
-/* ====== Footer Menu ====== */
-.footer-menu {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 65px;
-  background: linear-gradient(90deg, #006400, #ff0000);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  border-top: 2px solid #fff;
-  z-index: 10000;
-}
-.footer-menu div {
-  color: #fff;
-  text-align: center;
-  font-size: 13px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.footer-menu div:hover, .footer-menu .active {
-  color: #00ff00;
-  transform: scale(1.1);
-}
-.footer-menu i {
-  font-size: 20px;
-  display: block;
-}
+body { background:#000; color:white; margin:0; font-family:Arial,sans-serif; overflow-x:hidden; }
+.scrollmenu { display:flex; overflow-x:auto; padding:10px 0; gap:10px; }
+.scrollmenu::-webkit-scrollbar { display:none; }
+.scrollmenu img { height:80px; width:80px; border-radius:50%; cursor:pointer; border:2px solid #fff; transition:0.3s; }
+.scrollmenu img:hover { transform:scale(1.2); border-color:#00ff00; box-shadow:0 0 15px #ff0000; }
+.marquee { width:100%; background:red; text-align:center; padding:5px 0; font-weight:bold; }
+.marquee marquee { color:#fff; }
+.category { margin:10px 0; text-align:center; }
+.category button { padding:8px 15px; margin:0 5px; font-size:14px; cursor:pointer; border:none; border-radius:5px; background:#ff0000; color:#fff; }
+.category button:hover { background:#00ff00; }
+#rmpPlayer { width:100%; max-width:100%; height:300px; margin:10px auto; }
 </style>
 </head>
 <body>
 
-<!-- ====== Header Player ====== -->
-<div id="player-wrapper">
-  <div class="logo-section">
-    <img src="https://i.ibb.co/tCxPzLx/livefy-logo.png" alt="LiveFy TV">
-    <h1>LiveFy TV</h1>
-  </div>
-  <video id="video" controls autoplay playsinline></video>
+<!-- ====== Marquee ====== -->
+<div class="marquee">
+  <marquee scrollamount="5">🔴 Welcome to LiveFy TV — Watch Live Sports, Movies, News & Kids Shows ❤️💚</marquee>
 </div>
 
-<!-- ====== Home Section ====== -->
-<div id="home" class="section active-section">
-  <div class="marquee">
-    <span><i class="fa fa-broadcast-tower"></i></span>
-    <marquee scrollamount="5">🔴 Welcome to LiveFy TV — Watch Live Sports, Movies, News & Kids Shows ❤️💚</marquee>
-  </div>
-  <div class="category">
-    <button data-cat="sports">🏏 Sports</button>
-    <button data-cat="movies">🎬 Movies</button>
-    <button data-cat="news">📰 News</button>
-    <button data-cat="kids">🧒 Kids</button>
-  </div>
-  <div id="channels"></div>
+<!-- ====== Category Buttons ====== -->
+<div class="category">
+  <button data-cat="sports">🏏 Sports</button>
+  <button data-cat="movies">🎬 Movies</button>
+  <button data-cat="news">📰 News</button>
+  <button data-cat="kids">🧒 Kids</button>
 </div>
 
-<!-- ====== Live Section ====== -->
-<div id="live" class="section">
-  <h2>📺 Live Now</h2>
-  <p>Watch Live Cricket, Football, and more from LiveFy TV!</p>
-</div>
+<!-- ====== Scrollable Channel List ====== -->
+<div class="scrollmenu" id="channels"></div>
 
-<!-- ====== Search Section ====== -->
-<div id="search" class="section">
-  <h2>🔍 Search</h2>
-  <input type="text" id="searchInput" placeholder="Search channel..." style="width:100%;padding:10px;border-radius:5px;border:none;">
-</div>
+<!-- ====== Video Player ====== -->
+<div id="rmpPlayer"></div>
 
-<!-- ====== Profile Section ====== -->
-<div id="profile" class="section">
-  <h2>👤 My Profile</h2>
-  <p>User: <b>Md Abu Hasan</b></p>
-  <p>From: Naogaon</p>
-  <p>Experience: 6 Years (Warehouse Dept.)</p>
-</div>
-
-<!-- ====== Settings Section ====== -->
-<div id="settings" class="section">
-  <h2>⚙️ Settings</h2>
-  <p>Change theme, notifications & more (Coming Soon...)</p>
-</div>
-
-<!-- ====== Footer Menu ====== -->
-<div class="footer-menu">
-  <div class="active" data-target="home"><i class="fas fa-home"></i>Home</div>
-  <div data-target="live"><i class="fas fa-tv"></i>Live</div>
-  <div data-target="search"><i class="fas fa-search"></i>Search</div>
-  <div data-target="profile"><i class="fas fa-user"></i>Profile</div>
-  <div data-target="settings"><i class="fas fa-cog"></i>Settings</div>
-</div>
+<script src="https://cdn.radiantmediatechs.com/rmp/6.2.0/js/rmp.min.js"></script>
 
 <script>
-// ====== Default Video ======
-var video = document.getElementById('video');
-function playStream(url) {
-  if (Hls.isSupported()) {
-    var hls = new Hls();
-    hls.loadSource(url);
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, function () {
-      video.play();
-    });
-  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = url;
-    video.play();
-  }
-}
-
-// ====== Channel Data ======
+// Channel data
 var channels = {
   sports: [
-    {name:"PTV Sports", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/en/f/f1/PTV_Sports.png"},
-    {name:"Geo Super", url:"https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8", logo:"https://upload.wikimedia.org/wikipedia/en/f/f2/Geo_Super_logo.png"}
+    {name:"PTV Sports", logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU", url:"https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8"},
+    {name:"Ten Sports", logo:"https://upload.wikimedia.org/wikipedia/en/4/4b/Ten_Sports_logo.png", url:"http://mu03ye.wanicelife.com:8880/live/YALM4649/y6q3fhltq/31641.m3u8"}
   ],
   movies: [
-    {name:"HBO", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/commons/d/de/HBO_logo.svg"},
-    {name:"Sony Pix", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/en/1/1b/Sony_PIX.png"}
+    {name:"Movies1", logo:"https://upload.wikimedia.org/wikipedia/en/3/33/Movie_channel_logo.png", url:"https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"}
   ],
   news: [
-    {name:"BBC News", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/commons/b/bc/BBC_News_2022.svg"},
-    {name:"Geo News", url:"https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8", logo:"https://upload.wikimedia.org/wikipedia/en/2/2f/Geo_News_logo.png"}
+    {name:"News1", logo:"https://upload.wikimedia.org/wikipedia/commons/1/1b/News_channel_logo.png", url:"https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"}
   ],
   kids: [
-    {name:"Cartoon Network", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/commons/8/80/Cartoon_Network_2010_logo.svg"},
-    {name:"Nick", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/commons/7/7a/Nickelodeon_2009_logo.svg"}
+    {name:"Kids1", logo:"https://upload.wikimedia.org/wikipedia/commons/5/5b/Kids_channel_logo.png", url:"https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"}
   ]
 };
 
-// ====== Load Category ======
+// Load category
 function loadCategory(cat) {
   $("#channels").html("");
   channels[cat].forEach(c => {
-    $("#channels").append(`<img class="print" src="${c.logo}" title="${c.name}" onclick="playStream('${c.url}')">`);
+    $("#channels").append(`<img src="${c.logo}" title="${c.name}" onclick="playStream('${c.url}')">`);
   });
 }
 loadCategory("sports");
 
-// ====== Footer Navigation ======
-$(".footer-menu div").click(function() {
-  $(".footer-menu div").removeClass("active");
-  $(this).addClass("active");
-  var target = $(this).data("target");
-  $(".section").removeClass("active-section");
-  $("#" + target).addClass("active-section");
+// Auto scroll
+let scrollInterval = setInterval(() => {
+  let container = document.getElementById("channels");
+  container.scrollLeft += 1;
+  if (container.scrollLeft >= container.scrollWidth - container.clientWidth) container.scrollLeft = 0;
+}, 50);
+
+// Change category
+$(".category button").click(function() {
+  let cat = $(this).data("cat");
+  loadCategory(cat);
 });
+
+// Radiant Player init
+var rmp = new RadiantMP("rmpPlayer");
+rmp.init({
+  licenseKey: "eHp1dXRtb3Z5cEAxNDkyNDI4",
+  skin:"s4",
+  autoplay:true,
+  hideControls:false,
+  isLive:true,
+  src:{hls: channels.sports[0].url},
+});
+
+// Play function
+function playStream(url){
+  rmp.setSrc({hls:url});
+  rmp.play();
+}
 </script>
 
 </body>

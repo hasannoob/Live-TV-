@@ -20,7 +20,10 @@ body { background:#000; color:white; margin:0; font-family:Arial,sans-serif; ove
 .scrollmenu::-webkit-scrollbar { display:none; }
 .scrollmenu img { height:80px; width:80px; border-radius:50%; cursor:pointer; border:2px solid #fff; transition:0.3s; }
 .scrollmenu img:hover { transform:scale(1.2); border-color:#00ff00; box-shadow:0 0 15px #ff0000; }
-#rmpPlayer { width:100%; height:calc(100vh - 200px); margin:0 auto; display:block; }
+#rmpPlayer { width:100%; height:calc(100vh - 250px); margin:0 auto; display:block; }
+.viewer-count { position:absolute; top:10px; right:10px; background:red; padding:5px 10px; border-radius:5px; font-weight:bold; z-index:1000; }
+.controls { position:absolute; top:10px; left:10px; z-index:1000; }
+.controls button { margin-right:5px; padding:5px 10px; border:none; border-radius:5px; background:#ff0000; color:#fff; cursor:pointer; }
 @media screen and (max-width:768px){ #rmpPlayer{height:calc(60vh);} }
 </style>
 </head>
@@ -38,6 +41,13 @@ body { background:#000; color:white; margin:0; font-family:Arial,sans-serif; ove
 </div>
 
 <div class="scrollmenu" id="channels"></div>
+
+<div class="controls">
+  <button id="fullscreenBtn">⛶ Fullscreen</button>
+  <button id="pipBtn">🖼️ PIP</button>
+</div>
+
+<div class="viewer-count" id="viewerCount">👀 0</div>
 
 <div id="rmpPlayer"></div>
 
@@ -99,6 +109,34 @@ function playStream(url){
   rmp.setSrc({hls:url});
   rmp.play();
 }
+
+// Viewer count (CountAPI)
+const viewerEl = document.getElementById("viewerCount");
+function updateViewerCount() {
+  fetch('https://api.countapi.xyz/hit/awaispirkale/visits')
+    .then(res => res.json())
+    .then(res => { viewerEl.innerHTML = `👀 ${res.value}`; });
+}
+setInterval(updateViewerCount, 5000);
+updateViewerCount();
+
+// Fullscreen
+document.getElementById("fullscreenBtn").addEventListener("click", () => {
+  let player = document.getElementById("rmpPlayer");
+  if (player.requestFullscreen) player.requestFullscreen();
+  else if (player.mozRequestFullScreen) player.mozRequestFullScreen();
+  else if (player.webkitRequestFullscreen) player.webkitRequestFullscreen();
+  else if (player.msRequestFullscreen) player.msRequestFullscreen();
+});
+
+// Picture-in-Picture
+document.getElementById("pipBtn").addEventListener("click", async () => {
+  try {
+    let videoEl = rmp.getPlayerElement().querySelector("video");
+    if (videoEl !== document.pictureInPictureElement) await videoEl.requestPictureInPicture();
+    else await document.exitPictureInPicture();
+  } catch(e){ alert("PIP not supported"); }
+});
 </script>
 
 </body>

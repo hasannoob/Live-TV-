@@ -1,37 +1,16 @@
-চমৎকার ভাই 😎
-তোমার কোড আমি দেখে নিয়েছি — এখন আমি এটাকে এমনভাবে ঠিক করব যাতে:
-
-✅ ভিডিও প্লেয়ার (rmpPlayer)
-
-সবসময় উপরে দেখা যায় (hidden না থাকে),
-
-উচ্চতা প্রায় 250px–300px হয়,
-
-স্ক্রল করলে প্লেয়ার টপে ফিক্সড থাকে,
-
-নিচের কনটেন্ট সুন্দরভাবে নিচে শুরু হয়।
-
-
-এটা তোমার জন্য ঠিক করা সংস্করণ 👇
-(শুধু কপি করে আগের কোডের জায়গায় বসাও)
-
-
----
-
 <!DOCTYPE html>
 <html lang="en">  
 <head>  
 <meta charset="UTF-8">  
 <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-<title>Team</title>  
+<title>LiveFy TV — Dynamic Player</title>  
 
-<!-- প্রয়োজনীয় লিংকগুলো -->
+<!-- প্রয়োজনীয় লিংক -->
 <link href="https://niazitv.com/jtv/style.css" rel="stylesheet">  
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">  
 <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">  
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>  
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">  
-
 <link id="rmp-dress-code" type="text/css" rel="stylesheet" href="https://cdn.radiantmediatechs.com/rmp/5.9.2/css/rmp-s4.min.css">
 
 <style>
@@ -42,84 +21,143 @@ body {
   font-family: Arial, sans-serif;
 }
 
-/* ✅ ভিডিও প্লেয়ার টপে ফিক্সড */
+/* ✅ উপরের ভিডিও প্লেয়ার */
 #player-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 260px; /* উপরের উচ্চতা */
-  background: #000;
+  height: 280px;
+  background: linear-gradient(180deg, #008000 0%, #ff0000 100%);
+  box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+  border-bottom: 3px solid #fff;
   z-index: 9999;
+  animation: glow 3s infinite alternate;
+  text-align: center;
 }
 
-/* ✅ প্লেয়ার নিচে কনটেন্ট মার্জিন */
+/* ✅ লাইট গ্লো এফেক্ট */
+@keyframes glow {
+  from { box-shadow: 0 0 15px #00ff00; }
+  to { box-shadow: 0 0 25px #ff0000; }
+}
+
+/* ✅ লোগো ও শিরোনাম */
+.logo-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+.logo-section img {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 8px #00ff00;
+}
+.logo-section h1 {
+  font-size: 22px;
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 0 0 10px #ff0000, 0 0 20px #00ff00;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+/* ✅ ভিডিও প্লেয়ার */
+#rmpPlayer {
+  width: 100%;
+  height: 220px;
+  background: #000;
+}
+
+/* ✅ নিচের কনটেন্ট */
 #content {
-  margin-top: 270px;
+  margin-top: 290px;
   padding: 10px;
 }
 
+/* ✅ টিকার (marquee) */
 .marquee {
-  border: 2px solid red;
-  color: #fff;
+  border: 2px solid #ff0000;
   background: #111;
-  padding: 5px;
+  padding: 6px;
   width: 95%;
   margin: 10px auto;
-  border-radius: 5px;
+  border-radius: 6px;
+  box-shadow: 0 0 8px #008000;
+  text-align: center;
 }
 .marquee span {
-  background: red;
+  background: linear-gradient(90deg, #ff0000, #008000);
   color: #fff;
-  padding: 3px 8px;
+  padding: 3px 10px;
+  border-radius: 3px;
   font-weight: bold;
 }
 
+/* ✅ চ্যানেল আইকন */
 .print {
-  height: 65px;
-  width: 65px;
-  border-radius: 50px;
-  border: 1.5px solid #f5f5f5;
-  margin: 5px;
+  height: 70px;
+  width: 70px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  margin: 6px;
   cursor: pointer;
   transition: all 0.3s;
+  box-shadow: 0 0 10px rgba(255,255,255,0.3);
 }
 .print:hover {
-  transform: scale(1.1);
-  border-color: red;
-  box-shadow: 0 0 10px red;
+  transform: scale(1.15);
+  border-color: #00ff00;
+  box-shadow: 0 0 15px #ff0000;
+}
+
+/* হেডিং */
+h2 {
+  text-align: center;
+  margin-top: 15px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ✅ ভিডিও প্লেয়ার সেকশন -->
+<!-- ✅ টপ ভিডিও প্লেয়ার সেকশন -->
 <div id="player-wrapper">
+  <div class="logo-section">
+    <img src="https://i.ibb.co/tCxPzLx/livefy-logo.png" alt="LiveFy TV">
+    <h1>LiveFy TV</h1>
+  </div>
   <div id="rmpPlayer"></div>
 </div>
 
 <!-- ✅ নিচের কনটেন্ট -->
 <div id="content">
   <div class="marquee">
-    <span><i class="fa fa-bell"></i></span>
-    <marquee scrollamount="5" onmouseover="stop()" onmouseout="start()">We are Updating Our Application — Thanks For Choosing Livefy TV Official</marquee>
+    <span><i class="fa fa-broadcast-tower"></i></span>
+    <marquee scrollamount="5" onmouseover="stop()" onmouseout="start()">
+      🔴 Welcome to <b>LiveFy TV</b> — Watch Live Cricket, News & Entertainment Anytime ❤️💚
+    </marquee>
   </div>
 
   <h2>
     <span url="https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8">
-      <img class="print" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU">
+      <img class="print" src="https://upload.wikimedia.org/wikipedia/en/2/2f/Geo_News_logo.png">
     </span>
     <span url="http://mu03ye.wanicelife.com:8880/live/YALM4649/y6q3fhltq/31641.m3u8">
-      <img class="print" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU">
+      <img class="print" src="https://upload.wikimedia.org/wikipedia/en/e/ed/Sony_Ten_logo.png">
     </span>
   </h2>
 </div>
 
+<!-- ✅ রেডিয়েন্ট মিডিয়া প্লেয়ার -->
 <script src="https://cdn.radiantmediatechs.com/rmp/6.2.0/js/rmp.min.js"></script>
 
 <script>
-// ✅ ডিফল্ট HLS সোর্স
+// ✅ ডিফল্ট ভিডিও সোর্স
 var DEFAULT_HLS_URL = "https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8";
 
 var settings = {
@@ -136,7 +174,7 @@ var settings = {
 var rmp = new RadiantMP("rmpPlayer");
 rmp.init(settings);
 
-// ✅ ক্লিক করলে সোর্স পরিবর্তন হবে
+// ✅ ক্লিক করলে নতুন চ্যানেল লোড হবে
 $("span[url]").click(function(){
   var link = $(this).attr("url");
   rmp.setSrc({ hls: link });
@@ -146,18 +184,3 @@ $("span[url]").click(function(){
 
 </body>
 </html>
-
-
----
-
-📌 এখন যা হবে:
-
-ভিডিও প্লেয়ার পেজ ওপেন হতেই উপরে দেখা যাবে।
-
-স্ক্রল করলেও প্লেয়ার টপে ফিক্সড থাকবে।
-
-নিচের কনটেন্ট (চ্যানেল বাটন, marquee ইত্যাদি) সুন্দরভাবে নিচে দেখা যাবে।
-
-
-তুমি চাওলে আমি এটাতে লাল-সবুজ থিম বা গ্রেডিয়েন্ট বর্ডার যোগ করে দিতে পারি, যাতে “LiveFy TV” ব্র্যান্ডিংয়ের মতো লাগে।
-চাও কি আমি ওইভাবে সাজিয়ে দিই? ❤️💚

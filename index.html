@@ -10,20 +10,20 @@
 <link id="rmp-dress-code" type="text/css" rel="stylesheet" href="https://cdn.radiantmediatechs.com/rmp/5.9.2/css/rmp-s4.min.css">
 
 <style>
-body { background:#000; color:white; margin:0; font-family:Arial,sans-serif; overflow-x:hidden; }
+body { margin:0; font-family:Arial,sans-serif; background:#000; color:#fff; }
 .marquee { width:100%; background:red; text-align:center; padding:5px 0; font-weight:bold; }
 .marquee marquee { color:#fff; }
 .category { display:flex; justify-content:center; flex-wrap:wrap; margin:10px 0; }
 .category button { padding:8px 15px; margin:5px; font-size:14px; cursor:pointer; border:none; border-radius:5px; background:#ff0000; color:#fff; }
 .category button:hover { background:#00ff00; }
-.scrollmenu { display:flex; overflow-x:auto; padding:10px 0; gap:10px; scroll-behavior:smooth; }
+.scrollmenu { display:flex; overflow-x:auto; padding:10px 0; gap:10px; scroll-behavior:smooth; margin-bottom:10px; }
 .scrollmenu::-webkit-scrollbar { display:none; }
 .scrollmenu img { height:80px; width:80px; border-radius:50%; cursor:pointer; border:2px solid #fff; transition:0.3s; }
 .scrollmenu img:hover { transform:scale(1.2); border-color:#00ff00; box-shadow:0 0 15px #ff0000; }
-#rmpPlayer { width:100%; height:60vh; margin:0 auto; display:block; }
-.viewer-count { position:absolute; top:10px; right:10px; background:red; padding:5px 10px; border-radius:5px; font-weight:bold; z-index:1000; }
-.controls { position:absolute; top:10px; left:10px; z-index:1000; }
-.controls button { margin-right:5px; padding:5px 10px; border:none; border-radius:5px; background:#ff0000; color:#fff; cursor:pointer; }
+#rmpPlayer { width:100%; height:60vh; margin:10px auto; display:block; }
+footer { display:flex; justify-content:space-around; background:#111; padding:10px 0; position:fixed; bottom:0; width:100%; }
+footer a { color:#ff0000; font-size:20px; text-align:center; }
+footer a i { display:block; margin-bottom:5px; }
 @media screen and (max-width:768px){ #rmpPlayer{height:40vh;} }
 </style>
 </head>
@@ -42,23 +42,22 @@ body { background:#000; color:white; margin:0; font-family:Arial,sans-serif; ove
 
 <div class="scrollmenu" id="channels"></div>
 
-<div class="controls">
-  <button id="fullscreenBtn">⛶ Fullscreen</button>
-  <button id="pipBtn">🖼️ PIP</button>
-</div>
-
-<div class="viewer-count" id="viewerCount">👀 0</div>
-
 <div id="rmpPlayer"></div>
 
-<script src="https://cdn.radiantmediatechs.com/rmp/6.2.0/js/rmp.min.js"></script>
+<footer>
+  <a href="#" title="Home"><i class="fas fa-home"></i>Home</a>
+  <a href="#" title="Live"><i class="fas fa-tv"></i>Live</a>
+  <a href="#" title="Favorites"><i class="fas fa-star"></i>Fav</a>
+  <a href="#" title="Search"><i class="fas fa-search"></i>Search</a>
+  <a href="#" title="Settings"><i class="fas fa-cog"></i>Settings</a>
+</footer>
 
+<script src="https://cdn.radiantmediatechs.com/rmp/6.2.0/js/rmp.min.js"></script>
 <script>
-// Channel data
+// চ্যানেল ডেটা
 var channels = {
   sports: [
-    {name:"PTV Sports", logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU", url:"https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8"},
-    {name:"Ten Sports", logo:"https://upload.wikimedia.org/wikipedia/en/4/4b/Ten_Sports_logo.png", url:"http://mu03ye.wanicelife.com:8880/live/YALM4649/y6q3fhltq/31641.m3u8"}
+    {name:"PTV Sports", logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU", url:"https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8"}
   ],
   movies: [
     {name:"Movies1", logo:"https://upload.wikimedia.org/wikipedia/en/3/33/Movie_channel_logo.png", url:"https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"}
@@ -71,27 +70,16 @@ var channels = {
   ]
 };
 
-// Load category
+// চ্যানেল লোড
 function loadCategory(cat) {
   $("#channels").html("");
   channels[cat].forEach(c => {
     $("#channels").append(`<img src="${c.logo}" title="${c.name}" onclick="playStream('${c.url}')">`);
   });
 }
+
+// ডিফল্ট স্পোর্টস
 loadCategory("sports");
-
-// Auto scroll
-let scrollInterval = setInterval(() => {
-  let container = document.getElementById("channels");
-  container.scrollLeft += 1;
-  if (container.scrollLeft >= container.scrollWidth - container.clientWidth) container.scrollLeft = 0;
-}, 50);
-
-// Change category
-$(".category button").click(function() {
-  let cat = $(this).data("cat");
-  loadCategory(cat);
-});
 
 // Radiant Player init
 var rmp = new RadiantMP("rmpPlayer");
@@ -104,38 +92,16 @@ rmp.init({
   src:{hls: channels.sports[0].url},
 });
 
-// Play function
+// চ্যানেল প্লে ফাংশন
 function playStream(url){
   rmp.setSrc({hls:url});
   rmp.play();
 }
 
-// Viewer count (CountAPI)
-const viewerEl = document.getElementById("viewerCount");
-function updateViewerCount() {
-  fetch('https://api.countapi.xyz/hit/awaispirkale/visits')
-    .then(res => res.json())
-    .then(res => { viewerEl.innerHTML = `👀 ${res.value}`; });
-}
-setInterval(updateViewerCount, 5000);
-updateViewerCount();
-
-// Fullscreen
-document.getElementById("fullscreenBtn").addEventListener("click", () => {
-  let player = document.getElementById("rmpPlayer");
-  if (player.requestFullscreen) player.requestFullscreen();
-  else if (player.mozRequestFullScreen) player.mozRequestFullScreen();
-  else if (player.webkitRequestFullscreen) player.webkitRequestFullscreen();
-  else if (player.msRequestFullscreen) player.msRequestFullscreen();
-});
-
-// Picture-in-Picture
-document.getElementById("pipBtn").addEventListener("click", async () => {
-  try {
-    let videoEl = rmp.getPlayerElement().querySelector("video");
-    if (videoEl !== document.pictureInPictureElement) await videoEl.requestPictureInPicture();
-    else await document.exitPictureInPicture();
-  } catch(e){ alert("PIP not supported"); }
+// ক্যাটাগরি চেঞ্জ
+$(".category button").click(function() {
+  let cat = $(this).data("cat");
+  loadCategory(cat);
 });
 </script>
 

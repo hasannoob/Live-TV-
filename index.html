@@ -3,105 +3,167 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LiveFy TV</title>
+<title>Livefy TV</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<link id="rmp-dress-code" type="text/css" rel="stylesheet" href="https://cdn.radiantmediatechs.com/rmp/5.9.2/css/rmp-s4.min.css">
 
 <style>
-body { margin:0; font-family:Arial,sans-serif; background:#000; color:#fff; }
-.marquee { width:100%; background:red; text-align:center; padding:5px 0; font-weight:bold; }
-.marquee marquee { color:#fff; }
-.category { display:flex; justify-content:center; flex-wrap:wrap; margin:10px 0; }
-.category button { padding:8px 15px; margin:5px; font-size:14px; cursor:pointer; border:none; border-radius:5px; background:#ff0000; color:#fff; }
-.category button:hover { background:#00ff00; }
-.scrollmenu { display:flex; overflow-x:auto; padding:10px 0; gap:10px; scroll-behavior:smooth; margin-bottom:10px; }
-.scrollmenu::-webkit-scrollbar { display:none; }
-.scrollmenu img { height:80px; width:80px; border-radius:50%; cursor:pointer; border:2px solid #fff; transition:0.3s; }
-.scrollmenu img:hover { transform:scale(1.2); border-color:#00ff00; box-shadow:0 0 15px #ff0000; }
-#rmpPlayer { width:100%; height:60vh; margin:10px auto; display:block; }
-footer { display:flex; justify-content:space-around; background:#111; padding:10px 0; position:fixed; bottom:0; width:100%; }
-footer a { color:#ff0000; font-size:20px; text-align:center; }
-footer a i { display:block; margin-bottom:5px; }
-@media screen and (max-width:768px){ #rmpPlayer{height:40vh;} }
+:root {
+    --primaryColor: red;
+    --secondaryColor: black;
+    --secondaryOpposite: white;
+}
+body {
+    margin:0;
+    background: var(--secondaryColor);
+    color: var(--secondaryOpposite);
+    font-family: Arial, sans-serif;
+}
+#player-wrapper {
+    width: 100%;
+    max-height: 300px;
+    background: #000;
+    position: relative;
+}
+video {
+    width: 100%;
+    height: 300px;
+    background: #000;
+}
+.section-buttons {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+.section-buttons button {
+    margin: 0 5px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--primaryColor);
+    color: var(--secondaryOpposite);
+    cursor: pointer;
+}
+.section-buttons button.active {
+    background-color: var(--secondaryOpposite);
+    color: var(--primaryColor);
+    font-weight: bold;
+}
+.channel-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 60px; /* Footer space */
+}
+.channel-list img {
+    width: 100px;
+    height: 100px;
+    margin: 5px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid var(--primaryColor);
+    transition: transform 0.2s, border 0.2s;
+}
+.channel-list img:hover {
+    transform: scale(1.1);
+    border: 2px solid var(--secondaryOpposite);
+}
+footer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: var(--secondaryColor);
+    padding: 10px 0;
+}
+footer a {
+    color: var(--primaryColor);
+    text-align: center;
+    font-size: 18px;
+}
+footer a i {
+    font-size: 25px;
+}
 </style>
 </head>
 <body>
 
-<div class="marquee">
-  <marquee scrollamount="5">🔴 Welcome to LiveFy TV — Watch Live Sports, Movies, News & Kids Shows ❤️💚</marquee>
+<div id="player-wrapper">
+    <video id="videoPlayer" controls autoplay>
+        <source src="https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8" type="application/x-mpegURL">
+        Your browser does not support HTML5 video.
+    </video>
 </div>
 
-<div class="category">
-  <button data-cat="sports">🏏 Sports</button>
-  <button data-cat="movies">🎬 Movies</button>
-  <button data-cat="news">📰 News</button>
-  <button data-cat="kids">🧒 Kids</button>
+<div class="section-buttons">
+    <button class="active" data-section="sports">Sports</button>
+    <button data-section="movies">Movies</button>
+    <button data-section="news">News</button>
+    <button data-section="kids">Kids</button>
 </div>
 
-<div class="scrollmenu" id="channels"></div>
-
-<div id="rmpPlayer"></div>
+<div class="channel-list" id="channelList">
+    <!-- Channels will load here -->
+</div>
 
 <footer>
-  <a href="#" title="Home"><i class="fas fa-home"></i>Home</a>
-  <a href="#" title="Live"><i class="fas fa-tv"></i>Live</a>
-  <a href="#" title="Favorites"><i class="fas fa-star"></i>Fav</a>
-  <a href="#" title="Search"><i class="fas fa-search"></i>Search</a>
-  <a href="#" title="Settings"><i class="fas fa-cog"></i>Settings</a>
+    <a href="#"><i class="fas fa-home"></i><br>Home</a>
+    <a href="#"><i class="fas fa-search"></i><br>Search</a>
+    <a href="#"><i class="fas fa-play-circle"></i><br>Live</a>
+    <a href="#"><i class="fas fa-tv"></i><br>TV</a>
+    <a href="#"><i class="fas fa-user"></i><br>Profile</a>
 </footer>
 
-<script src="https://cdn.radiantmediatechs.com/rmp/6.2.0/js/rmp.min.js"></script>
 <script>
-// চ্যানেল ডেটা
-var channels = {
-  sports: [
-    {name:"PTV Sports", logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU", url:"https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8"}
-  ],
-  movies: [
-    {name:"Movies1", logo:"https://upload.wikimedia.org/wikipedia/en/3/33/Movie_channel_logo.png", url:"https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"}
-  ],
-  news: [
-    {name:"News1", logo:"https://upload.wikimedia.org/wikipedia/commons/1/1b/News_channel_logo.png", url:"https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"}
-  ],
-  kids: [
-    {name:"Kids1", logo:"https://upload.wikimedia.org/wikipedia/commons/5/5b/Kids_channel_logo.png", url:"https://sample-videos.com/video123/mp4/720/big_buck_bunny_1mb.mp4"}
-  ]
+const videoPlayer = document.getElementById('videoPlayer');
+const channelList = document.getElementById('channelList');
+
+const channels = {
+    sports: [
+        {name:'PTV Sports', url:'https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU'},
+        {name:'Sports2', url:'http://mu03ye.wanicelife.com:8880/live/YALM4649/y6q3fhltq/31641.m3u8', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU'}
+    ],
+    movies: [
+        {name:'Movie1', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=Movie1'},
+        {name:'Movie2', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=Movie2'}
+    ],
+    news: [
+        {name:'News1', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=News1'},
+        {name:'News2', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=News2'}
+    ],
+    kids: [
+        {name:'Cartoon1', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=Kids1'},
+        {name:'Cartoon2', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=Kids2'}
+    ]
 };
 
-// চ্যানেল লোড
-function loadCategory(cat) {
-  $("#channels").html("");
-  channels[cat].forEach(c => {
-    $("#channels").append(`<img src="${c.logo}" title="${c.name}" onclick="playStream('${c.url}')">`);
-  });
+function loadChannels(section){
+    channelList.innerHTML = '';
+    channels[section].forEach(ch => {
+        const img = document.createElement('img');
+        img.src = ch.img;
+        img.title = ch.name;
+        img.addEventListener('click', () => {
+            videoPlayer.src = ch.url;
+            videoPlayer.play();
+        });
+        channelList.appendChild(img);
+    });
 }
 
-// ডিফল্ট স্পোর্টস
-loadCategory("sports");
+// Initial load
+loadChannels('sports');
 
-// Radiant Player init
-var rmp = new RadiantMP("rmpPlayer");
-rmp.init({
-  licenseKey: "eHp1dXRtb3Z5cEAxNDkyNDI4",
-  skin:"s4",
-  autoplay:true,
-  hideControls:false,
-  isLive:true,
-  src:{hls: channels.sports[0].url},
-});
-
-// চ্যানেল প্লে ফাংশন
-function playStream(url){
-  rmp.setSrc({hls:url});
-  rmp.play();
-}
-
-// ক্যাটাগরি চেঞ্জ
-$(".category button").click(function() {
-  let cat = $(this).data("cat");
-  loadCategory(cat);
+// Section buttons
+document.querySelectorAll('.section-buttons button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.section-buttons button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const section = btn.getAttribute('data-section');
+        loadChannels(section);
+    });
 });
 </script>
 

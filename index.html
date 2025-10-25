@@ -1,113 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1.0">  
-<title>LiveFy TV — Dynamic Player</title>  
-
-<!-- প্রয়োজনীয় লিংক -->
-<link href="https://niazitv.com/jtv/style.css" rel="stylesheet">  
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">  
-<link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">  
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>  
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">  
-<link id="rmp-dress-code" type="text/css" rel="stylesheet" href="https://cdn.radiantmediatechs.com/rmp/5.9.2/css/rmp-s4.min.css">
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiveFy TV — Watch Live</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
 body {
   margin: 0;
   background: #000;
-  color: white;
+  color: #fff;
   font-family: Arial, sans-serif;
+  padding-bottom: 70px;
 }
 
-/* ✅ উপরের ভিডিও প্লেয়ার */
+/* ====== Top Player ====== */
 #player-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 280px;
-  background: linear-gradient(180deg, #008000 0%, #ff0000 100%);
-  box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+  height: 260px;
+  background: linear-gradient(180deg, #006400 0%, #ff0000 100%);
   border-bottom: 3px solid #fff;
   z-index: 9999;
-  animation: glow 3s infinite alternate;
   text-align: center;
+  box-shadow: 0 0 20px #ff0000;
 }
-
-/* ✅ লাইট গ্লো এফেক্ট */
-@keyframes glow {
-  from { box-shadow: 0 0 15px #00ff00; }
-  to { box-shadow: 0 0 25px #ff0000; }
-}
-
-/* ✅ লোগো ও শিরোনাম */
 .logo-section {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 8px 0;
+  padding: 6px 0;
 }
 .logo-section img {
   height: 40px;
   width: 40px;
   border-radius: 50%;
   border: 2px solid white;
-  box-shadow: 0 0 8px #00ff00;
+  box-shadow: 0 0 10px #00ff00;
 }
 .logo-section h1 {
   font-size: 22px;
   color: #fff;
   font-weight: bold;
-  text-shadow: 0 0 10px #ff0000, 0 0 20px #00ff00;
-  letter-spacing: 1px;
+  text-shadow: 0 0 10px #ff0000, 0 0 15px #00ff00;
   margin: 0;
 }
-
-/* ✅ ভিডিও প্লেয়ার */
-#rmpPlayer {
+#video {
   width: 100%;
-  height: 220px;
+  height: 210px;
   background: #000;
 }
 
-/* ✅ নিচের কনটেন্ট */
-#content {
-  margin-top: 290px;
-  padding: 10px;
+/* ====== Main Section ====== */
+.section {
+  display: none;
+  margin-top: 270px;
+  padding: 15px;
+}
+.active-section {
+  display: block;
 }
 
-/* ✅ টিকার (marquee) */
+/* ====== Home Section ====== */
 .marquee {
   border: 2px solid #ff0000;
   background: #111;
-  padding: 6px;
+  padding: 5px;
   width: 95%;
   margin: 10px auto;
-  border-radius: 6px;
-  box-shadow: 0 0 8px #008000;
+  border-radius: 5px;
   text-align: center;
+  box-shadow: 0 0 10px #008000;
 }
-.marquee span {
-  background: linear-gradient(90deg, #ff0000, #008000);
-  color: #fff;
-  padding: 3px 10px;
-  border-radius: 3px;
+.category {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.category button {
+  background: linear-gradient(90deg, #ff0000, #006400);
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
   font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
 }
-
-/* ✅ চ্যানেল আইকন */
+.category button:hover {
+  background: #00ff00;
+  color: black;
+}
 .print {
   height: 70px;
   width: 70px;
   border-radius: 50%;
   border: 2px solid #fff;
-  margin: 6px;
+  margin: 5px;
   cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 0 10px rgba(255,255,255,0.3);
+  transition: 0.3s;
 }
 .print:hover {
   transform: scale(1.15);
@@ -115,70 +115,150 @@ body {
   box-shadow: 0 0 15px #ff0000;
 }
 
-/* হেডিং */
-h2 {
+/* ====== Footer Menu ====== */
+.footer-menu {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 65px;
+  background: linear-gradient(90deg, #006400, #ff0000);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 2px solid #fff;
+  z-index: 10000;
+}
+.footer-menu div {
+  color: #fff;
   text-align: center;
-  margin-top: 15px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.footer-menu div:hover, .footer-menu .active {
+  color: #00ff00;
+  transform: scale(1.1);
+}
+.footer-menu i {
+  font-size: 20px;
+  display: block;
 }
 </style>
 </head>
-
 <body>
 
-<!-- ✅ টপ ভিডিও প্লেয়ার সেকশন -->
+<!-- ====== Header Player ====== -->
 <div id="player-wrapper">
   <div class="logo-section">
     <img src="https://i.ibb.co/tCxPzLx/livefy-logo.png" alt="LiveFy TV">
     <h1>LiveFy TV</h1>
   </div>
-  <div id="rmpPlayer"></div>
+  <video id="video" controls autoplay playsinline></video>
 </div>
 
-<!-- ✅ নিচের কনটেন্ট -->
-<div id="content">
+<!-- ====== Home Section ====== -->
+<div id="home" class="section active-section">
   <div class="marquee">
     <span><i class="fa fa-broadcast-tower"></i></span>
-    <marquee scrollamount="5" onmouseover="stop()" onmouseout="start()">
-      🔴 Welcome to <b>LiveFy TV</b> — Watch Live Cricket, News & Entertainment Anytime ❤️💚
-    </marquee>
+    <marquee scrollamount="5">🔴 Welcome to LiveFy TV — Watch Live Sports, Movies, News & Kids Shows ❤️💚</marquee>
   </div>
-
-  <h2>
-    <span url="https://premierleageplnew2.akamaized.net/hls/live/2107109/tapmadenc-1/hdntl=exp=1761495333~acl=%2f*~data=hdntl~hmac=dcb626a133781dd86726d2cce064053ebd52231b64d73ec30d432acf63487722/level_0.m3u8">
-      <img class="print" src="https://upload.wikimedia.org/wikipedia/en/2/2f/Geo_News_logo.png">
-    </span>
-    <span url="https://premierleageplnew2.akamaized.net/hls/live/2107109/tapmadenc-1/hdntl=exp=1761495333~acl=%2f*~data=hdntl~hmac=dcb626a133781dd86726d2cce064053ebd52231b64d73ec30d432acf63487722/level_0.m3u8">
-      <img class="print" src="https://upload.wikimedia.org/wikipedia/en/e/ed/Sony_Ten_logo.png">
-    </span>
-  </h2>
+  <div class="category">
+    <button data-cat="sports">🏏 Sports</button>
+    <button data-cat="movies">🎬 Movies</button>
+    <button data-cat="news">📰 News</button>
+    <button data-cat="kids">🧒 Kids</button>
+  </div>
+  <div id="channels"></div>
 </div>
 
-<!-- ✅ রেডিয়েন্ট মিডিয়া প্লেয়ার -->
-<script src="https://cdn.radiantmediatechs.com/rmp/6.2.0/js/rmp.min.js"></script>
+<!-- ====== Live Section ====== -->
+<div id="live" class="section">
+  <h2>📺 Live Now</h2>
+  <p>Watch Live Cricket, Football, and more from LiveFy TV!</p>
+</div>
+
+<!-- ====== Search Section ====== -->
+<div id="search" class="section">
+  <h2>🔍 Search</h2>
+  <input type="text" id="searchInput" placeholder="Search channel..." style="width:100%;padding:10px;border-radius:5px;border:none;">
+</div>
+
+<!-- ====== Profile Section ====== -->
+<div id="profile" class="section">
+  <h2>👤 My Profile</h2>
+  <p>User: <b>Md Abu Hasan</b></p>
+  <p>From: Naogaon</p>
+  <p>Experience: 6 Years (Warehouse Dept.)</p>
+</div>
+
+<!-- ====== Settings Section ====== -->
+<div id="settings" class="section">
+  <h2>⚙️ Settings</h2>
+  <p>Change theme, notifications & more (Coming Soon...)</p>
+</div>
+
+<!-- ====== Footer Menu ====== -->
+<div class="footer-menu">
+  <div class="active" data-target="home"><i class="fas fa-home"></i>Home</div>
+  <div data-target="live"><i class="fas fa-tv"></i>Live</div>
+  <div data-target="search"><i class="fas fa-search"></i>Search</div>
+  <div data-target="profile"><i class="fas fa-user"></i>Profile</div>
+  <div data-target="settings"><i class="fas fa-cog"></i>Settings</div>
+</div>
 
 <script>
-// ✅ ডিফল্ট ভিডিও সোর্স
-var DEFAULT_HLS_URL = "https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8";
+// ====== Default Video ======
+var video = document.getElementById('video');
+function playStream(url) {
+  if (Hls.isSupported()) {
+    var hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+      video.play();
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = url;
+    video.play();
+  }
+}
 
-var settings = {
-  licenseKey: "eHp1dXRtb3Z5cEAxNDkyNDI4",
-  skin: "s4",
-  autoHeightMode: true,
-  autoplay: true,
-  hideControls: false,
-  isLive: true,
-  playsInline: true,
-  src: { hls: DEFAULT_HLS_URL }
+// ====== Channel Data ======
+var channels = {
+  sports: [
+    {name:"PTV Sports", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/en/f/f1/PTV_Sports.png"},
+    {name:"Geo Super", url:"https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8", logo:"https://upload.wikimedia.org/wikipedia/en/f/f2/Geo_Super_logo.png"}
+  ],
+  movies: [
+    {name:"HBO", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/commons/d/de/HBO_logo.svg"},
+    {name:"Sony Pix", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/en/1/1b/Sony_PIX.png"}
+  ],
+  news: [
+    {name:"BBC News", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/commons/b/bc/BBC_News_2022.svg"},
+    {name:"Geo News", url:"https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8", logo:"https://upload.wikimedia.org/wikipedia/en/2/2f/Geo_News_logo.png"}
+  ],
+  kids: [
+    {name:"Cartoon Network", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/commons/8/80/Cartoon_Network_2010_logo.svg"},
+    {name:"Nick", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", logo:"https://upload.wikimedia.org/wikipedia/commons/7/7a/Nickelodeon_2009_logo.svg"}
+  ]
 };
 
-var rmp = new RadiantMP("rmpPlayer");
-rmp.init(settings);
+// ====== Load Category ======
+function loadCategory(cat) {
+  $("#channels").html("");
+  channels[cat].forEach(c => {
+    $("#channels").append(`<img class="print" src="${c.logo}" title="${c.name}" onclick="playStream('${c.url}')">`);
+  });
+}
+loadCategory("sports");
 
-// ✅ ক্লিক করলে নতুন চ্যানেল লোড হবে
-$("span[url]").click(function(){
-  var link = $(this).attr("url");
-  rmp.setSrc({ hls: link });
-  rmp.play();
+// ====== Footer Navigation ======
+$(".footer-menu div").click(function() {
+  $(".footer-menu div").removeClass("active");
+  $(this).addClass("active");
+  var target = $(this).data("target");
+  $(".section").removeClass("active-section");
+  $("#" + target).addClass("active-section");
 });
 </script>
 

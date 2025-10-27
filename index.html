@@ -1,222 +1,288 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Livefy TV</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV Fixed UI Player</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- HLS.js Library for M3U8 playback -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+    <!-- Lucide Icons for UI -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-<style>
-:root {
-    --primaryColor: red;
-    --secondaryColor: black;
-    --secondaryOpposite: white;
-}
-body {
-    margin:0;
-    background: var(--secondaryColor);
-    color: var(--secondaryOpposite);
-    font-family: Arial, sans-serif;
-}
-header {
-    width: 100%;
-    background: var(--primaryColor);
-    padding: 10px 0;
-    text-align: center;
-    font-size: 24px;
-    font-weight: bold;
-    color: var(--secondaryOpposite);
-    position: fixed;
-    top:0;
-    z-index:1000;
-}
-#player-wrapper {
-    width: 100%;
-    max-height: 300px;
-    background: #000;
-    margin-top:50px; /* header height */
-}
-video {
-    width: 100%;
-    height: 300px;
-    background: #000;
-}
-.marquee-bar {
-    width: 100%;
-    background: #111;
-    overflow: hidden;
-    white-space: nowrap;
-    box-sizing: border-box;
-    padding: 5px 0;
-    margin-bottom: 10px;
-}
-.marquee-bar span {
-    display: inline-block;
-    color: #fff;
-    font-weight: bold;
-    padding-left: 100%;
-    animation: marquee 15s linear infinite;
-}
-@keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-100%); }
-}
-.section-buttons {
-    display: flex;
-    justify-content: center;
-    margin: 10px 0;
-}
-.section-buttons button {
-    margin: 0 5px;
-    padding: 8px 15px;
-    border: none;
-    border-radius: 5px;
-    background-color: var(--primaryColor);
-    color: var(--secondaryOpposite);
-    cursor: pointer;
-}
-.section-buttons button.active {
-    background-color: var(--secondaryOpposite);
-    color: var(--primaryColor);
-    font-weight: bold;
-}
-.channel-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 60px; /* Footer space */
-}
-.channel-list img {
-    width: 100px;
-    height: 100px;
-    margin: 5px;
-    border-radius: 10px;
-    cursor: pointer;
-    border: 2px solid var(--primaryColor);
-    transition: transform 0.2s, border 0.2s;
-}
-.channel-list img:hover {
-    transform: scale(1.1);
-    border: 2px solid var(--secondaryOpposite);
-}
-footer {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background-color: var(--secondaryColor);
-    padding: 10px 0;
-}
-footer a {
-    color: var(--primaryColor);
-    text-align: center;
-    font-size: 18px;
-}
-footer a i {
-    font-size: 25px;
-}
-</style>
+    <style>
+        /* Custom styles for a dark theme and mobile optimization */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Dark background */
+            color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            /* Set to full viewport height and disable main scroll for the fixed layout */
+            height: 100vh;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Custom animation for the right-to-left scrolling text */
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .scrolling-text-bar {
+            white-space: nowrap;
+            overflow: hidden;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .scrolling-text-bar p {
+            display: inline-block;
+            animation: scroll-left 15s linear infinite; /* Smooth, continuous scroll */
+            padding-left: 100%; /* Start off-screen */
+        }
+
+        /* Video container aspect ratio */
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+            overflow: hidden;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-900">
 
-<header>Live TV Official</header>
+    <!-- Fixed UI Section (Header, Player, Scrolling Text) -->
+    <!-- flex-shrink-0 ensures this section takes only the necessary space -->
+    <div id="fixedUISection" class="w-full flex-shrink-0 bg-gray-900 shadow-2xl z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-4"> 
+            
+            <!-- Fixed Header -->
+            <header class="text-center mb-4">
+                <h1 class="text-3xl font-extrabold text-indigo-400 tracking-tight sm:text-4xl">
+                    IPTV Media Player
+                </h1>
+            </header>
+            
+            <!-- Message Box -->
+             <div id="messageBox" class="p-3 text-center rounded-xl mb-3 hidden"></div>
+             
+             <!-- Video Player -->
+            <div class="video-container shadow-2xl ring-4 ring-indigo-500/50 rounded-xl">
+                <video
+                    id="videoPlayer"
+                    controls
+                    playsinline
+                    poster="https://placehold.co/1920x1080/1f2937/a5b4fc?text=Select+a+Channel"
+                    class="cursor-pointer w-full h-full rounded-xl"
+                ></video>
+            </div>
+            
+            <!-- Current Channel Name Display -->
+            <div class="mt-2 p-2 bg-gray-800 rounded-xl mb-4">
+                <p id="currentChannelName" class="text-sm text-indigo-400 font-medium">No channel currently selected.</p>
+            </div>
+            
+        </div>
+        
+        <!-- Fixed Scrolling Text Bar (Right to Left) -->
+        <div class="scrolling-text-bar bg-yellow-700/20 text-yellow-300 py-2 shadow-inner border-y border-yellow-700/50">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                <p class="text-sm font-medium">
+                    Important Notice: The fixed player, scrolling notice, and channel grid container are static. The channel buttons inside the grid are scrollable.
+                </p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- Channel Grid (Scrollable Content Area) -->
+    <!-- flex-grow fills the remaining space, and overflow-y-auto allows internal scrolling -->
+    <main class="flex-grow max-w-6xl mx-auto p-4 sm:p-6 w-full overflow-y-auto">
+        <div class="w-full bg-gray-800 p-4 rounded-xl shadow-2xl">
+            <h2 class="text-2xl font-semibold mb-4 border-b border-indigo-500 pb-2 flex items-center gap-2 text-gray-200">
+                <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+                Channel Grid (Scrollable)
+            </h2>
+            <!-- Grid Layout: 1 col on mobile, 2 on sm, 3 on lg, 4 on xl -->
+            <div id="channelList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- Channel buttons will be generated here -->
+            </div>
+        </div>
+    </main>
 
-<div id="player-wrapper">
-    <video id="videoPlayer" controls autoplay>
-        <source src="https://jk3lz82elw79-hls-live.5centscdn.com/newgeonews/07811dc6c422334ce36a09ff5cd6fe71.sdp/playlist.m3u8" type="application/x-mpegURL">
-        Your browser does not support HTML5 video.
-    </video>
-</div>
+    <script>
+        // Global variables
+        const video = document.getElementById('videoPlayer');
+        const channelListElement = document.getElementById('channelList');
+        const messageBox = document.getElementById('messageBox');
+        const currentChannelNameElement = document.getElementById('currentChannelName');
+        let hlsInstance = null; // Variable to hold the Hls.js instance
 
-<div class="marquee-bar">
-    <span>We are updating our application. All users will get notifications once updates are live. Thanks for choosing Livefy TV Official!</span>
-</div>
+        // Demo Channel Data. Change these with your own M3U8 links.
+        const channels = [
+            { name: "Channel 1 - News Live", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", color: "indigo", icon: "megaphone" },
+            { name: "Channel 2 - Movies", url: "https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8", color: "green", icon: "clapperboard" },
+            { name: "Channel 3 - Sports", url: "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8", color: "pink", icon: "trophy" },
+            { name: "Channel 4 - Music", url: "https://bitmovin-a.akamaihd.net/content/playhouse-vr/m3u8/105560.m3u8", color: "yellow", icon: "music" },
+            { name: "Channel 5 - Cartoons", url: "https://d3rlp0tv243glt.cloudfront.net/test/hls/test_primary.m3u8", color: "red", icon: "smile" },
+            { name: "Channel 6 - Documentary", url: "https://cdn.jwplayer.com/manifests/pKM6uPdQ.m3u8", color: "blue", icon: "book-open" },
+            { name: "Channel 7 - Nature", url: "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8", color: "teal", icon: "leaf" },
+            { name: "Channel 8 - Food", url: "https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f061559f6d72.m3u8", color: "orange", icon: "chef-hat" },
+            { name: "Channel 9 - Fiction", url: "https://moctobdev.hls-ott-sfu.just-test.ovh/manifest.m3u8", color: "purple", icon: "rocket" },
+            { name: "Channel 10 - Travel", url: "https://test-streams.mux.dev/test_001/stream.m3u8", color: "cyan", icon: "plane" },
+            { name: "Channel 11 - Technology", url: "https://d3rlp0tv243glt.cloudfront.net/test/hls/test_secondary.m3u8", color: "lime", icon: "laptop" },
+            { name: "Channel 12 - Gaming", url: "https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f061559f6d72.m3u8", color: "fuchsia", icon: "gamepad" },
+        ];
+        
+        /**
+         * Displays a temporary message in the message box.
+         */
+        function displayMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-red-900/50', 'bg-green-900/50', 'text-red-300', 'text-green-300', 'bg-blue-900/50', 'text-blue-300');
 
-<div class="section-buttons">
-    <button class="active" data-section="sports">Sports</button>
-    <button data-section="movies">Movies</button>
-    <button data-section="news">News</button>
-    <button data-section="kids">Kids</button>
-</div>
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-900/50', 'text-red-300');
+            } else if (type === 'success') {
+                messageBox.classList.add('bg-green-900/50', 'text-green-300');
+            } else {
+                 messageBox.classList.add('bg-blue-900/50', 'text-blue-300'); // Info
+            }
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 6000);
+        }
 
-<div class="channel-list" id="channelList">
-    <!-- Channels will load here -->
-</div>
+        /**
+         * Generates the channel list buttons and adds them to the DOM.
+         */
+        function createChannelList() {
+            channelListElement.innerHTML = ''; // Clear existing list
+            channels.forEach((channel) => {
+                const button = document.createElement('button');
+                button.setAttribute('data-url', channel.url);
+                button.setAttribute('data-name', channel.name);
+                
+                // Design for the grid item
+                button.className = `w-full text-center p-4 rounded-xl bg-gray-700 hover:bg-${channel.color}-600/70 text-white font-semibold transition duration-150 transform hover:scale-[1.03] focus:ring-4 focus:ring-${channel.color}-500 focus:outline-none flex flex-col items-center gap-2 shadow-xl`;
+                
+                button.innerHTML = `
+                    <i data-lucide="${channel.icon}" class="w-8 h-8 text-${channel.color}-400"></i>
+                    <span class="text-lg">${channel.name}</span>
+                `;
+                channelListElement.appendChild(button);
+            });
+            // Render Lucide icons
+            lucide.createIcons();
+        }
 
-<footer>
-    <a href="#" data-section="sports"><i class="fas fa-football-ball"></i><br>Sports</a>
-    <a href="#" data-section="movies"><i class="fas fa-film"></i><br>Movies</a>
-    <a href="#" data-section="news"><i class="fas fa-newspaper"></i><br>News</a>
-    <a href="#" data-section="kids"><i class="fas fa-child"></i><br>Kids</a>
-    <a href="#"><i class="fas fa-user"></i><br>Profile</a>
-</footer>
+        /**
+         * Main function to load and play the M3U8 stream using Hls.js.
+         */
+        function loadAndPlayStream(url, name) {
+            
+            // 1. URL validation
+            if (!url || !url.toLowerCase().endsWith('.m3u8')) {
+                displayMessage("This is not a valid M3U8 URL or the URL is missing.", 'error');
+                return;
+            }
 
-<script>
-const videoPlayer = document.getElementById('videoPlayer');
-const channelList = document.getElementById('channelList');
+            // 2. Destroy previous Hls.js instance if it exists
+            if (hlsInstance) {
+                hlsInstance.destroy();
+                hlsInstance = null;
+            }
+            
+            // 3. Reset video element source
+            video.removeAttribute('src');
+            video.load();
+            currentChannelNameElement.textContent = `Currently Playing: ${name}`;
+            
+            // 4. Load using Hls.js
+            if (window.Hls && Hls.isSupported()) {
+                hlsInstance = new Hls();
+                
+                hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+                    let errorMsg = `Playback Error: ${data.details}.`;
+                    if (data.fatal) {
+                        errorMsg += " Fatal error, playback stopped.";
+                        hlsInstance.destroy();
+                    }
+                    displayMessage(errorMsg, 'error');
+                    console.error("HLS Error:", data);
+                });
 
-const channels = {
-    sports: [
-        {name:'PTV Sports', url:'http://66.102.120.18:8000/play/a04w/index.m3u8', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU'},
-        {name:'Sports2', url:'http://mu03ye.wanicelife.com:8880/live/YALM4649/y6q3fhltq/31641.m3u8', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLKQnYyjRugWFvMa9ngfzT0CLxkcsjNp-wsw&usqp=CAU'}
-    ],
-    movies: [
-        {name:'Movie1', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=Movie1'},
-        {name:'Movie2', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=Movie2'}
-    ],
-    news: [
-        {name:'News1', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=News1'},
-        {name:'News2', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=News2'}
-    ],
-    kids: [
-        {name:'Cartoon1', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=Kids1'},
-        {name:'Cartoon2', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', img:'https://via.placeholder.com/100x100?text=Kids2'}
-    ]
-};
+                try {
+                    hlsInstance.loadSource(url);
+                    hlsInstance.attachMedia(video);
+                    
+                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, function () {
+                        // Attempt to play after manifest is successfully loaded
+                        video.play().catch(e => {
+                            displayMessage("Autoplay failed. Click the video to play.", 'error');
+                            console.warn("Autoplay was prevented:", e);
+                        });
+                        displayMessage(`Channel "${name}" is loading...`, 'success');
+                    });
+                } catch (e) {
+                    displayMessage("Failed to start HLS streaming: " + e.message, 'error');
+                }
 
-function loadChannels(section){
-    channelList.innerHTML = '';
-    channels[section].forEach(ch => {
-        const img = document.createElement('img');
-        img.src = ch.img;
-        img.title = ch.name;
-        img.addEventListener('click', () => {
-            videoPlayer.src = ch.url;
-            videoPlayer.play();
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // 5. Fallback for Native HLS support (iOS/Safari)
+                video.src = url;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play().catch(e => {
+                        displayMessage("Autoplay failed. Click the video to play.", 'error');
+                    });
+                });
+                displayMessage(`Channel "${name}" (Native) is loading...`, 'success');
+            } else {
+                // 6. No HLS support
+                displayMessage("Sorry, your browser does not support HLS streaming.", 'error');
+            }
+        }
+
+        // Event Listener: Handle clicks on the channel list
+        channelListElement.addEventListener('click', function(event) {
+            const target = event.target.closest('button');
+            if (target && target.hasAttribute('data-url')) {
+                
+                // Remove active class from all buttons
+                document.querySelectorAll('#channelList button').forEach(btn => {
+                    btn.classList.remove('ring-4', 'ring-indigo-400', 'bg-indigo-600/90');
+                    btn.classList.add('bg-gray-700');
+                });
+                
+                // Add active class to the clicked button
+                target.classList.remove('bg-gray-700');
+                target.classList.add('ring-4', 'ring-indigo-400', 'bg-indigo-600/90');
+                
+                const url = target.getAttribute('data-url');
+                const name = target.getAttribute('data-name');
+                loadAndPlayStream(url, name);
+            }
         });
-        channelList.appendChild(img);
-    });
-}
 
-// Initial load
-loadChannels('sports');
 
-// Section buttons
-document.querySelectorAll('.section-buttons button').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.section-buttons button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const section = btn.getAttribute('data-section');
-        loadChannels(section);
-    });
-});
-
-// Footer buttons to switch sections
-document.querySelectorAll('footer a[data-section]').forEach(link => {
-    link.addEventListener('click', (e)=>{
-        e.preventDefault();
-        const section = link.getAttribute('data-section');
-        loadChannels(section);
-        // Activate the corresponding top section button
-        document.querySelectorAll('.section-buttons button').forEach(b => b.classList.remove('active'));
-        const topBtn = document.querySelector(`.section-buttons button[data-section="${section}"]`);
-        if(topBtn) topBtn.classList.add('active');
-    });
-});
-</script>
-
+        // Initialize the app on page load
+        document.addEventListener('DOMContentLoaded', () => {
+             createChannelList();
+             displayMessage("IPTV Player ready! Select a channel from the grid below.", 'info');
+        });
+        
+    </script>
 </body>
 </html>
+

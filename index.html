@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Livefy IPTV</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- HLS.js Library for M3U8 playback -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
-    <!-- Lucide Icons for UI (Needed for the refresh icon) -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -64,34 +60,33 @@
 </head>
 <body class="bg-gray-900">
 
-    <!-- Fixed UI Section (Header, Player, Scrolling Text) -->
-    <!-- flex-shrink-0 ensures this section takes only the necessary space -->
     <div id="fixedUISection" class="w-full flex-shrink-0 bg-gray-900 shadow-2xl z-50">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-4"> 
             
-            <!-- Fixed Header (Updated with Refresh Button) -->
             <header class="mb-4 flex items-center justify-between">
                 
-                <!-- Refresh Button -->
                 <button id="refreshButton" class="p-2 bg-gray-700 hover:bg-red-600/90 rounded-xl text-sm font-semibold transition duration-150 flex items-center gap-1 shadow-md">
-                    <!-- Lucide Icon: rotate-cw (Reload) -->
                     <i data-lucide="rotate-cw" class="w-4 h-4 text-red-400"></i> রিফ্রেশ
                 </button>
 
-                <!-- Title - uses flex-grow and text-center to center it -->
-                <h1 class="text-3xl font-extrabold text-indigo-400 tracking-tight sm:text-4xl flex-grow text-center">
+                <h1 class="text-2xl font-extrabold text-indigo-400 tracking-tight sm:text-4xl flex-grow text-center">
                     Livefy IPTV
                 </h1>
                 
-                <!-- Placeholder for alignment (to perfectly center the title) -->
-                <div class="w-[74px]"></div> 
-            </header>
+                <a 
+                    href="https://t.me/livefytv" 
+                    target="_blank"
+                    class="p-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-semibold transition duration-150 flex items-center gap-1 shadow-md ml-2" 
+                    title="আমাদের টেলিগ্রাম চ্যানেলে যুক্ত হন"
+                >
+                    <i data-lucide="send" class="w-4 h-4 text-white"></i> 
+                    টেলিগ্রাম
+                </a> 
+                </header>
             
-            <!-- Message Box -->
-             <div id="messageBox" class="p-3 text-center rounded-xl mb-3 hidden"></div>
+            <div id="messageBox" class="p-3 text-center rounded-xl mb-3 hidden"></div>
              
-             <!-- Video Player -->
-            <div class="video-container shadow-2xl ring-4 ring-indigo-500/50 rounded-xl">
+             <div class="video-container shadow-2xl ring-4 ring-indigo-500/50 rounded-xl">
                 <video
                     id="videoPlayer"
                     controls
@@ -101,24 +96,18 @@
                 ></video>
             </div>
             
-            <!-- Current Channel Name Display -->
             <div class="mt-2 p-2 bg-gray-800 rounded-xl mb-4">
                 <p id="currentChannelName" class="text-sm text-indigo-400 font-medium">No channel currently selected.</p>
             </div>
             
         </div>
         
-        <!-- Fixed Scrolling Text Bar -->
         <div class="bg-gray-800 py-2 shadow-inner border-y border-red-600/70">
-            <!-- Use flex to align the fixed text and the scrolling area -->
             <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center">
                 
-                <!-- Fixed Label with Border -->
                 <span class="font-extrabold text-red-400 mr-4 text-sm flex-shrink-0 border border-red-500 p-1 rounded-md">গুরুত্বপূর্ণ বার্তা:</span>
 
-                <!-- Scrolling Area Container -->
                 <div class="scrolling-content-container text-yellow-300">
-                    <!-- Scrolling Content (Applied 60s animation) -->
                     <p class="text-sm font-medium scrolling-text">
                         প্রিয় দর্শকবৃন্দ, আমাদের ওয়েবসাইটে বর্তমানে আপডেটের কাজ চলছে 🛠️ যদি কোনো চ্যানেলে সমস্যা পান, অনুগ্রহ করে আমাদের টেলিগ্রাম গ্রুপে জানাবেন।👉 দয়া করে সবাই আমাদের টেলিগ্রাম গ্রুপে যোগ দিন এবং আপনাদের বন্ধু-বান্ধবদেরও এড করুন 💬 🎬 সম্পূর্ণ ফ্রিতে টিভি দেখার জন্য 💥 LiveFy IPTV – আপনার সেরা পছন্দ!  ⚽ যেকোনো খেলা লাইভ দেখতে ভিজিট করুন: 🌐 https://Livefy.vercel.app/ . &nbsp;&nbsp;&nbsp;&nbsp;
                     </p>
@@ -128,16 +117,13 @@
         
     </div>
     
-    <!-- Channel List Container -->
     <main class="flex-grow max-w-6xl mx-auto p-4 sm:p-6 w-full overflow-y-auto">
         <div class="w-full bg-gray-800 p-4 rounded-xl shadow-2xl">
             <h2 class="text-2xl font-semibold mb-4 border-b border-indigo-500 pb-2 flex items-center gap-2 text-gray-200">
                 Channel List
             </h2>
-            <!-- Grid Layout: 1 col on mobile, 2 on sm, 3 on lg, 4 on xl -->
             <div id="channelList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <!-- Channel buttons will be generated here -->
-            </div>
+                </div>
         </div>
     </main>
 
@@ -343,11 +329,10 @@
         document.addEventListener('DOMContentLoaded', () => {
              createChannelList();
              displayMessage("IPTV Player ready! Select a channel from the grid below.", 'info');
-             // Render Lucide icons for the refresh button
+             // Render Lucide icons for the refresh and telegram button
              lucide.createIcons();
         });
         
     </script>
 </body>
 </html>
-

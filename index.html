@@ -78,7 +78,7 @@
             pointer-events: none; /* যাতে ভিডিও কন্ট্রোলে সমস্যা না হয় */
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); /* লেখার ছায়া */
             animation: pulsate 2s infinite alternate; /* অ্যানিমেশন যোগ করা */
-            display: none; /* ডিফল্টভাবে লুকানো থাকবে */
+            /* Removed display: none from CSS, now controlled by inline style/JS */
         }
 
         /* Watermark Pulsate Animation */
@@ -127,10 +127,13 @@
                     id="videoPlayer"
                     controls
                     playsinline
-                    poster="https://placehold.co/1920x1080/1f2937/a5b4fc?text=Select+a+Channel"
+                    
+                    poster="https://placehold.co/1920x1080/1f2937/a5b4fc?text=SELECT+A+CHANNEL+TO+START"
+                    
                     class="cursor-pointer w-full h-full rounded-xl"
                 ></video>
-                <div id="videoWatermark" class="watermark">Livefy</div>
+                
+                <div id="videoWatermark" class="watermark" style="display: none;">Livefy</div> 
             </div>
             
             <div class="mt-2 p-2 bg-gray-800 rounded-xl mb-4">
@@ -179,7 +182,11 @@
         const currentChannelNameElement = document.getElementById('currentChannelName');
         const refreshButton = document.getElementById('refreshButton');
         const categoryDropdown = document.getElementById('categoryDropdown'); 
-        const videoWatermark = document.getElementById('videoWatermark'); // নতুন: ওয়াটারমার্ক এলিমেন্ট
+        const videoWatermark = document.getElementById('videoWatermark'); 
+        
+        // পোস্টে থাকা ডিফল্ট পোস্টার URL (ভিডিও প্লে না হলে এটি দেখাবে)
+        const defaultPosterUrl = video.getAttribute('poster'); 
+        
         let hlsInstance = null;
         let allCategories = []; 
 
@@ -329,9 +336,11 @@
          * Main function to load and play the M3U8 stream using Hls.js.
          */
         function loadAndPlayStream(url, name) {
-            // কোডের বাকি অংশ অপরিবর্তিত
             if (!url || !url.toLowerCase().endsWith('.m3u8')) {
                 displayMessage("This is not a valid M3U8 URL or the URL is missing.", 'error');
+                // Invalid URL হলে পোস্টার ফিরে আসবে এবং ওয়াটারমার্ক লুকাবে
+                video.setAttribute('poster', defaultPosterUrl);
+                videoWatermark.style.display = 'none'; 
                 return;
             }
 
@@ -340,6 +349,8 @@
                 hlsInstance = null;
             }
             
+            // ভিডিও প্লে হলে পোস্টার অ্যাট্রিবিউটটি মুছে ফেলা হয়
+            video.removeAttribute('poster'); 
             video.removeAttribute('src');
             video.load();
             currentChannelNameElement.textContent = `Currently Playing: ${name}`;
@@ -358,7 +369,10 @@
                     }
                     displayMessage(errorMsg, 'error');
                     console.error("HLS Error:", data);
-                    videoWatermark.style.display = 'none'; // ত্রুটি হলে ওয়াটারমার্ক লুকানো
+                    
+                    // ত্রুটি হলে পোস্টার ফিরে আসবে এবং ওয়াটারমার্ক লুকাবে
+                    video.setAttribute('poster', defaultPosterUrl);
+                    videoWatermark.style.display = 'none'; 
                 });
 
                 try {
@@ -373,7 +387,8 @@
                     });
                 } catch (e) {
                     displayMessage("Failed to start HLS streaming: " + e.message, 'error');
-                    videoWatermark.style.display = 'none'; // ত্রুটি হলে ওয়াটারমার্ক লুকানো
+                    video.setAttribute('poster', defaultPosterUrl);
+                    videoWatermark.style.display = 'none'; 
                 }
 
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -386,7 +401,8 @@
                 displayMessage(`Channel "${name}" (Native) is loading...`, 'success');
             } else {
                 displayMessage("Sorry, your browser does not support HLS streaming.", 'error');
-                videoWatermark.style.display = 'none'; // HLS সাপোর্ট না করলে ওয়াটারমার্ক লুকানো
+                video.setAttribute('poster', defaultPosterUrl);
+                videoWatermark.style.display = 'none'; 
             }
         }
 

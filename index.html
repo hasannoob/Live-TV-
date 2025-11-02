@@ -43,7 +43,6 @@
         /* The element that actually scrolls */
         .scrolling-text {
             display: inline-block;
-            /* UPDATED: Changed from 45s to 60s for maximum readability */
             animation: scroll-left 60s linear infinite; 
             padding-left: 100%; /* Start off-screen */
             white-space: nowrap; /* Essential for continuous scrolling of text */
@@ -55,6 +54,13 @@
             aspect-ratio: 16 / 9;
             background-color: #000;
             overflow: hidden;
+        }
+        
+        /* Style for the active filter button */
+        .filter-active {
+            background-color: #ef4444; /* Red 500 */
+            color: white;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -122,6 +128,17 @@
             <h2 class="text-2xl font-semibold mb-4 border-b border-indigo-500 pb-2 flex items-center gap-2 text-gray-200">
                 Channel List
             </h2>
+            
+            <div id="categoryFilters" class="mb-6 flex flex-wrap gap-3 p-3 bg-gray-700 rounded-xl">
+                <button data-category="All" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70 filter-active">সব চ্যানেল</button>
+                <button data-category="Sports" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">খেলাধুলা</button>
+                <button data-category="Entertainment" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">বিনোদন</button>
+                <button data-category="Movie" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">সিনেমা</button>
+                <button data-category="News" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">খবর</button>
+                <button data-category="Cartoon" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">কার্টুন</button>
+                <button data-category="Music" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">গান</button>
+            </div>
+
             <div id="channelList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 </div>
         </div>
@@ -133,59 +150,60 @@
         const channelListElement = document.getElementById('channelList');
         const messageBox = document.getElementById('messageBox');
         const currentChannelNameElement = document.getElementById('currentChannelName');
-        const refreshButton = document.getElementById('refreshButton'); // New: Refresh Button
-        let hlsInstance = null; // Variable to hold the Hls.js instance
+        const refreshButton = document.getElementById('refreshButton');
+        const categoryFilters = document.getElementById('categoryFilters'); // নতুন: ক্যাটাগরি ফিল্টার কন্টেইনার
+        let hlsInstance = null;
 
-        // Demo Channel Data. Change these with your own M3U8 links.
+        // আপডেট করা চ্যানেল ডেটা: 'icon' এর পরিবর্তে স্পষ্ট 'category' প্রোপার্টি ব্যবহার করা হলো।
         const channels = [
-            { name: "Sony Sports 2- Sports Live", url: "https://bongoflixbd.top/test/live.php?id=sony_sports_2_hd&e=.m3u8", color: "indigo", icon: "sports" },
-            { name: "Zee Bangla - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=zee_bangla&e=.m3u8", color: "green", icon: "entertainment" },
-            { name: "Zee Chenema - Movie", url: "https://bongoflixbd.top/test/live.php?id=zee_cinema_hd&e=.m3u8", color: "pink", icon: "movie" },
-            { name: "Sony Aaht - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sonyaath&e=.m3u8", color: "yellow", icon: "music" },
-            { name: "Sony Entertainment - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sonyentertainmnt_hd&e=.m3u8", color: "red", icon: "entertainment" },
-            { name: "Zee TV - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=zee_tv_hd&e=.m3u8", color: "blue", icon: "entertainment" },
-            { name: "Sony ten sports 5;- Sports", url: "https://bongoflixbd.top/test/live.php?id=sony_sports_5_hd&e=.m3u8", color: "teal", icon: "sports" },
-            { name: "& TV - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=and_tv_hd&e=.m3u8", color: "orange", icon: "entertainment" },
-            { name: "CNN - News", url: "https://bongoflixbd.top/test/live.php?id=cnn&e=.m3u8", color: "purple", icon: "news" },
-            { name: "HUM TV - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=hum_tv&e=.m3u8", color: "cyan", icon: "entertainment" },
-            { name: "Sony MAX - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sony_max_hd&e=.m3u8", color: "lime", icon: "entertainment" },
-            { name: "Sony Yay - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sonyyay&e=.m3u8", color: "fuchsia", icon: "entertainment" },
-            { name: "Zee Bangla Cinema - Movie", url: "https://bongoflixbd.top/test/live.php?id=zee_bangla_cinema&e=.m3u8", color: "fuchsia", icon: "mpvie" },
-            { name: "Sony Max - Movie", url: "https://bongoflixbd.top/test/live.php?id=sony_max&e=.m3u8", color: "fuchsia", icon: "movie" },
-            { name: "Zee Zction - Movie", url: "https://bongoflixbd.top/test/live.php?id=zee_action&e=.m3u8", color: "fuchsia", icon: "movie" },
-            { name: "Hum Sitaray - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=hum_sitaray&e=.m3u8", color: "fuchsia", icon: "entertainment" },
-            { name: "Toffee Drama - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=toffee_drama&e=.m3u8", color: "fuchsia", icon: "entertainment" },
-            { name: "B4U Music - Music", url: "https://bongoflixbd.top/test/live.php?id=b4u_music&e=.m3u8", color: "fuchsia", icon: "misic" },
-            { name: "Sony Pix - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sonypix_hd&e=.m3u8", color: "fuchsia", icon: "entertainment" },
-            { name: "Pogo - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=pogo_sd&e=.m3u8", color: "fuchsia", icon: "entertainment" },
-            { name: "Cartoon Network - Cartoon", url: "https://bongoflixbd.top/test/live.php?id=cartoon_network_sd&e=.m3u8", color: "fuchsia", icon: "cartoon" },
-            { name: "B4u Movies - Movie", url: "https://bongoflixbd.top/test/live.php?id=b4u_movies&e=.m3u8", color: "fuchsia", icon: "movie" },
-            { name: "Cartoon Network HD - Gaming", url: "https://bongoflixbd.top/test/live.php?id=cartoon_network_hd&e=.m3u8", color: "fuchsia", icon: "cartoon" },
-            { name: "Sony Sab HD - Movie", url: "https://bongoflixbd.top/test/live.php?id=sonysab_hd&e=.m3u8", color: "fuchsia", icon: "movie" },
-            { name: "Sony Entertainment - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sony_entertainment&e=.m3u8", color: "fuchsia", icon: "entertainment" },
-            { name: "Ten Cricket - Sports", url: "https://bongoflixbd.top/test/live.php?id=ten_cricket&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Sony Sports 1 - Sports", url: "https://bongoflixbd.top/test/live.php?id=sony_sports_1_hd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Discovery Kids ", url: "https://bongoflixbd.top/test/live.php?id=discovery_kids&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Animal Planet_HD", url: "https://bongoflixbd.top/test/live.php?id=animal_planet_hd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Animal Planet", url: "https://bongoflixbd.top/test/live.php?id=animal_planet_sd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Discovery", url: "https://bongoflixbd.top/test/live.php?id=discovery_sd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "EuroSports HD", url: "https://bongoflixbd.top/test/live.php?id=euro_sports_hd&e=.m3u88", color: "fuchsia", icon: "sports" },
-            { name: "Sony Max", url: "https://bongoflixbd.top/test/live.php?id=sonymax_2&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Discovery HD", url: "https://bongoflixbd.top/test/live.php?id=discovery_hd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Sony BBC Earth HD", url: "https://bongoflixbd.top/test/live.php?id=sonybbc_earth_hd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Hum Masala", url: "https://bongoflixbd.top/test/live.php?id=hum_masala&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "TLC", url: "https://bongoflixbd.top/test/live.php?id=tlc_sd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "TLC HD", url: "https://bongoflixbd.top/test/live.php?id=tlc_hd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Discovary Investigation", url: "https://bongoflixbd.top/test/live.php?id=discovary_investigation_hd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Discovery Science", url: "https://bongoflixbd.top/test/live.php?id=discovery_science&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Discovery Turbo", url: "https://bongoflixbd.top/test/live.php?id=discovery_turbo&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "& Picture HD", url: "https://bongoflixbd.top/test/live.php?id=andpicture_hd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Zee Anmol", url: "https://bongoflixbd.top/test/live.php?id=zee_anmol&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Zing SD", url: "https://bongoflixbd.top/test/live.php?id=zing_sd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Zee Cafe", url: "https://bongoflixbd.top/test/live.php?id=zee_cafe_hd&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "Zee Bollywood", url: "https://bongoflixbd.top/test/live.php?id=zee_bollywood&e=.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "COLORS BANGLA", url: "https://tvsen3.aynaott.com/u3LkNQ7UHhFX/tracks-v1a1/mono.ts.m3u8", color: "fuchsia", icon: "sports" },
-            { name: "COLORS BANGLA", url: "https://tvsen3.aynaott.com/u3LkNQ7UHhFX/tracks-v1a1/mono.ts.m3u8", color: "fuchsia", icon: "sports" },
+            { name: "Sony Sports 2 - Sports Live", url: "https://bongoflixbd.top/test/live.php?id=sony_sports_2_hd&e=.m3u8", color: "indigo", category: "Sports" },
+            { name: "Zee Bangla - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=zee_bangla&e=.m3u8", color: "green", category: "Entertainment" },
+            { name: "Zee Chenema - Movie", url: "https://bongoflixbd.top/test/live.php?id=zee_cinema_hd&e=.m3u8", color: "pink", category: "Movie" },
+            { name: "Sony Aaht - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sonyaath&e=.m3u8", color: "yellow", category: "Entertainment" },
+            { name: "Sony Entertainment - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sonyentertainmnt_hd&e=.m3u8", color: "red", category: "Entertainment" },
+            { name: "Zee TV - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=zee_tv_hd&e=.m3u8", color: "blue", category: "Entertainment" },
+            { name: "Sony ten sports 5 - Sports", url: "https://bongoflixbd.top/test/live.php?id=sony_sports_5_hd&e=.m3u8", color: "teal", category: "Sports" },
+            { name: "& TV - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=and_tv_hd&e=.m3u8", color: "orange", category: "Entertainment" },
+            { name: "CNN - News", url: "https://bongoflixbd.top/test/live.php?id=cnn&e=.m3u8", color: "purple", category: "News" },
+            { name: "HUM TV - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=hum_tv&e=.m3u8", color: "cyan", category: "Entertainment" },
+            { name: "Sony MAX - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sony_max_hd&e=.m3u8", color: "lime", category: "Entertainment" },
+            { name: "Sony Yay - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sonyyay&e=.m3u8", color: "fuchsia", category: "Entertainment" },
+            { name: "Zee Bangla Cinema - Movie", url: "https://bongoflixbd.top/test/live.php?id=zee_bangla_cinema&e=.m3u8", color: "fuchsia", category: "Movie" },
+            { name: "Sony Max - Movie", url: "https://bongoflixbd.top/test/live.php?id=sony_max&e=.m3u8", color: "fuchsia", category: "Movie" },
+            { name: "Zee Zction - Movie", url: "https://bongoflixbd.top/test/live.php?id=zee_action&e=.m3u8", color: "fuchsia", category: "Movie" },
+            { name: "Hum Sitaray - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=hum_sitaray&e=.m3u8", color: "fuchsia", category: "Entertainment" },
+            { name: "Toffee Drama - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=toffee_drama&e=.m3u8", color: "fuchsia", category: "Entertainment" },
+            { name: "B4U Music - Music", url: "https://bongoflixbd.top/test/live.php?id=b4u_music&e=.m3u8", color: "fuchsia", category: "Music" },
+            { name: "Sony Pix - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sonypix_hd&e=.m3u8", color: "fuchsia", category: "Entertainment" },
+            { name: "Pogo - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=pogo_sd&e=.m3u8", color: "fuchsia", category: "Entertainment" },
+            { name: "Cartoon Network - Cartoon", url: "https://bongoflixbd.top/test/live.php?id=cartoon_network_sd&e=.m3u8", color: "fuchsia", category: "Cartoon" },
+            { name: "B4u Movies - Movie", url: "https://bongoflixbd.top/test/live.php?id=b4u_movies&e=.m3u8", color: "fuchsia", category: "Movie" },
+            { name: "Cartoon Network HD - Cartoon", url: "https://bongoflixbd.top/test/live.php?id=cartoon_network_hd&e=.m3u8", color: "fuchsia", category: "Cartoon" },
+            { name: "Sony Sab HD - Movie", url: "https://bongoflixbd.top/test/live.php?id=sonysab_hd&e=.m3u8", color: "fuchsia", category: "Movie" },
+            { name: "Sony Entertainment - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=sony_entertainment&e=.m3u8", color: "fuchsia", category: "Entertainment" },
+            { name: "Ten Cricket - Sports", url: "https://bongoflixbd.top/test/live.php?id=ten_cricket&e=.m3u8", color: "fuchsia", category: "Sports" },
+            { name: "Sony Sports 1 - Sports", url: "https://bongoflixbd.top/test/live.php?id=sony_sports_1_hd&e=.m3u8", color: "fuchsia", category: "Sports" },
+            { name: "Discovery Kids", url: "https://bongoflixbd.top/test/live.php?id=discovery_kids&e=.m3u8", color: "fuchsia", category: "Kids" },
+            { name: "Animal Planet_HD", url: "https://bongoflixbd.top/test/live.php?id=animal_planet_hd&e=.m3u8", color: "fuchsia", category: "Nature" },
+            { name: "Animal Planet", url: "https://bongoflixbd.top/test/live.php?id=animal_planet_sd&e=.m3u8", color: "fuchsia", category: "Nature" },
+            { name: "Discovery", url: "https://bongoflixbd.top/test/live.php?id=discovery_sd&e=.m3u8", color: "fuchsia", category: "Nature" },
+            { name: "EuroSports HD", url: "https://bongoflixbd.top/test/live.php?id=euro_sports_hd&e=.m3u88", color: "fuchsia", category: "Sports" },
+            { name: "Sony Max 2", url: "https://bongoflixbd.top/test/live.php?id=sonymax_2&e=.m3u8", color: "fuchsia", category: "Movie" },
+            { name: "Discovery HD", url: "https://bongoflixbd.top/test/live.php?id=discovery_hd&e=.m3u8", color: "fuchsia", category: "Nature" },
+            { name: "Sony BBC Earth HD", url: "https://bongoflixbd.top/test/live.php?id=sonybbc_earth_hd&e=.m3u8", color: "fuchsia", category: "Nature" },
+            { name: "Hum Masala", url: "https://bongoflixbd.top/test/live.php?id=hum_masala&e=.m3u8", color: "fuchsia", category: "Lifestyle" },
+            { name: "TLC", url: "https://bongoflixbd.top/test/live.php?id=tlc_sd&e=.m3u8", color: "fuchsia", category: "Lifestyle" },
+            { name: "TLC HD", url: "https://bongoflixbd.top/test/live.php?id=tlc_hd&e=.m3u8", color: "fuchsia", category: "Lifestyle" },
+            { name: "Discovary Investigation", url: "https://bongoflixbd.top/test/live.php?id=discovary_investigation_hd&e=.m3u8", color: "fuchsia", category: "Documentary" },
+            { name: "Discovery Science", url: "https://bongoflixbd.top/test/live.php?id=discovery_science&e=.m3u8", color: "fuchsia", category: "Documentary" },
+            { name: "Discovery Turbo", url: "https://bongoflixbd.top/test/live.php?id=discovery_turbo&e=.m3u8", color: "fuchsia", category: "Documentary" },
+            { name: "& Picture HD", url: "https://bongoflixbd.top/test/live.php?id=andpicture_hd&e=.m3u8", color: "fuchsia", category: "Movie" },
+            { name: "Zee Anmol", url: "https://bongoflixbd.top/test/live.php?id=zee_anmol&e=.m3u8", color: "fuchsia", category: "Entertainment" },
+            { name: "Zing SD", url: "https://bongoflixbd.top/test/live.php?id=zing_sd&e=.m3u8", color: "fuchsia", category: "Music" },
+            { name: "Zee Cafe", url: "https://bongoflixbd.top/test/live.php?id=zee_cafe_hd&e=.m3u8", color: "fuchsia", category: "Entertainment" },
+            { name: "Zee Bollywood", url: "https://bongoflixbd.top/test/live.php?id=zee_bollywood&e=.m3u8", color: "fuchsia", category: "Movie" },
+            { name: "COLORS BANGLA 1", url: "https://tvsen3.aynaott.com/u3LkNQ7UHhFX/tracks-v1a1/mono.ts.m3u8", color: "fuchsia", category: "Entertainment" },
+            { name: "COLORS BANGLA 2", url: "https://tvsen3.aynaott.com/u3LkNQ7UHhFX/tracks-v1a1/mono.ts.m3u8", color: "fuchsia", category: "Entertainment" },
         ];
         
         /**
@@ -208,11 +226,21 @@
         }
 
         /**
-         * Generates the channel list buttons and adds them to the DOM.
+         * Generates the channel list buttons based on the provided array.
+         * @param {Array} filteredChannels - The array of channels to display.
          */
-        function createChannelList() {
+        function createChannelList(filteredChannels) {
+            // যদি কোনো ফিল্টার না থাকে, তবে সম্পূর্ণ চ্যানেল লিস্ট দেখাও
+            const channelsToDisplay = filteredChannels || channels; 
+            
             channelListElement.innerHTML = ''; // Clear existing list
-            channels.forEach((channel) => {
+            
+            if (channelsToDisplay.length === 0) {
+                 channelListElement.innerHTML = `<p class="text-xl text-center text-gray-400 p-8 col-span-full">এই ক্যাটাগরিতে কোনো চ্যানেল নেই।</p>`;
+                 return;
+            }
+            
+            channelsToDisplay.forEach((channel) => {
                 const button = document.createElement('button');
                 button.setAttribute('data-url', channel.url);
                 button.setAttribute('data-name', channel.name);
@@ -222,34 +250,66 @@
                 
                 button.innerHTML = `
                     <span class="text-lg">${channel.name}</span>
+                    <span class="block text-xs font-normal text-gray-400 mt-1">${channel.category}</span>
                 `;
                 channelListElement.appendChild(button);
             });
         }
+        
+        // নতুন ফাংশন: ক্যাটাগরি অনুসারে চ্যানেল ফিল্টার করা
+        function filterChannels(category) {
+            let filtered;
+            
+            // "All" ক্যাটাগরি হলে সব চ্যানেল দেখাও
+            if (category === 'All') {
+                filtered = channels;
+            } else {
+                // অন্যথায়, নির্বাচিত ক্যাটাগরির সাথে মেলাও
+                filtered = channels.filter(channel => channel.category === category);
+            }
+            
+            // নতুন লিস্ট তৈরি করো
+            createChannelList(filtered);
+        }
+
+        // ইভেন্ট লিসেনার: ক্যাটাগরি ফিল্টার হ্যান্ডেল করা
+        categoryFilters.addEventListener('click', function(event) {
+            const target = event.target.closest('.filter-btn');
+            if (target && target.hasAttribute('data-category')) {
+                
+                // Active ক্লাস সরিয়ে নতুন বাটনে যোগ করা
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('filter-active');
+                });
+                target.classList.add('filter-active');
+                
+                const category = target.getAttribute('data-category');
+                filterChannels(category);
+                
+                displayMessage(`Showing channels for: ${category}`, 'info');
+            }
+        });
+
 
         /**
          * Main function to load and play the M3U8 stream using Hls.js.
          */
         function loadAndPlayStream(url, name) {
-            
-            // 1. URL validation
+            // কোডের বাকি অংশ অপরিবর্তিত
             if (!url || !url.toLowerCase().endsWith('.m3u8')) {
                 displayMessage("This is not a valid M3U8 URL or the URL is missing.", 'error');
                 return;
             }
 
-            // 2. Destroy previous Hls.js instance if it exists
             if (hlsInstance) {
                 hlsInstance.destroy();
                 hlsInstance = null;
             }
             
-            // 3. Reset video element source
             video.removeAttribute('src');
             video.load();
             currentChannelNameElement.textContent = `Currently Playing: ${name}`;
             
-            // 4. Load using Hls.js
             if (window.Hls && Hls.isSupported()) {
                 hlsInstance = new Hls();
                 
@@ -268,7 +328,6 @@
                     hlsInstance.attachMedia(video);
                     
                     hlsInstance.on(Hls.Events.MANIFEST_PARSED, function () {
-                        // Attempt to play after manifest is successfully loaded
                         video.play().catch(e => {
                             displayMessage("Autoplay failed. Click the video to play.", 'error');
                             console.warn("Autoplay was prevented:", e);
@@ -280,7 +339,6 @@
                 }
 
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // 5. Fallback for Native HLS support (iOS/Safari)
                 video.src = url;
                 video.addEventListener('loadedmetadata', function() {
                     video.play().catch(e => {
@@ -289,7 +347,6 @@
                 });
                 displayMessage(`Channel "${name}" (Native) is loading...`, 'success');
             } else {
-                // 6. No HLS support
                 displayMessage("Sorry, your browser does not support HLS streaming.", 'error');
             }
         }
@@ -318,7 +375,6 @@
         // Event Listener: Handle Refresh Button click
         refreshButton.addEventListener('click', () => {
             displayMessage("Page refreshing...", 'info');
-            // Wait slightly before reloading to ensure the message is seen
             setTimeout(() => {
                 window.location.reload();
             }, 500); 
@@ -327,9 +383,9 @@
 
         // Initialize the app on page load
         document.addEventListener('DOMContentLoaded', () => {
-             createChannelList();
+             // প্রথমে সব চ্যানেল দেখানো হবে
+             createChannelList(); 
              displayMessage("IPTV Player ready! Select a channel from the grid below.", 'info');
-             // Render Lucide icons for the refresh and telegram button
              lucide.createIcons();
         });
         

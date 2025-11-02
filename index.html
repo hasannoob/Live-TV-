@@ -56,11 +56,13 @@
             overflow: hidden;
         }
         
-        /* Style for the active filter button */
-        .filter-active {
-            background-color: #ef4444; /* Red 500 */
-            color: white;
-            font-weight: 700;
+        /* Ensure the select dropdown looks good in dark mode */
+        #categoryDropdown {
+            background-color: #1f2937; /* Gray-800 */
+            border: 2px solid #4f46e5; /* Indigo-600 border */
+            color: #f3f4f6; /* Light text */
+            appearance: none; /* Remove default styling for better customization */
+            padding-right: 2rem; /* Space for the custom dropdown arrow if added */
         }
     </style>
 </head>
@@ -129,14 +131,10 @@
                 Channel List
             </h2>
             
-            <div id="categoryFilters" class="mb-6 flex flex-wrap gap-3 p-3 bg-gray-700 rounded-xl">
-                <button data-category="All" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70 filter-active">সব চ্যানেল</button>
-                <button data-category="Sports" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">খেলাধুলা</button>
-                <button data-category="Entertainment" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">বিনোদন</button>
-                <button data-category="Movie" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">সিনেমা</button>
-                <button data-category="News" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">খবর</button>
-                <button data-category="Cartoon" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">কার্টুন</button>
-                <button data-category="Music" class="filter-btn text-sm px-4 py-2 rounded-full bg-gray-900/50 text-gray-300 transition duration-150 hover:bg-red-600/70">গান</button>
+            <div class="mb-6 flex items-center gap-3">
+                <label for="categoryDropdown" class="text-lg font-medium text-indigo-400 flex-shrink-0">ক্যাটাগরি ফিল্টার:</label>
+                <select id="categoryDropdown" class="flex-grow p-3 rounded-xl shadow-lg cursor-pointer transition duration-150 focus:ring-2 focus:ring-red-500">
+                    </select>
             </div>
 
             <div id="channelList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -151,10 +149,11 @@
         const messageBox = document.getElementById('messageBox');
         const currentChannelNameElement = document.getElementById('currentChannelName');
         const refreshButton = document.getElementById('refreshButton');
-        const categoryFilters = document.getElementById('categoryFilters'); // নতুন: ক্যাটাগরি ফিল্টার কন্টেইনার
+        const categoryDropdown = document.getElementById('categoryDropdown'); // নতুন: ড্রপডাউন এলিমেন্ট
         let hlsInstance = null;
+        let allCategories = []; // সমস্ত ক্যাটাগরি সংরক্ষণ করার জন্য
 
-        // আপডেট করা চ্যানেল ডেটা: 'icon' এর পরিবর্তে স্পষ্ট 'category' প্রোপার্টি ব্যবহার করা হলো।
+        // চ্যানেল ডেটা
         const channels = [
             { name: "Sony Sports 2 - Sports Live", url: "https://bongoflixbd.top/test/live.php?id=sony_sports_2_hd&e=.m3u8", color: "indigo", category: "Sports" },
             { name: "Zee Bangla - Entertainment", url: "https://bongoflixbd.top/test/live.php?id=zee_bangla&e=.m3u8", color: "green", category: "Entertainment" },
@@ -256,6 +255,29 @@
             });
         }
         
+        /**
+         * Dynamically populates the dropdown with unique categories.
+         */
+        function populateDropdown() {
+            // ১. সব ক্যাটাগরি সংগ্রহ করো
+            const uniqueCategories = new Set(channels.map(channel => channel.category));
+            allCategories = ['All', ...Array.from(uniqueCategories).sort()]; // 'All' এবং সাজানো ক্যাটাগরিগুলো
+
+            // ২. ড্রপডাউনে অপশন যোগ করো
+            categoryDropdown.innerHTML = ''; // পুরোনো অপশন মুছে দাও
+            
+            allCategories.forEach(category => {
+                const option = document.createElement('option');
+                // 'All' কে বাংলায় 'সব চ্যানেল' হিসেবে দেখাও
+                option.textContent = (category === 'All') ? 'সব চ্যানেল' : category; 
+                option.value = category; // ভ্যালু হিসেবে ইংরেজি নাম রাখো ফিল্টারিং এর জন্য
+                categoryDropdown.appendChild(option);
+            });
+            
+            // ৩. প্রথমবার সব চ্যানেল দেখাও
+            filterChannels('All'); 
+        }
+
         // নতুন ফাংশন: ক্যাটাগরি অনুসারে চ্যানেল ফিল্টার করা
         function filterChannels(category) {
             let filtered;
@@ -270,24 +292,15 @@
             
             // নতুন লিস্ট তৈরি করো
             createChannelList(filtered);
+            
+            const categoryName = (category === 'All') ? 'সব চ্যানেল' : category;
+            displayMessage(`Showing channels for: ${categoryName}`, 'info');
         }
 
-        // ইভেন্ট লিসেনার: ক্যাটাগরি ফিল্টার হ্যান্ডেল করা
-        categoryFilters.addEventListener('click', function(event) {
-            const target = event.target.closest('.filter-btn');
-            if (target && target.hasAttribute('data-category')) {
-                
-                // Active ক্লাস সরিয়ে নতুন বাটনে যোগ করা
-                document.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.classList.remove('filter-active');
-                });
-                target.classList.add('filter-active');
-                
-                const category = target.getAttribute('data-category');
-                filterChannels(category);
-                
-                displayMessage(`Showing channels for: ${category}`, 'info');
-            }
+        // ইভেন্ট লিসেনার: ড্রপডাউন পরিবর্তন হ্যান্ডেল করা
+        categoryDropdown.addEventListener('change', function() {
+            const selectedCategory = this.value;
+            filterChannels(selectedCategory);
         });
 
 
@@ -383,8 +396,8 @@
 
         // Initialize the app on page load
         document.addEventListener('DOMContentLoaded', () => {
-             // প্রথমে সব চ্যানেল দেখানো হবে
-             createChannelList(); 
+             // ড্রপডাউন তৈরি এবং প্রথমবার চ্যানেল লিস্ট লোড করা
+             populateDropdown(); 
              displayMessage("IPTV Player ready! Select a channel from the grid below.", 'info');
              lucide.createIcons();
         });

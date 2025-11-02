@@ -54,6 +54,7 @@
             aspect-ratio: 16 / 9;
             background-color: #000;
             overflow: hidden;
+            position: relative; /* ওয়াটারমার্কের জন্য প্রয়োজন */
         }
         
         /* Ensure the select dropdown looks good in dark mode */
@@ -63,6 +64,33 @@
             color: #f3f4f6; /* Light text */
             appearance: none; /* Remove default styling for better customization */
             padding-right: 2rem; /* Space for the custom dropdown arrow if added */
+        }
+
+        /* Watermark Styles */
+        .watermark {
+            position: absolute;
+            top: 10px;    /* উপরের দিক থেকে দূরত্ব */
+            right: 15px;  /* ডান দিক থেকে দূরত্ব */
+            font-size: 1.2rem; /* লেখার সাইজ */
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.6); /* হালকা সাদা রঙ */
+            z-index: 10; /* ভিডিওর উপরে থাকবে */
+            pointer-events: none; /* যাতে ভিডিও কন্ট্রোলে সমস্যা না হয় */
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); /* লেখার ছায়া */
+            animation: pulsate 2s infinite alternate; /* অ্যানিমেশন যোগ করা */
+            display: none; /* ডিফল্টভাবে লুকানো থাকবে */
+        }
+
+        /* Watermark Pulsate Animation */
+        @keyframes pulsate {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            100% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
         }
     </style>
 </head>
@@ -102,6 +130,7 @@
                     poster="https://placehold.co/1920x1080/1f2937/a5b4fc?text=Select+a+Channel"
                     class="cursor-pointer w-full h-full rounded-xl"
                 ></video>
+                <div id="videoWatermark" class="watermark">Livefy</div>
             </div>
             
             <div class="mt-2 p-2 bg-gray-800 rounded-xl mb-4">
@@ -149,11 +178,12 @@
         const messageBox = document.getElementById('messageBox');
         const currentChannelNameElement = document.getElementById('currentChannelName');
         const refreshButton = document.getElementById('refreshButton');
-        const categoryDropdown = document.getElementById('categoryDropdown'); // নতুন: ড্রপডাউন এলিমেন্ট
+        const categoryDropdown = document.getElementById('categoryDropdown'); 
+        const videoWatermark = document.getElementById('videoWatermark'); // নতুন: ওয়াটারমার্ক এলিমেন্ট
         let hlsInstance = null;
-        let allCategories = []; // সমস্ত ক্যাটাগরি সংরক্ষণ করার জন্য
+        let allCategories = []; 
 
-        // চ্যানেল ডেটা
+        // চ্যানেল ডেটা (আগের মতোই আছে)
         const channels = [
             { name: "Sony Sports 2", url: "https://bongoflixbd.top/test/live.php?id=sony_sports_2_hd&e=.m3u8", color: "indigo", category: "Sports" },
             { name: "Zee Bangla", url: "https://bongoflixbd.top/test/live.php?id=zee_bangla&e=.m3u8", color: "green", category: "Entertainment" },
@@ -229,10 +259,8 @@
          * @param {Array} filteredChannels - The array of channels to display.
          */
         function createChannelList(filteredChannels) {
-            // যদি কোনো ফিল্টার না থাকে, তবে সম্পূর্ণ চ্যানেল লিস্ট দেখাও
             const channelsToDisplay = filteredChannels || channels; 
-            
-            channelListElement.innerHTML = ''; // Clear existing list
+            channelListElement.innerHTML = ''; 
             
             if (channelsToDisplay.length === 0) {
                  channelListElement.innerHTML = `<p class="text-xl text-center text-gray-400 p-8 col-span-full">এই ক্যাটাগরিতে কোনো চ্যানেল নেই।</p>`;
@@ -244,7 +272,6 @@
                 button.setAttribute('data-url', channel.url);
                 button.setAttribute('data-name', channel.name);
                 
-                // Design for the grid item (Centered text)
                 button.className = `w-full text-center p-4 rounded-xl bg-gray-700 hover:bg-${channel.color}-600/70 text-white font-semibold transition duration-150 transform hover:scale-[1.03] focus:ring-4 focus:ring-${channel.color}-500 focus:outline-none shadow-xl`;
                 
                 button.innerHTML = `
@@ -259,38 +286,32 @@
          * Dynamically populates the dropdown with unique categories.
          */
         function populateDropdown() {
-            // ১. সব ক্যাটাগরি সংগ্রহ করো
             const uniqueCategories = new Set(channels.map(channel => channel.category));
-            allCategories = ['All', ...Array.from(uniqueCategories).sort()]; // 'All' এবং সাজানো ক্যাটাগরিগুলো
+            allCategories = ['All', ...Array.from(uniqueCategories).sort()]; 
 
-            // ২. ড্রপডাউনে অপশন যোগ করো
-            categoryDropdown.innerHTML = ''; // পুরোনো অপশন মুছে দাও
+            categoryDropdown.innerHTML = ''; 
             
             allCategories.forEach(category => {
                 const option = document.createElement('option');
-                // 'All' কে বাংলায় 'সব চ্যানেল' হিসেবে দেখাও
                 option.textContent = (category === 'All') ? 'সব চ্যানেল' : category; 
-                option.value = category; // ভ্যালু হিসেবে ইংরেজি নাম রাখো ফিল্টারিং এর জন্য
+                option.value = category; 
                 categoryDropdown.appendChild(option);
             });
             
-            // ৩. প্রথমবার সব চ্যানেল দেখাও
             filterChannels('All'); 
         }
 
-        // নতুন ফাংশন: ক্যাটাগরি অনুসারে চ্যানেল ফিল্টার করা
+        /**
+         * Filters channels based on the selected category.
+         */
         function filterChannels(category) {
             let filtered;
-            
-            // "All" ক্যাটাগরি হলে সব চ্যানেল দেখাও
             if (category === 'All') {
                 filtered = channels;
             } else {
-                // অন্যথায়, নির্বাচিত ক্যাটাগরির সাথে মেলাও
                 filtered = channels.filter(channel => channel.category === category);
             }
             
-            // নতুন লিস্ট তৈরি করো
             createChannelList(filtered);
             
             const categoryName = (category === 'All') ? 'সব চ্যানেল' : category;
@@ -323,6 +344,9 @@
             video.load();
             currentChannelNameElement.textContent = `Currently Playing: ${name}`;
             
+            // ওয়াটারমার্ক দেখানো
+            videoWatermark.style.display = 'block'; 
+
             if (window.Hls && Hls.isSupported()) {
                 hlsInstance = new Hls();
                 
@@ -334,6 +358,7 @@
                     }
                     displayMessage(errorMsg, 'error');
                     console.error("HLS Error:", data);
+                    videoWatermark.style.display = 'none'; // ত্রুটি হলে ওয়াটারমার্ক লুকানো
                 });
 
                 try {
@@ -343,12 +368,12 @@
                     hlsInstance.on(Hls.Events.MANIFEST_PARSED, function () {
                         video.play().catch(e => {
                             displayMessage("Autoplay failed. Click the video to play.", 'error');
-                            console.warn("Autoplay was prevented:", e);
                         });
                         displayMessage(`Channel "${name}" is loading...`, 'success');
                     });
                 } catch (e) {
                     displayMessage("Failed to start HLS streaming: " + e.message, 'error');
+                    videoWatermark.style.display = 'none'; // ত্রুটি হলে ওয়াটারমার্ক লুকানো
                 }
 
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -361,6 +386,7 @@
                 displayMessage(`Channel "${name}" (Native) is loading...`, 'success');
             } else {
                 displayMessage("Sorry, your browser does not support HLS streaming.", 'error');
+                videoWatermark.style.display = 'none'; // HLS সাপোর্ট না করলে ওয়াটারমার্ক লুকানো
             }
         }
 
@@ -368,14 +394,10 @@
         channelListElement.addEventListener('click', function(event) {
             const target = event.target.closest('button');
             if (target && target.hasAttribute('data-url')) {
-                
-                // Remove active class from all buttons
                 document.querySelectorAll('#channelList button').forEach(btn => {
                     btn.classList.remove('ring-4', 'ring-indigo-400', 'bg-indigo-600/90');
                     btn.classList.add('bg-gray-700');
                 });
-                
-                // Add active class to the clicked button
                 target.classList.remove('bg-gray-700');
                 target.classList.add('ring-4', 'ring-indigo-400', 'bg-indigo-600/90');
                 
@@ -396,7 +418,6 @@
 
         // Initialize the app on page load
         document.addEventListener('DOMContentLoaded', () => {
-             // ড্রপডাউন তৈরি এবং প্রথমবার চ্যানেল লিস্ট লোড করা
              populateDropdown(); 
              displayMessage("IPTV Player ready! Select a channel from the grid below.", 'info');
              lucide.createIcons();
